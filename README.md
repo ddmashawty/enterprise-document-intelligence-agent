@@ -6,7 +6,8 @@
 
 - LLM：DeepSeek（`deepseek-chat`）
 - 文档：一期仅 PDF + txt
-- 检索：本地 Ollama `qwen3-embedding:0.6b` → Chroma；未配置 Embedding 时回退 BM25
+- 检索：**Hybrid** = 本地 Ollama `qwen3-embedding:0.6b`（Chroma）+ BM25；含年报章节查询扩展与文档过滤  
+- 未配置 `EMBEDDING_BASE_URL` 时回退纯 BM25
 
 > DeepSeek 无官方 Embedding。默认使用本机 Ollama 的 OpenAI 兼容接口。
 
@@ -37,9 +38,12 @@ PYTHONPATH=src python -m uvicorn doc_agent.api:app --host 0.0.0.0 --port 8000
 健康检查 / 问答：
 
 ```bash
-curl -s localhost:8000/health
+curl -s localhost:8000/health | python3 -m json.tool
+# 期望 retrieval_backend 类似：hybrid(qwen3-embedding:0.6b+bm25)
+
 curl -s localhost:8000/v1/chat -H 'Content-Type: application/json' \
-  -d '{"message":"演示产品手册里 TopK 和切片大小分别是多少？"}'
+  -d '{"message":"从茅台2024年报中概括主营业务和主要风险因素，用条目列出并标注页码"}' \
+  | python3 -c 'import sys,json; print(json.load(sys.stdin)["answer"][:1500])'
 ```
 
 ## 主要接口
@@ -50,13 +54,22 @@ curl -s localhost:8000/v1/chat -H 'Content-Type: application/json' \
 | POST | `/v1/ingest` | 导入文档到本地索引 |
 | POST | `/v1/chat` | 自然语言任务（Agent） |
 
+## 文档
+
+| 文件 | 说明 |
+|------|------|
+| `docs/backend_verification_result.md` | 人工验收结论 |
+| `docs/backend_verification_checklist.md` | 验证清单模板 |
+| `task_plan.md` / `findings.md` / `progress.md` | 规划与进度 |
+| `data/SOURCES.md` | 演示语料来源 |
+
 ## 目录
 
 ```
 src/doc_agent/   # 后端代码
 data/raw/        # 演示文档（大 PDF 默认不入库，见 SOURCES.md）
 scripts/         # ingest / smoke / 下载脚本
-task_plan.md     # 规划文件
+docs/            # 验证与说明
 ```
 
 ## 安全

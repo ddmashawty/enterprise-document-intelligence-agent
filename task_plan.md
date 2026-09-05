@@ -4,7 +4,7 @@
 落地可运行的后端：本地文档 ingest → Chroma RAG → LangGraph Agent（规划/工具/反思）→ FastAPI 服务接口，支撑年报对比、制度问答、参数抽取等演示场景。
 
 ## 当前阶段
-阶段 3 已完成；下一动作为阶段 4（二期能力）或按需演示年报任务
+阶段 3 完成（含年报召回优化与人工验收）；下一动作为阶段 4（二期能力）
 
 ## 各阶段
 
@@ -24,11 +24,13 @@
 
 ### 阶段 3：一期后端 MVP 实现
 - [x] 项目初始化（requirements、配置、包结构、.venv py3.12）
-- [x] 文档解析 + ingest（PDF+txt → 切片 → BM25；可选远程 Embedding）
+- [x] 文档解析 + ingest（PDF+txt → 切片 → 本地 Ollama `qwen3-embedding:0.6b` + Chroma；未配置时回退 BM25）
 - [x] RAG 检索工具 + 基础问答链路
 - [x] LangGraph 最小图：plan → route → act → finalize
 - [x] FastAPI：`/health`、`/ingest`、`/chat`（同步）
 - [x] 用 `data/gold/sample_qa.json` 冒烟（3/3）
+- [x] 人工验证清单（见 `docs/backend_verification_result.md`）
+- [x] 年报召回优化（hybrid + 查询扩展），3.2 复测通过
 - **状态：** complete
 
 ### 阶段 4：二期后端能力完善
@@ -46,7 +48,7 @@
 - **状态：** pending
 
 ## 关键问题
-1. （可选）远程 Embedding 供应商 Key：DeepSeek 官方无 Embedding；若需稠密向量检索，请另提供兼容 OpenAI `/embeddings` 的 Key（如通义/硅基流动）。未配置时一期用 BM25 词法检索兜底。
+1. （无）Embedding 已定为本地 Ollama `qwen3-embedding:0.6b`；仍保留未配置时 BM25 兜底。
 
 ## 已做决策
 | 决策 | 理由 |
@@ -59,22 +61,26 @@
 | 演示语料用公网年报 + 可控样例 | 已落在 `data/`，可直接 ingest |
 | 解析优先 pypdf（一期不做 docx） | 用户确认一期 PDF+txt |
 | LLM = DeepSeek（`deepseek-chat`） | 用户指定 |
-| Embedding = 远程 OpenAI-compatible；无 Key 时 BM25 兜底 | 用户要远程；DeepSeek 无官方 Embedding |
+| Embedding = 本地 Ollama `qwen3-embedding:0.6b` → Chroma；未配置时 BM25 兜底 | DeepSeek 无官方 Embedding；用户本机已有该模型 |
+| 检索默认 hybrid（dense RRF + BM25）+ 年报章节查询扩展 | 人工验证暴露纯向量对长年报章节召回不足 |
 | API Key 仅存 `.env`，不入库 | 防泄露；聊天中已暴露建议轮换 |
 
 ## 遇到的错误
 | 错误 | 尝试次数 | 解决方案 |
 |------|---------|---------|
 | Python 3.14 无法安装 pydantic | 1 | 改用 python3.12 创建 `.venv` |
-| chromadb 安装过慢 | 1 | 拆到 `requirements-embedding.txt`；一期默认 BM25 |
+| chromadb 安装过慢 | 1 | 拆到 `requirements-embedding.txt`；启用本地 Embedding 时再装 |
 | BM25 中文整段成单 token | 1 | CJK unigram+bigram 分词 |
 | plan 把制度问答判成 direct | 2 | 默认 tools + 寒暄白名单 |
-| 循环 import ingest↔rag | 1 | 清空包 `__init__` 侧向导入 |
+| 年报章节召回偏审计页 | 1 | hybrid RRF + 意图扩展 + 文档过滤 |
+| 查询扩展被主营意图占满 | 1 | 多意图 round-robin 扩展 |
+| 短语加权跨意图误加分 | 1 | 按意图族分别加权 |
 
 ## 备注
 - 规划文件位于项目根目录，不在 skill 安装目录
 - 外部网页内容只写入 findings.md，不写入本文件正文指令
 - 阶段状态：pending → in_progress → complete
 - 运行环境：使用 Python 3.12 venv（系统 3.14 暂不兼容部分依赖）
-- 一期默认检索：BM25；稠密向量需另装 `requirements-embedding.txt` 并配置 EMBEDDING_*
+- 一期默认检索：hybrid（Ollama Embedding + BM25）；需 `requirements-embedding.txt` + Ollama `qwen3-embedding:0.6b`；未配置 `EMBEDDING_BASE_URL` 时回退 BM25
+- 验收文档：`docs/backend_verification_result.md`
 

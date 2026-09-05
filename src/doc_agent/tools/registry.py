@@ -21,9 +21,17 @@ def list_documents() -> str:
 
 
 @tool
-def rag_search(query: str, top_k: int = 5) -> str:
-    """Search private documents and return relevant grounded snippets with citations."""
-    hits = get_store().search(query, top_k=top_k)
+def rag_search(query: str, top_k: int = 8, doc_name: str = "") -> str:
+    """Search private documents and return relevant grounded snippets with citations.
+
+    Optional doc_name pins search to one ingested file name (exact match), e.g.
+    '600519_贵州茅台_贵州茅台2024年年度报告.pdf'.
+    """
+    hits = get_store().search(
+        query,
+        top_k=top_k,
+        doc_name=doc_name or None,
+    )
     if not hits:
         return "未检索到相关内容。请确认已 ingest，或换一种问法。"
     payload = [h.to_dict() for h in hits]

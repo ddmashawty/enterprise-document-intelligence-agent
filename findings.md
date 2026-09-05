@@ -15,15 +15,19 @@
 - 已切换为本地 Ollama：`qwen3-embedding:0.6b` via `http://127.0.0.1:11434/v1`，写入 Chroma。
 - 未配置 `EMBEDDING_BASE_URL` 时回退 BM25。
 
+### 年报召回优化（2026-09-05）
+- **问题：** 纯稠密检索对「主营业务 / 主要风险」类问句易落到审计、财报页。
+- **根因：** 语义近邻 ≠ 章节关键词命中；BM25 对「主营业务分行业」「可能面对的风险」更稳。
+- **方案：** `hybrid(dense RRF + BM25)` + 意图查询扩展 + 文档名启发式过滤 + 同意图短语加权。
+- **结果：** 复测可召回 p9/p15/p22/p56 等页，并产出带页码的业务与四类风险摘要。
+- **实现：** `src/doc_agent/rag/query_expand.py`、`store.py`；工具 `rag_search(doc_name=...)`。
+
 ### 现有仓库资产
 - PRD：`企业文档智能处理Agent 产品需求文档（PRD）.md`
-- 演示数据已就绪（约 30MB）：
-  - 年报：茅台 / 五粮液 / 宁德时代 2024
-  - 制度：OHCHR 世界人权宣言 + 可控制度 txt
-  - 手册：PostgreSQL 16、C n1570、可控产品参数 txt
-  - 黄金问答：`data/gold/sample_qa.json`
+- 演示数据：年报 PDF（本地，默认不入库）+ 可控 txt + `data/gold/sample_qa.json`
+- 代码：`src/doc_agent/`（FastAPI + LangGraph + hybrid RAG）
+- 验收：`docs/backend_verification_result.md`
 - 下载脚本：`scripts/download_demo_data.py`
-- 尚无应用代码（无 `src/`、无 API、无依赖清单）
 
 ### 后端职责边界
 | 在范围内 | 不在一期后端范围 |
@@ -205,10 +209,11 @@ requirements.txt  .env.example  README.md
 |------|------|
 | Python 3.11+ + FastAPI + LangGraph + Chroma | 对齐 PRD，生态成熟 |
 | LLM：DeepSeek `https://api.deepseek.com` + `deepseek-chat` | 用户指定 |
-| Embedding：远程 OpenAI-compatible（独立 EMBEDDING_*） | 用户要远程；DeepSeek 官方无 Embedding |
-| 未配置 Embedding 时用 BM25 词法检索 | 保证仅 DeepSeek Key 也能跑通一期 |
+| Embedding：本地 Ollama `qwen3-embedding:0.6b` | DeepSeek 无官方 Embedding；本机已有模型 |
+| 检索：hybrid（dense RRF + BM25）+ 年报章节扩展 | 人工验证暴露纯向量对长年报章节召回不足 |
+| 未配置 Embedding 时用 BM25 词法检索 | 无向量服务时仍可跑通 |
 | 一期只解析 PDF + txt | 用户确认；docx 二期再加 |
-| API Key 写入 `.env` 并 gitignore | 防泄露；聊天暴露后建议用户轮换 Key |
+| API Key 写入 `.env` 并 gitignore | 防泄露 |
 | 一期同步 `/chat`，重任务用预 ingest | 实现简单，演示稳定 |
 | 记忆二期用 SQLite | 零运维，够用轨迹回溯 |
 | 解析：pypdf | 一期够用 |
@@ -219,7 +224,8 @@ requirements.txt  .env.example  README.md
 |------|---------|
 | 部分公网手册下载曾不完整 | 续传校验 `%%EOF`；年报主源巨潮稳定 |
 | skill session-catchup 路径在 `.codex` | 规划文件仍写项目根，无影响 |
-
+| 纯向量年报章节召回偏差 | hybrid + 查询扩展 + 文档过滤 |
+| 验证清单粘贴完整 JSON 过大 | 结论写入 result；清单仅保留模板 |
 ## 资源
 - PRD：项目根目录 md
 - 数据清单：`data/SOURCES.md`

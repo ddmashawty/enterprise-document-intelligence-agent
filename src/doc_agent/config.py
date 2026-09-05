@@ -31,9 +31,9 @@ class Settings(BaseSettings):
 
     chunk_size: int = 800
     chunk_overlap: int = 120
-    top_k: int = 5
+    top_k: int = 8
     max_tool_calls: int = 5
-    request_timeout: int = 60
+    request_timeout: int = 120
 
     @property
     def root(self) -> Path:

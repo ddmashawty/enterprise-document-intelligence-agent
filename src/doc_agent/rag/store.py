@@ -10,6 +10,7 @@ from rank_bm25 import BM25Okapi
 from doc_agent.config import Settings, get_settings
 from doc_agent.ingest.chunking import TextChunk
 from doc_agent.rag.embeddings import Hit, get_remote_embeddings
+from doc_agent.rag.query_expand import expand_queries, infer_doc_name, keyword_boost
 
 
 def _tokenize(text: str) -> list[str]:
@@ -147,31 +148,93 @@ class DocumentStore:
             )
         return sorted(out, key=lambda x: x["doc_name"])
 
-    def search(self, query: str, top_k: int | None = None) -> list[Hit]:
+    def search(
+        self,
+        query: str,
+        top_k: int | None = None,
+        doc_name: str | None = None,
+    ) -> list[Hit]:
         k = top_k or self.settings.top_k
         if not self._chunks:
             return []
 
-        embedder = get_remote_embeddings(self.settings)
-        if embedder is not None:
-            dense = self._search_dense(query, k, embedder)
-            if dense:
-                return dense
-        return self._search_bm25(query, k)
+        doc_filter = doc_name or infer_doc_name(
+            query, [d["doc_name"] for d in self.list_documents()]
+        )
+        queries = expand_queries(query)
+        pool = max(k * 4, 20)
+        fused: dict[str, dict[str, Any]] = {}
 
-    def _search_bm25(self, query: str, k: int) -> list[Hit]:
+        embedder = get_remote_embeddings(self.settings)
+        for qi, q in enumerate(queries):
+            # Prefer the original query slightly over expansions.
+            w = 1.0 if qi == 0 else 0.9
+            if embedder is not None:
+                for rank, hit in enumerate(self._search_dense(q, pool, embedder, doc_filter)):
+                    self._rrf_add(fused, hit, w / (60 + rank + 1), backend="hybrid")
+            for rank, hit in enumerate(self._search_bm25(q, pool, doc_filter)):
+                self._rrf_add(fused, hit, w / (60 + rank + 1), backend="hybrid")
+
+        if not fused:
+            return []
+
+        for item in fused.values():
+            item["score"] += keyword_boost(query, item["hit"].text)
+
+        ranked = sorted(fused.values(), key=lambda x: x["score"], reverse=True)[:k]
+        out: list[Hit] = []
+        for item in ranked:
+            h: Hit = item["hit"]
+            out.append(
+                Hit(
+                    chunk_id=h.chunk_id,
+                    source=h.source,
+                    page=h.page,
+                    doc_name=h.doc_name,
+                    text=h.text,
+                    score=float(item["score"]),
+                    backend=item.get("backend", h.backend),
+                )
+            )
+        return out
+
+    @staticmethod
+    def _rrf_add(
+        fused: dict[str, dict[str, Any]],
+        hit: Hit,
+        score: float,
+        *,
+        backend: str,
+    ) -> None:
+        cur = fused.get(hit.chunk_id)
+        if cur is None:
+            fused[hit.chunk_id] = {"hit": hit, "score": score, "backend": backend}
+        else:
+            cur["score"] += score
+            # Keep the higher-scoring payload text/page from whichever side contributed.
+            if hit.score > cur["hit"].score:
+                cur["hit"] = hit
+
+    def _search_bm25(
+        self,
+        query: str,
+        k: int,
+        doc_name: str | None = None,
+    ) -> list[Hit]:
         if not self._bm25:
             return []
         tokens = _tokenize(query)
         if not tokens:
             return []
         scores = self._bm25.get_scores(tokens)
-        ranked = sorted(enumerate(scores), key=lambda x: x[1], reverse=True)[:k]
+        ranked = sorted(enumerate(scores), key=lambda x: x[1], reverse=True)
         hits: list[Hit] = []
         for idx, score in ranked:
             if score <= 0:
                 continue
             c = self._chunks[idx]
+            if doc_name and c.get("doc_name") != doc_name:
+                continue
             hits.append(
                 Hit(
                     chunk_id=c["chunk_id"],
@@ -183,9 +246,17 @@ class DocumentStore:
                     backend="bm25",
                 )
             )
+            if len(hits) >= k:
+                break
         return hits
 
-    def _search_dense(self, query: str, k: int, embedder: Any) -> list[Hit]:
+    def _search_dense(
+        self,
+        query: str,
+        k: int,
+        embedder: Any,
+        doc_name: str | None = None,
+    ) -> list[Hit]:
         import chromadb
         from chromadb.config import Settings as ChromaSettings
 
@@ -198,7 +269,18 @@ class DocumentStore:
         except Exception:  # noqa: BLE001
             return []
         qvec = embedder.embed_query(query)
-        result = collection.query(query_embeddings=[qvec], n_results=k)
+        kwargs: dict[str, Any] = {
+            "query_embeddings": [qvec],
+            "n_results": min(k, max(collection.count(), 1)),
+        }
+        if doc_name:
+            kwargs["where"] = {"doc_name": doc_name}
+        try:
+            result = collection.query(**kwargs)
+        except Exception:  # noqa: BLE001
+            # Fallback without metadata filter if chroma rejects the where clause.
+            kwargs.pop("where", None)
+            result = collection.query(**kwargs)
         hits: list[Hit] = []
         ids = (result.get("ids") or [[]])[0]
         docs = (result.get("documents") or [[]])[0]
@@ -227,7 +309,7 @@ class DocumentStore:
     @property
     def retrieval_backend(self) -> str:
         if self.settings.embedding_enabled:
-            return f"chroma+{self.settings.embedding_model}"
+            return f"hybrid({self.settings.embedding_model}+bm25)"
         return "bm25"
 
 
