@@ -6,19 +6,15 @@
 - **状态：** complete
 - 用户确认：DeepSeek / PDF+txt / 远程 Embedding（无独立 Embedding Key 时 BM25）
 
-### 阶段 3：一期后端 MVP
+### 阶段 3 后续：Ollama Embedding + GitHub
 - **状态：** complete
 - 执行的操作：
-  - 脚手架 `src/doc_agent`、FastAPI、LangGraph、ingest/RAG/tools
-  - `.env` 写入 DeepSeek Key（gitignore）
-  - Python 3.12 venv；chromadb 改为可选
-  - 修复中文 BM25 与 plan 误判 direct
-  - gold 冒烟 3/3；uvicorn `/health` `/v1/chat` 可用
-- 创建/修改的文件：
-  - `src/doc_agent/**`、`requirements.txt`、`requirements-embedding.txt`
-  - `.env` / `.env.example` / `.gitignore` / `README.md`
-  - `scripts/ingest_demo.py`、`scripts/smoke_chat.py`
-  - `task_plan.md` / `findings.md` / `progress.md`
+  - Embedding 切换为本地 `qwen3-embedding:0.6b`（Ollama `/v1`）
+  - 安装 chromadb，reindex 293 chunks，retrieval=`chroma+qwen3-embedding:0.6b`
+  - gold 冒烟 3/3
+  - 初始化 git 并推送到 GitHub（不含 `.env` 与大 PDF）
+- 仓库：https://github.com/ddmashawty/enterprise-document-intelligence-agent
+
 
 ## 测试结果
 | 测试 | 输入 | 预期结果 | 实际结果 | 状态 |
