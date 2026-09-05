@@ -1,0 +1,36 @@
+# 环境变量 / secrets
+.env
+.env.*
+!.env.example
+
+# Python
+.venv/
+venv/
+__pycache__/
+*.py[cod]
+*.egg-info/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+dist/
+build/
+
+# App runtime data
+data/chroma/
+data/memory.db
+data/exports/
+*.db
+
+# Large public demo PDFs (re-download via scripts/download_demo_data.py)
+data/raw/**/*.pdf
+
+# Local planning scratch (optional keep; uncomment to ignore)
+# task_plan.md
+# findings.md
+# progress.md
+
+# IDE / OS
+.idea/
+.vscode/
+.DS_Store
+*:Zone.Identifier

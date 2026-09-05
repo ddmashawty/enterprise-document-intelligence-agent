@@ -1,0 +1,16 @@
+fastapi>=0.115.0
+uvicorn[standard]>=0.32.0
+pydantic>=2.9.0
+pydantic-settings>=2.6.0
+python-dotenv>=1.0.1
+httpx>=0.27.0
+openai>=1.55.0
+langgraph>=0.2.50
+langchain-core>=0.3.20
+langchain-openai>=0.2.10
+pypdf>=5.1.0
+rank-bm25>=0.2.2
+numpy>=1.26.0
+orjson>=3.10.0
+# Optional dense retrieval (install when EMBEDDING_* configured):
+# chromadb>=0.5.20

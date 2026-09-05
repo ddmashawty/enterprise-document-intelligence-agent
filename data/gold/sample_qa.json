@@ -1,0 +1,20 @@
+{
+  "description": "可控样例的黄金问答，便于验证抽取/问答是否命中原文",
+  "items": [
+    {
+      "doc": "data/raw/manuals/演示产品参数手册.txt",
+      "question": "DocMind Agent Pro 的 TopK 和切片大小分别是多少？",
+      "expected_answer": "TopK 为 5，切片大小为 500 tokens"
+    },
+    {
+      "doc": "data/raw/policies/演示企业文档管理制度.txt",
+      "question": "普通文档与财务合规文档的保存期限分别是多久？",
+      "expected_answer": "普通文档不少于3年，财务与合规文档不少于10年"
+    },
+    {
+      "doc": "data/raw/policies/演示企业文档管理制度.txt",
+      "question": "保密等级分为哪几级？",
+      "expected_answer": "公开、内部、秘密、机密四级"
+    }
+  ]
+}

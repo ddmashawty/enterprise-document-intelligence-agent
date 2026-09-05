@@ -1,0 +1,19 @@
+from __future__ import annotations
+
+from typing import Annotated, Any, Literal, TypedDict
+
+from langgraph.graph.message import add_messages
+
+
+class AgentState(TypedDict):
+    messages: Annotated[list, add_messages]
+    user_goal: str
+    session_id: str
+    plan: list[str]
+    route: Literal["tools", "direct", ""]
+    tool_results: list[dict[str, Any]]
+    citations: list[dict[str, Any]]
+    iteration: int
+    final_answer: str
+    status: str
+    error: str

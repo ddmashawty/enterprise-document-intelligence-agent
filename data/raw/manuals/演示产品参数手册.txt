@@ -1,0 +1,13 @@
+演示产品参数手册
+
+产品名称：DocMind Agent Pro
+版本：1.0.0
+支持格式：PDF、Word、Markdown
+最大文档页数：100
+向量库：Chroma
+默认模型：通义千问 / DeepSeek
+关键参数：
+- 切片大小：500 tokens
+- TopK：5
+- 工具调用上限：5
+- 问答响应目标：≤3s
