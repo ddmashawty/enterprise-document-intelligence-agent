@@ -1,40 +1,49 @@
 # Enterprise Document Intelligence Agent
 
-基于 DeepSeek + LangGraph 的企业文档智能处理 Agent（二期后端：记忆 / 反思 / 导出 / 对比）。
+基于 DeepSeek + LangGraph 的企业文档智能处理 Agent（三期工程化后端）。
 
 ## 已确认配置
 
 - LLM：DeepSeek（`deepseek-chat`）
-- 文档：一期/二期仅 PDF + txt
-- 检索：**Hybrid** = Ollama `qwen3-embedding:0.6b`（Chroma）+ BM25；含年报章节查询扩展
-- 记忆：会话短期（进程内）+ SQLite 任务轨迹（`data/memory.db`）
-- 图：`plan → act → reflect → (重试 act | finalize)`，工具上限 5
+- 文档：PDF + txt
+- 检索：**Hybrid** = Ollama `qwen3-embedding:0.6b`（Chroma）+ BM25
+- 记忆：会话短期 + SQLite（`data/memory.db`）
+- 图：`plan → act → reflect → (重试|finalize)`，工具上限默认 5（请求可覆盖）
+- 异步：`POST /v1/chat/async` + `GET /v1/tasks/{id}` 轮询
 
 ## 快速开始
 
 ```bash
 python3.12 -m venv .venv
 source .venv/bin/activate
-pip install -r requirements.txt
-pip install -r requirements-embedding.txt   # Chroma
+pip install -r requirements.txt -r requirements-dev.txt
+pip install -r requirements-embedding.txt
 
 cp .env.example .env
 # 填写 LLM_API_KEY；Embedding 默认指向本地 Ollama
 # ollama pull qwen3-embedding:0.6b
 
-PYTHONPATH=src python scripts/ingest_demo.py --reindex
-PYTHONPATH=src python scripts/smoke_chat.py
-PYTHONPATH=src python scripts/smoke_phase4.py
+# 一键复现（ingest + pytest + 可选 smoke）
+bash scripts/demo_repro.sh
 
 PYTHONPATH=src python -m uvicorn doc_agent.api:app --host 0.0.0.0 --port 8000
 ```
 
+打开 http://127.0.0.1:8000/docs 。注意 Request body 里 `message` 只要一层字符串，不要写成 `"message": "message": "..."`。
+
 ```bash
 curl -s localhost:8000/health | python3 -m json.tool
 
+# 同步问答
 curl -s localhost:8000/v1/chat -H 'Content-Type: application/json' \
-  -d '{"session_id":"demo-1","message":"演示产品手册里 TopK 是多少？导出为 Markdown"}' \
-  | python3 -c 'import sys,json; d=json.load(sys.stdin); print(d["answer"][:800]); print("exports", d.get("exports")); print("task", d.get("task_id"))'
+  -d '{"session_id":"demo-1","message":"演示产品手册里 TopK 是多少？"}' \
+  | python3 -c 'import sys,json; d=json.load(sys.stdin); print(d["answer"][:500]); print(d["task_id"])'
+
+# 异步问答
+curl -s localhost:8000/v1/chat/async -H 'Content-Type: application/json' \
+  -d '{"session_id":"demo-1","message":"保密等级分为哪几级？导出 Excel，文件名 demo_secrecy"}'
+# 用返回的 task_id 轮询：
+# curl -s localhost:8000/v1/tasks/<task_id> | python3 -m json.tool
 ```
 
 ## 主要接口
@@ -43,23 +52,33 @@ curl -s localhost:8000/v1/chat -H 'Content-Type: application/json' \
 |------|------|------|
 | GET | `/health` | 健康与配置 |
 | POST | `/v1/ingest` | 导入文档 |
-| POST | `/v1/chat` | Agent 问答（含 plan/citations/trace/exports/reflection） |
-| GET | `/v1/tasks/{task_id}` | 查询任务轨迹 |
-| GET | `/v1/sessions/{session_id}` | 会话历史与近期任务 |
+| POST | `/v1/chat` | 同步 Agent 问答 |
+| POST | `/v1/chat/async` | 异步排队，立即返回 `task_id` |
+| GET | `/v1/tasks` | 任务列表（可选 `session_id`） |
+| GET | `/v1/tasks/{task_id}` | 任务轨迹 / 异步结果 |
+| GET | `/v1/sessions/{session_id}` | 会话历史 |
 
-## 二期工具
+错误响应统一为：`{"error":{"code":"...","message":"...","details":...}}`。
 
-`list_documents` · `rag_search` · `parse_document` · `summarize_citations` · `compare_docs` · `extract_fields` · `export_markdown` · `export_excel`
+## 测试与性能
 
-导出文件写入 `data/exports/`（默认 gitignore）。
+```bash
+PYTHONPATH=src pytest -q
+PYTHONPATH=src python scripts/perf_baseline.py   # 写出 docs/perf_baseline.json
+PYTHONPATH=src python scripts/smoke_chat.py
+PYTHONPATH=src python scripts/smoke_phase4.py
+```
 
 ## 文档
 
 | 文件 | 说明 |
 |------|------|
-| `docs/backend_verification_result.md` | 一期验收 |
-| `docs/phase4_notes.md` | 二期能力说明 |
-| `task_plan.md` / `findings.md` / `progress.md` | 规划与进度 |
+| `docs/phase5_notes.md` | 三期工程化说明 |
+| `docs/phase5_verification_checklist.md` | 三期人工验证清单 |
+| `docs/frontend_implementation_plan.md` | Streamlit 前端实现计划（阶段 6） |
+| `docs/phase4_retest_result.md` | 二期复测通过 |
+| `docs/backend_verification_checklist.md` | 一/二期功能验证清单 |
+| `task_plan.md` | 阶段计划 |
 
 ## 安全
 

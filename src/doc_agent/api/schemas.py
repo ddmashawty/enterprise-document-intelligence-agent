@@ -21,8 +21,8 @@ class IngestResponse(BaseModel):
 
 
 class ChatOptions(BaseModel):
-    max_tool_calls: int | None = None
-    temperature: float | None = None
+    max_tool_calls: int | None = Field(default=None, ge=1, le=10)
+    temperature: float | None = Field(default=None, ge=0, le=2)
 
 
 class ChatRequest(BaseModel):
@@ -42,6 +42,13 @@ class ChatResponse(BaseModel):
     reflection: str = ""
     status: str = ""
     iterations: int = 0
+
+
+class AsyncChatResponse(BaseModel):
+    session_id: str
+    task_id: str
+    status: str = "queued"
+    poll_url: str = ""
 
 
 class HealthResponse(BaseModel):
@@ -66,6 +73,11 @@ class TaskResponse(BaseModel):
     status: str = ""
     iterations: int = 0
     created_at: str = ""
+
+
+class TaskListResponse(BaseModel):
+    tasks: list[TaskResponse] = Field(default_factory=list)
+    count: int = 0
 
 
 class SessionHistoryResponse(BaseModel):

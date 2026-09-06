@@ -1,0 +1,18 @@
+{
+  "chunks": 293,
+  "retrieval_backend": "hybrid(qwen3-embedding:0.6b+bm25)",
+  "health_probe_ms": {
+    "p50": 0.0,
+    "mean": 0.0,
+    "max": 0.01
+  },
+  "rag_search_topk_ms": {
+    "p50": 119.14,
+    "mean": 613.23,
+    "max": 2599.96
+  },
+  "targets": {
+    "rag_search_p50_ms": "< 1500 (local hybrid; depends on Ollama)",
+    "note": "Full /v1/chat latency dominated by LLM; use smoke scripts for E2E."
+  }
+}

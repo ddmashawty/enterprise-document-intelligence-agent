@@ -59,16 +59,22 @@ def _format_session_context(session_id: str) -> str:
     return "\n".join(lines)
 
 
-def run_agent(message: str, session_id: str | None = None) -> dict[str, Any]:
+def run_agent(
+    message: str,
+    session_id: str | None = None,
+    *,
+    task_id: str | None = None,
+    persist: bool = True,
+) -> dict[str, Any]:
     sid = session_id or str(uuid4())
-    task_id = new_task_id()
+    tid = task_id or new_task_id()
     session_context = _format_session_context(sid)
     graph = get_graph()
     initial: AgentState = {
         "messages": [HumanMessage(content=message)],
         "user_goal": message,
         "session_id": sid,
-        "task_id": task_id,
+        "task_id": tid,
         "plan": [],
         "route": "",
         "tool_results": [],
@@ -94,34 +100,39 @@ def run_agent(message: str, session_id: str | None = None) -> dict[str, Any]:
     status = final.get("status") or ""
     iterations = final.get("iteration") or 0
 
-    # Dual-layer memory write
-    session_mem = get_session_memory()
-    session_mem.append(sid, "user", message)
-    session_mem.append(sid, "assistant", answer[:2000])
+    if persist:
+        session_mem = get_session_memory()
+        session_mem.append(sid, "user", message)
+        session_mem.append(sid, "assistant", answer[:2000])
 
-    store = get_task_store()
-    record = TaskRecord(
-        task_id=task_id,
-        session_id=sid,
-        user_goal=message,
-        plan=list(plan),
-        answer=answer,
-        citations=list(citations)[:20],
-        trace=list(trace),
-        reflection=reflection,
-        exports=list(exports),
-        status=status,
-        iterations=int(iterations),
-        created_at="",
-    )
-    record.created_at = datetime.now(timezone.utc).isoformat()
-    store.save_task(record)
-    store.append_turn(sid, "user", message, task_id=task_id)
-    store.append_turn(sid, "assistant", answer[:4000], task_id=task_id)
+        store = get_task_store()
+        existing = store.get_task(tid)
+        created_at = (
+            existing.created_at
+            if existing and existing.created_at
+            else datetime.now(timezone.utc).isoformat()
+        )
+        record = TaskRecord(
+            task_id=tid,
+            session_id=sid,
+            user_goal=message,
+            plan=list(plan),
+            answer=answer,
+            citations=list(citations)[:20],
+            trace=list(trace),
+            reflection=reflection,
+            exports=list(exports),
+            status=status or "done",
+            iterations=int(iterations),
+            created_at=created_at,
+        )
+        store.save_task(record)
+        store.append_turn(sid, "user", message, task_id=tid)
+        store.append_turn(sid, "assistant", answer[:4000], task_id=tid)
 
     return {
         "session_id": sid,
-        "task_id": task_id,
+        "task_id": tid,
         "answer": answer,
         "plan": plan,
         "citations": citations,

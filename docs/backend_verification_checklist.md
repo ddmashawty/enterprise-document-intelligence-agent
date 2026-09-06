@@ -2,9 +2,9 @@
 
 服务地址：`http://127.0.0.1:8000`  
 检索：hybrid（Ollama `qwen3-embedding:0.6b` + BM25）· LLM：DeepSeek `deepseek-chat`  
-版本：`0.2.0`（含阶段 4）
+版本：`0.3.0`（含阶段 4–5）
 
-**结论汇总：** `[backend_verification_result.md](./backend_verification_result.md)`（一期）· `[phase4_notes.md](./phase4_notes.md)`（二期说明）  
+**结论汇总：** [`backend_verification_result.md`](./backend_verification_result.md)（一期）· [`phase4_retest_result.md`](./phase4_retest_result.md)（二期）· [`phase5_verification_checklist.md`](./phase5_verification_checklist.md)（三期人工清单）  
 **规则：** 不要把完整 `/v1/chat` JSON 贴进本文件；只勾选结果，并可选写 `answer` / `task_id` / 导出路径摘要。
 
 ---

@@ -21,6 +21,7 @@ from doc_agent.agent.guardrails import (
 from doc_agent.agent.prompts import FINAL_SYSTEM, PLAN_SYSTEM, REFLECT_SYSTEM
 from doc_agent.agent.state import AgentState
 from doc_agent.config import get_settings
+from doc_agent.runtime_options import effective_max_tool_calls
 from doc_agent.llm.factory import get_chat_model
 from doc_agent.tools.registry import get_tool_list, parse_export_payload, tools_by_name
 
@@ -192,7 +193,7 @@ def plan_node(state: AgentState) -> dict[str, Any]:
 def route_node(state: AgentState) -> str:
     if state.get("route") == "direct":
         return "finalize"
-    if state.get("iteration", 0) >= get_settings().max_tool_calls:
+    if state.get("iteration", 0) >= effective_max_tool_calls():
         return "finalize"
     return "act"
 
@@ -325,7 +326,6 @@ def act_node(state: AgentState) -> dict[str, Any]:
 
 
 def reflect_node(state: AgentState) -> dict[str, Any]:
-    settings = get_settings()
     iteration = state.get("iteration", 0)
     goal = (state.get("user_goal") or "").strip()
     greetings = {"你好", "您好", "hello", "hi", "谢谢", "thanks", "thank you"}
@@ -337,7 +337,7 @@ def reflect_node(state: AgentState) -> dict[str, Any]:
             "status": "reflected",
         }
 
-    if iteration >= settings.max_tool_calls:
+    if iteration >= effective_max_tool_calls():
         return {
             "reflection": "已达工具调用上限，停止重试。",
             "should_retry": False,
@@ -433,8 +433,7 @@ def reflect_node(state: AgentState) -> dict[str, Any]:
 
 
 def after_reflect(state: AgentState) -> str:
-    settings = get_settings()
-    if state.get("should_retry") and state.get("iteration", 0) < settings.max_tool_calls:
+    if state.get("should_retry") and state.get("iteration", 0) < effective_max_tool_calls():
         return "act"
     return "finalize"
 

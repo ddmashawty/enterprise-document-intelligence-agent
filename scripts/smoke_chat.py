@@ -15,6 +15,16 @@ from doc_agent.config import get_settings  # noqa: E402
 from doc_agent.rag.store import get_store  # noqa: E402
 
 
+def _normalize(text: str) -> str:
+    return (
+        text.replace(" ", "")
+        .replace("\u3000", "")
+        .replace("，", ",")
+        .replace("、", ",")
+        .replace("：", ":")
+    )
+
+
 def main() -> int:
     settings = get_settings()
     if not settings.llm_configured:
@@ -36,25 +46,18 @@ def main() -> int:
         result = run_agent(q)
         answer = result.get("answer", "")
         print(f"A: {answer[:500]}")
-        # lightweight heuristic: check a few keywords from expected
-        keys = [
-            t
-            for t in expected.replace("，", " ")
-            .replace("、", " ")
-            .replace("：", " ")
-            .split()
-            if len(t) >= 2
-        ]
-        # Also accept shorter numeric/duration anchors for Chinese answers in tables.
-        for anchor in ("3年", "10年", "TopK", "500", "公开", "内部", "秘密", "机密"):
-            if anchor in expected and anchor not in keys:
+        ans_n = _normalize(answer)
+        exp_n = _normalize(expected)
+        keys = [t for t in exp_n.replace(",", " ").split() if len(t) >= 2]
+        for anchor in ("3年", "10年", "TopK", "500", "公开", "内部", "秘密", "机密", "不少于"):
+            if anchor in exp_n and anchor not in keys:
                 keys.append(anchor)
-        hit = sum(1 for k in keys if k in answer)
+        hit = sum(1 for k in keys if k in ans_n)
         passed = hit >= max(1, (len(keys) + 2) // 3)
         print(f"pass={passed} keyword_hits={hit}/{len(keys)}")
         ok += int(passed)
     print(f"\nsummary: {ok}/{len(items)} passed")
-    return 0 if ok >= max(1, len(items) - 1) else 1
+    return 0 if ok == len(items) else (0 if ok >= max(1, len(items) - 1) else 1)
 
 
 if __name__ == "__main__":
