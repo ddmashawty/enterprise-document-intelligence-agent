@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+from datetime import datetime, timezone
 from functools import lru_cache
 from typing import Any
 from uuid import uuid4
@@ -7,19 +8,31 @@ from uuid import uuid4
 from langchain_core.messages import HumanMessage
 from langgraph.graph import END, START, StateGraph
 
-from doc_agent.agent.nodes import act_node, finalize_node, plan_node, route_node, should_continue
+from doc_agent.agent.nodes import (
+    act_node,
+    after_reflect,
+    finalize_node,
+    plan_node,
+    reflect_node,
+    route_node,
+)
 from doc_agent.agent.state import AgentState
+from doc_agent.memory import TaskRecord, get_session_memory, get_task_store, new_task_id
 
 
 def build_graph():
     g = StateGraph(AgentState)
     g.add_node("plan", plan_node)
     g.add_node("act", act_node)
+    g.add_node("reflect", reflect_node)
     g.add_node("finalize", finalize_node)
 
     g.add_edge(START, "plan")
     g.add_conditional_edges("plan", route_node, {"act": "act", "finalize": "finalize"})
-    g.add_conditional_edges("act", should_continue, {"act": "act", "finalize": "finalize"})
+    g.add_edge("act", "reflect")
+    g.add_conditional_edges(
+        "reflect", after_reflect, {"act": "act", "finalize": "finalize"}
+    )
     g.add_edge("finalize", END)
     return g.compile()
 
@@ -29,29 +42,92 @@ def get_graph():
     return build_graph()
 
 
+def _format_session_context(session_id: str) -> str:
+    mem = get_session_memory()
+    turns = mem.history(session_id, limit=6)
+    if not turns:
+        # fall back to durable turns if process restarted
+        turns = get_task_store().session_history(session_id, limit=6)
+        turns = [{"role": t["role"], "content": t["content"]} for t in turns]
+    if not turns:
+        return ""
+    lines = []
+    for t in turns:
+        role = t.get("role", "")
+        content = (t.get("content") or "").replace("\n", " ")[:240]
+        lines.append(f"- {role}: {content}")
+    return "\n".join(lines)
+
+
 def run_agent(message: str, session_id: str | None = None) -> dict[str, Any]:
     sid = session_id or str(uuid4())
+    task_id = new_task_id()
+    session_context = _format_session_context(sid)
     graph = get_graph()
     initial: AgentState = {
         "messages": [HumanMessage(content=message)],
         "user_goal": message,
         "session_id": sid,
+        "task_id": task_id,
         "plan": [],
         "route": "",
         "tool_results": [],
         "citations": [],
+        "exports": [],
+        "reflection": "",
+        "should_retry": False,
+        "retry_hint": "",
+        "session_context": session_context,
         "iteration": 0,
         "final_answer": "",
         "status": "started",
         "error": "",
     }
     final = graph.invoke(initial)
+
+    answer = final.get("final_answer") or ""
+    plan = final.get("plan") or []
+    citations = final.get("citations") or []
+    trace = final.get("tool_results") or []
+    exports = final.get("exports") or []
+    reflection = final.get("reflection") or ""
+    status = final.get("status") or ""
+    iterations = final.get("iteration") or 0
+
+    # Dual-layer memory write
+    session_mem = get_session_memory()
+    session_mem.append(sid, "user", message)
+    session_mem.append(sid, "assistant", answer[:2000])
+
+    store = get_task_store()
+    record = TaskRecord(
+        task_id=task_id,
+        session_id=sid,
+        user_goal=message,
+        plan=list(plan),
+        answer=answer,
+        citations=list(citations)[:20],
+        trace=list(trace),
+        reflection=reflection,
+        exports=list(exports),
+        status=status,
+        iterations=int(iterations),
+        created_at="",
+    )
+    record.created_at = datetime.now(timezone.utc).isoformat()
+    store.save_task(record)
+    store.append_turn(sid, "user", message, task_id=task_id)
+    store.append_turn(sid, "assistant", answer[:4000], task_id=task_id)
+
     return {
         "session_id": sid,
-        "answer": final.get("final_answer") or "",
-        "plan": final.get("plan") or [],
-        "citations": final.get("citations") or [],
-        "trace": final.get("tool_results") or [],
-        "status": final.get("status") or "",
-        "iterations": final.get("iteration") or 0,
+        "task_id": task_id,
+        "answer": answer,
+        "plan": plan,
+        "citations": citations,
+        "trace": trace,
+        "exports": exports,
+        "reflection": reflection,
+        "status": status,
+        "iterations": iterations,
     }

@@ -27,6 +27,7 @@ class Settings(BaseSettings):
     chroma_dir: str = "data/chroma"
     raw_dir: str = "data/raw"
     export_dir: str = "data/exports"
+    memory_db: str = "data/memory.db"
     collection_name: str = "enterprise_docs"
 
     chunk_size: int = 800
@@ -54,6 +55,10 @@ class Settings(BaseSettings):
     @property
     def export_path(self) -> Path:
         return self.resolve(self.export_dir)
+
+    @property
+    def memory_path(self) -> Path:
+        return self.resolve(self.memory_db)
 
     @property
     def embedding_enabled(self) -> bool:

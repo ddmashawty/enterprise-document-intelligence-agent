@@ -4,7 +4,7 @@
 落地可运行的后端：本地文档 ingest → Chroma RAG → LangGraph Agent（规划/工具/反思）→ FastAPI 服务接口，支撑年报对比、制度问答、参数抽取等演示场景。
 
 ## 当前阶段
-阶段 3 完成（含年报召回优化与人工验收）；下一动作为阶段 4（二期能力）
+阶段 4 完成；下一动作为阶段 5（工程化：异步任务、测试、交付文档）
 
 ## 各阶段
 
@@ -34,11 +34,11 @@
 - **状态：** complete
 
 ### 阶段 4：二期后端能力完善
-- [ ] 双层记忆（会话短期 + SQLite 任务轨迹）
-- [ ] 结构化输出工具（Markdown / Excel）
-- [ ] 反思校验节点 + 工具重试（max 5）
-- [ ] 多文档对比/汇总工具
-- **状态：** pending
+- [x] 双层记忆（会话短期 + SQLite 任务轨迹）
+- [x] 结构化输出工具（Markdown / Excel）
+- [x] 反思校验节点 + 工具重试（max 5）
+- [x] 多文档对比/汇总工具
+- **状态：** complete
 
 ### 阶段 5：三期工程化与交付
 - [ ] FastAPI 完善（任务异步、轨迹查询、错误模型）
@@ -63,6 +63,8 @@
 | LLM = DeepSeek（`deepseek-chat`） | 用户指定 |
 | Embedding = 本地 Ollama `qwen3-embedding:0.6b` → Chroma；未配置时 BM25 兜底 | DeepSeek 无官方 Embedding；用户本机已有该模型 |
 | 检索默认 hybrid（dense RRF + BM25）+ 年报章节查询扩展 | 人工验证暴露纯向量对长年报章节召回不足 |
+| 二期记忆：进程内 Session + SQLite TaskStore | 零运维，可回放轨迹 |
+| 二期图：act→reflect→条件重试 | 对齐 PRD 自我校验与 max 5 工具轮次 |
 | API Key 仅存 `.env`，不入库 | 防泄露；聊天中已暴露建议轮换 |
 
 ## 遇到的错误
@@ -82,5 +84,5 @@
 - 阶段状态：pending → in_progress → complete
 - 运行环境：使用 Python 3.12 venv（系统 3.14 暂不兼容部分依赖）
 - 一期默认检索：hybrid（Ollama Embedding + BM25）；需 `requirements-embedding.txt` + Ollama `qwen3-embedding:0.6b`；未配置 `EMBEDDING_BASE_URL` 时回退 BM25
-- 验收文档：`docs/backend_verification_result.md`
+- 验收文档：`docs/backend_verification_result.md`；二期说明：`docs/phase4_notes.md`
 

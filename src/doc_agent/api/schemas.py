@@ -33,10 +33,13 @@ class ChatRequest(BaseModel):
 
 class ChatResponse(BaseModel):
     session_id: str
+    task_id: str = ""
     answer: str
     plan: list[str] = Field(default_factory=list)
     citations: list[dict[str, Any]] = Field(default_factory=list)
     trace: list[dict[str, Any]] = Field(default_factory=list)
+    exports: list[dict[str, Any]] = Field(default_factory=list)
+    reflection: str = ""
     status: str = ""
     iterations: int = 0
 
@@ -47,3 +50,25 @@ class HealthResponse(BaseModel):
     retrieval_backend: str
     chunks: int
     version: str
+    memory_db: str = ""
+
+
+class TaskResponse(BaseModel):
+    task_id: str
+    session_id: str
+    user_goal: str
+    plan: list[str] = Field(default_factory=list)
+    answer: str = ""
+    citations: list[dict[str, Any]] = Field(default_factory=list)
+    trace: list[dict[str, Any]] = Field(default_factory=list)
+    reflection: str = ""
+    exports: list[dict[str, Any]] = Field(default_factory=list)
+    status: str = ""
+    iterations: int = 0
+    created_at: str = ""
+
+
+class SessionHistoryResponse(BaseModel):
+    session_id: str
+    turns: list[dict[str, Any]] = Field(default_factory=list)
+    tasks: list[TaskResponse] = Field(default_factory=list)

@@ -1,3 +1,3 @@
-"""Enterprise document intelligence agent (phase-1 backend)."""
+"""Enterprise document intelligence agent backend."""
 
-__version__ = "0.1.0"
+__version__ = "0.2.0"

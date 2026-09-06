@@ -12,5 +12,6 @@ pypdf>=5.1.0
 rank-bm25>=0.2.2
 numpy>=1.26.0
 orjson>=3.10.0
+openpyxl>=3.1.5
 # Optional dense retrieval (install when EMBEDDING_* configured):
 # chromadb>=0.5.20

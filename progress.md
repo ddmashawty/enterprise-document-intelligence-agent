@@ -1,44 +1,31 @@
 # 进度日志
 
+## 会话：2026-09-06
+
+### 阶段 4：二期能力
+- **状态：** complete（含空转修复 + 人工复测通过）
+- 复测结论：`docs/phase4_retest_result.md`（B2.2/B3.2/B4.1/B4.2 全过）
+
 ## 会话：2026-09-05
 
-### 阶段 1–2：需求与方案
-- **状态：** complete
-- 确认：DeepSeek chat、一期 PDF+txt、本地 Ollama embedding
-
-### 阶段 3：一期后端 MVP
-- **状态：** complete
-- ingest + LangGraph + FastAPI；gold 3/3；GitHub 初推
-
-### 人工验证
-- **状态：** complete
-- 结论：`docs/backend_verification_result.md`
-- 初测核心通过；3.2 年报开放汇总召回不足
-
-### 年报召回优化
-- **状态：** complete
-- hybrid(dense+bm25) + 查询扩展 + 文档过滤 + 短语加权
-- 复测：主营业务/四类风险带页码通过
-- 文件：`query_expand.py`、`store.py`、`registry.py`
-
-### 文档同步并推送 GitHub
-- **状态：** complete
+### 阶段 1–3
+- **状态：** complete（含 hybrid 召回优化与验收文档推送）
 
 ## 测试结果
 | 测试 | 输入 | 预期结果 | 实际结果 | 状态 |
 |------|------|---------|---------|------|
-| gold Q1–Q3 | 可控样例 | 命中原文 | 命中 | pass |
-| GET /health | - | hybrid 后端 | hybrid(qwen3-embedding:0.6b+bm25) | pass |
-| 年报 3.2 复测 | 主营业务+风险 | 有条目与页码 | p9/p15/p22/p56 等 | pass |
+| gold Q1–Q3 | 可控样例 | 命中原文 | 3/3 | pass |
+| smoke_phase4 | 导出+记忆+会话 | 落盘且 task 入库 | OK | pass |
+| GET /health | - | hybrid + memory_db | 字段已加 | pass |
 
 ## 五问重启检查
 | 问题 | 答案 |
 |------|------|
-| 我在哪里？ | 一期 MVP + 年报召回优化完成，文档待推送 |
-| 我要去哪里？ | 阶段 4 二期能力 |
-| 目标是什么？ | 可运行、可验证的企业文档 Agent 后端 |
-| 我学到了什么？ | 长年报需 hybrid，不能只靠稠密向量 |
-| 我做了什么？ | 见上方各阶段 |
+| 我在哪里？ | 阶段 4 完成 |
+| 我要去哪里？ | 阶段 5 工程化 |
+| 目标是什么？ | 可运行企业文档 Agent 后端 |
+| 我学到了什么？ | 反思重试需启发式防空转；导出工具要进 reflect 检查 |
+| 我做了什么？ | 二期记忆/导出/反思/对比 |
 
 ---
 *每个阶段完成后或遇到错误时更新此文件*

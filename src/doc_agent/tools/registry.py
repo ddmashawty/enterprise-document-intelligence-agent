@@ -9,6 +9,8 @@ from langchain_core.tools import tool
 from doc_agent.config import get_settings
 from doc_agent.ingest.loaders import load_file
 from doc_agent.rag.store import get_store
+from doc_agent.tools.compare import compare_docs, extract_fields
+from doc_agent.tools.export import export_excel, export_markdown
 
 
 @tool
@@ -44,7 +46,6 @@ def parse_document(path: str, max_chars: int = 6000) -> str:
     settings = get_settings()
     file_path = settings.resolve(path)
     if not file_path.exists():
-        # also try matching by filename under raw dir
         matches = list(settings.raw_path.rglob(Path(path).name))
         if not matches:
             return f"文件不存在: {path}"
@@ -90,8 +91,29 @@ def summarize_citations(question: str, citations_json: str) -> str:
 
 
 def get_tool_list():
-    return [list_documents, rag_search, parse_document, summarize_citations]
+    return [
+        list_documents,
+        rag_search,
+        parse_document,
+        summarize_citations,
+        compare_docs,
+        extract_fields,
+        export_markdown,
+        export_excel,
+    ]
 
 
 def tools_by_name() -> dict[str, Any]:
     return {t.name: t for t in get_tool_list()}
+
+
+def parse_export_payload(tool_name: str, output: Any) -> dict[str, Any] | None:
+    if tool_name not in {"export_markdown", "export_excel"}:
+        return None
+    try:
+        data = json.loads(str(output))
+    except json.JSONDecodeError:
+        return None
+    if isinstance(data, dict) and data.get("path"):
+        return data
+    return None

@@ -22,11 +22,18 @@
 - **结果：** 复测可召回 p9/p15/p22/p56 等页，并产出带页码的业务与四类风险摘要。
 - **实现：** `src/doc_agent/rag/query_expand.py`、`store.py`；工具 `rag_search(doc_name=...)`。
 
+### 阶段 4 二期落地（2026-09-06）
+- 双层记忆：`SessionMemory` + SQLite `TaskStore`（`MEMORY_DB=data/memory.db`）。
+- 图增加 `reflect`；`should_retry` 且未达 `MAX_TOOL_CALLS` 时回 `act`。
+- 新工具：`compare_docs`、`extract_fields`、`export_markdown`、`export_excel`（openpyxl）。
+- API：`task_id` / `exports` / `reflection`；`GET /v1/tasks/{id}`、`GET /v1/sessions/{id}`。
+- 说明：`docs/phase4_notes.md`。
+
 ### 现有仓库资产
 - PRD：`企业文档智能处理Agent 产品需求文档（PRD）.md`
 - 演示数据：年报 PDF（本地，默认不入库）+ 可控 txt + `data/gold/sample_qa.json`
-- 代码：`src/doc_agent/`（FastAPI + LangGraph + hybrid RAG）
-- 验收：`docs/backend_verification_result.md`
+- 代码：`src/doc_agent/`（FastAPI + LangGraph + hybrid RAG + memory）
+- 验收：`docs/backend_verification_result.md`、`docs/phase4_notes.md`
 - 下载脚本：`scripts/download_demo_data.py`
 
 ### 后端职责边界
