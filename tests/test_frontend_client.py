@@ -25,6 +25,34 @@ def test_api_error_envelope():
         raise AssertionError("expected ApiError")
 
 
+def test_health_rejects_foreign_service():
+    def handler(request: httpx.Request) -> httpx.Response:
+        return httpx.Response(200, json={"status": "ok"})
+
+    client = DocAgentClient("http://127.0.0.1:8000", transport=httpx.MockTransport(handler))
+    try:
+        client.health()
+    except ApiError as exc:
+        assert exc.code == "wrong_service"
+        assert "不是文档 Agent" in exc.message
+    else:
+        raise AssertionError("expected ApiError")
+
+
+def test_not_found_detail_is_wrong_service():
+    def handler(request: httpx.Request) -> httpx.Response:
+        return httpx.Response(404, json={"detail": "Not Found"})
+
+    client = DocAgentClient("http://127.0.0.1:8000", transport=httpx.MockTransport(handler))
+    try:
+        client.chat("你好")
+    except ApiError as exc:
+        assert exc.code == "wrong_service"
+        assert "别的服务" in exc.message
+    else:
+        raise AssertionError("expected ApiError")
+
+
 def test_chat_body_includes_options():
     seen: dict[str, str] = {}
 

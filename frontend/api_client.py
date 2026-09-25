@@ -20,6 +20,10 @@ class ApiError(Exception):
         super().__init__(f"{status_code} {code}: {message}")
 
 
+def is_doc_agent_health(payload: dict[str, Any]) -> bool:
+    return "version" in payload and "llm" in payload and "retrieval_backend" in payload
+
+
 def _error_from_response(response: httpx.Response) -> ApiError:
     code = "http_error"
     message = response.text[:500] or response.reason_phrase
@@ -34,6 +38,10 @@ def _error_from_response(response: httpx.Response) -> ApiError:
             code = str(err.get("code") or code)
             message = str(err.get("message") or message)
             details = err.get("details")
+        elif body.get("detail") == "Not Found":
+            code = "wrong_service"
+            message = "这个地址没有文档 Agent 的接口。侧栏 API 指向了别的服务。"
+            details = body
     return ApiError(response.status_code, code, message, details)
 
 
@@ -71,7 +79,15 @@ class DocAgentClient:
         return data if isinstance(data, dict) else {"data": data}
 
     def health(self) -> dict[str, Any]:
-        return self._request("GET", "/health", timeout=10)
+        data = self._request("GET", "/health", timeout=10)
+        if not is_doc_agent_health(data):
+            raise ApiError(
+                200,
+                "wrong_service",
+                f"{self.base_url} 不是文档 Agent：/health 没有 version、llm、retrieval_backend。",
+                data,
+            )
+        return data
 
     def chat(
         self,

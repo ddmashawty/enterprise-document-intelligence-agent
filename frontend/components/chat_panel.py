@@ -35,6 +35,10 @@ def send_message(client: DocAgentClient, message: str, *, async_mode: bool, max_
     message = message.strip()
     if not message:
         return
+    err = st.session_state.get("health_error")
+    if err:
+        st.error(f"{err.code}：{err.message}")
+        return
     _append("user", message)
     session_id = st.session_state.session_id.strip() or None
     try:

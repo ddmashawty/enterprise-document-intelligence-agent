@@ -38,12 +38,47 @@ def _sidebar_controls() -> None:
     st.session_state.base_url = st.sidebar.text_input("API Base URL", st.session_state.base_url)
 
 
-def _sidebar_health(client: DocAgentClient) -> None:
+def _prefer_local_agent() -> None:
+    """Before the URL widget is drawn, leave 8000 when another process owns it."""
+    if st.session_state.get("port_checked"):
+        return
+    st.session_state.port_checked = True
+    if st.session_state.base_url.rstrip("/") != "http://127.0.0.1:8000":
+        return
     try:
-        health = client.health()
+        DocAgentClient(st.session_state.base_url).health()
+        return
     except ApiError as exc:
-        st.sidebar.error(f"{exc.code}：{exc.message}")
-        health = None
+        if exc.code != "wrong_service":
+            return
+    alt = DocAgentClient("http://127.0.0.1:8001")
+    try:
+        alt.health()
+    except ApiError:
+        return
+    st.session_state.base_url = alt.base_url
+    st.session_state.port_notice = "8000 被其他服务占用，已改连本项目的 8001。"
+
+
+def _connect() -> DocAgentClient:
+    client = DocAgentClient(st.session_state.base_url)
+    try:
+        st.session_state.health = client.health()
+        st.session_state.health_error = None
+    except ApiError as exc:
+        st.session_state.health = None
+        st.session_state.health_error = exc
+    return client
+
+
+def _sidebar_health(client: DocAgentClient) -> None:
+    health = st.session_state.get("health")
+    notice = st.session_state.get("port_notice") or ""
+    if notice:
+        st.sidebar.info(notice)
+    err = st.session_state.get("health_error")
+    if err:
+        st.sidebar.error(f"{err.code}：{err.message}")
     if health:
         st.sidebar.success(
             f"{health.get('status')} · {health.get('version')} · "
@@ -81,11 +116,18 @@ def _demo_tab() -> None:
 def main() -> None:
     st.set_page_config(page_title="文档智能 Agent", layout="wide")
     _init_state()
+    _prefer_local_agent()
     _sidebar_controls()
-    client = DocAgentClient(st.session_state.base_url)
+    client = _connect()
     _sidebar_health(client)
     st.title("企业文档智能处理")
-    st.caption("本地演示界面。不要把未鉴权的 API 暴露到公网。")
+    st.caption(f"API {st.session_state.base_url} · 本地演示，不要暴露到公网。")
+    err = st.session_state.get("health_error")
+    if err:
+        st.error(f"{err.code}：{err.message}")
+    notice = st.session_state.get("port_notice")
+    if notice:
+        st.info(notice)
 
     tab_chat, tab_kb, tab_tasks, tab_demo = st.tabs(["对话", "知识库", "任务中心", "演示剧本"])
     with tab_chat:
