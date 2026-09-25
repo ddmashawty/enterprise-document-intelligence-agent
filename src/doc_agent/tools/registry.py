@@ -42,7 +42,7 @@ def rag_search(query: str, top_k: int = 8, doc_name: str = "") -> str:
 
 @tool
 def parse_document(path: str, max_chars: int = 6000) -> str:
-    """Parse a local PDF/TXT file and return truncated plain text with page markers."""
+    """Parse a local PDF, DOCX, TXT, or Markdown file and return truncated plain text with page markers."""
     settings = get_settings()
     file_path = settings.resolve(path)
     if not file_path.exists():

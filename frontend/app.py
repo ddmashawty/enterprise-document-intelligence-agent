@@ -1,0 +1,106 @@
+from __future__ import annotations
+
+import sys
+import uuid
+from pathlib import Path
+
+import streamlit as st
+
+ROOT = Path(__file__).resolve().parents[1]
+if str(ROOT) not in sys.path:
+    sys.path.insert(0, str(ROOT))
+
+from frontend.api_client import ApiError, DocAgentClient
+from frontend.components.chat_panel import render_chat
+from frontend.components.ingest_panel import render_ingest
+from frontend.components.tasks_panel import render_tasks
+
+DEMO_QUESTIONS = [
+    "演示产品手册里 TopK 和切片大小分别是多少？",
+    "普通文档的保存期限是多久？",
+    "保密等级分为哪几级？",
+    "贵州茅台 2024 年报的主营业务和主要风险是什么？",
+    "对比演示产品参数手册和演示企业文档管理制度的要点",
+    "保密等级分为哪几级？导出 Excel，文件名 demo_secrecy",
+]
+
+
+def _init_state() -> None:
+    st.session_state.setdefault("session_id", f"ui-{uuid.uuid4().hex[:8]}")
+    st.session_state.setdefault("messages", [])
+    st.session_state.setdefault("base_url", "http://127.0.0.1:8000")
+    st.session_state.setdefault("async_mode", False)
+    st.session_state.setdefault("max_tool_calls", 5)
+
+
+def _sidebar_controls() -> None:
+    st.sidebar.header("连接")
+    st.session_state.base_url = st.sidebar.text_input("API Base URL", st.session_state.base_url)
+
+
+def _sidebar_health(client: DocAgentClient) -> None:
+    try:
+        health = client.health()
+    except ApiError as exc:
+        st.sidebar.error(f"{exc.code}：{exc.message}")
+        health = None
+    if health:
+        st.sidebar.success(
+            f"{health.get('status')} · {health.get('version')} · "
+            f"llm {health.get('llm')} · {health.get('chunks')} chunks"
+        )
+        st.sidebar.caption(str(health.get("retrieval_backend") or ""))
+
+    st.sidebar.header("会话")
+    st.session_state.session_id = st.sidebar.text_input("session_id", st.session_state.session_id)
+    if st.sidebar.button("新建会话"):
+        st.session_state.session_id = f"ui-{uuid.uuid4().hex[:8]}"
+        st.session_state.messages = []
+        st.rerun()
+
+    mode = st.sidebar.radio("模式", ["同步 Chat", "异步 Chat"], index=1 if st.session_state.async_mode else 0)
+    st.session_state.async_mode = mode == "异步 Chat"
+    st.session_state.max_tool_calls = st.sidebar.slider(
+        "max_tool_calls",
+        min_value=1,
+        max_value=5,
+        value=int(st.session_state.max_tool_calls),
+    )
+    st.sidebar.caption("异步任务在单个 uvicorn 进程内执行，不要开多 worker。")
+
+
+def _demo_tab() -> None:
+    st.subheader("演示剧本")
+    st.caption("点一条问句，会填入对话并发送。")
+    for question in DEMO_QUESTIONS:
+        if st.button(question, use_container_width=True):
+            st.session_state.draft_question = question
+            st.rerun()
+
+
+def main() -> None:
+    st.set_page_config(page_title="文档智能 Agent", layout="wide")
+    _init_state()
+    _sidebar_controls()
+    client = DocAgentClient(st.session_state.base_url)
+    _sidebar_health(client)
+    st.title("企业文档智能处理")
+    st.caption("本地演示界面。不要把未鉴权的 API 暴露到公网。")
+
+    tab_chat, tab_kb, tab_tasks, tab_demo = st.tabs(["对话", "知识库", "任务中心", "演示剧本"])
+    with tab_chat:
+        render_chat(
+            client,
+            async_mode=st.session_state.async_mode,
+            max_tool_calls=int(st.session_state.max_tool_calls),
+        )
+    with tab_kb:
+        render_ingest(client)
+    with tab_tasks:
+        render_tasks(client)
+    with tab_demo:
+        _demo_tab()
+
+
+if __name__ == "__main__":
+    main()

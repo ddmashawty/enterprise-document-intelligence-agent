@@ -9,6 +9,7 @@ langgraph>=0.2.50
 langchain-core>=0.3.20
 langchain-openai>=0.2.10
 pypdf>=5.1.0
+python-docx>=1.1.2
 rank-bm25>=0.2.2
 numpy>=1.26.0
 orjson>=3.10.0

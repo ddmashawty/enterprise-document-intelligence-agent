@@ -5,7 +5,7 @@
 ## 已确认配置
 
 - LLM：DeepSeek（`deepseek-chat`）
-- 文档：PDF + txt
+- 文档：PDF、Word（.docx）、txt、Markdown
 - 检索：**Hybrid** = Ollama `qwen3-embedding:0.6b`（Chroma）+ BM25
 - 记忆：会话短期 + SQLite（`data/memory.db`）
 - 图：`plan → act → reflect → (重试|finalize)`，工具上限默认 5（请求可覆盖）
@@ -30,6 +30,16 @@ PYTHONPATH=src python -m uvicorn doc_agent.api:app --host 0.0.0.0 --port 8000
 ```
 
 打开 http://127.0.0.1:8000/docs 。注意 Request body 里 `message` 只要一层字符串，不要写成 `"message": "message": "..."`。
+
+## 启动前端
+
+另开一个终端（后端保持在 8000）：
+
+```bash
+bash scripts/run_frontend.sh
+```
+
+打开 http://127.0.0.1:8501 。这是本地演示界面，没有鉴权，不要暴露到公网。验证步骤见 `docs/frontend_verification_checklist.md`。
 
 ```bash
 curl -s localhost:8000/health | python3 -m json.tool

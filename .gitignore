@@ -19,6 +19,7 @@ build/
 data/chroma/
 data/memory.db
 data/exports/
+data/uploads/
 *.db
 
 # Large public demo PDFs (re-download via scripts/download_demo_data.py)

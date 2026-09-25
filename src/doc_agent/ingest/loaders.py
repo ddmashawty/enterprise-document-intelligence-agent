@@ -5,6 +5,10 @@ import warnings
 from dataclasses import dataclass
 from pathlib import Path
 
+from docx import Document
+from docx.oxml.ns import qn
+from docx.table import Table
+from docx.text.paragraph import Paragraph
 from pypdf import PdfReader
 
 # pypdf may spam fontTools warnings on complex PDFs
@@ -59,21 +63,93 @@ def load_pdf(path: Path) -> LoadedDocument:
     return LoadedDocument(source=str(path), pages=pages)
 
 
+def _page_break_before(paragraph: Paragraph) -> bool:
+    p_pr = paragraph._p.pPr
+    return p_pr is not None and p_pr.find(qn("w:pageBreakBefore")) is not None
+
+
+def _split_paragraph(paragraph: Paragraph) -> list[str]:
+    """Split paragraph text on explicit or last-rendered page breaks."""
+    parts = [""]
+    for el in paragraph._p.iter():
+        if el.tag == qn("w:lastRenderedPageBreak"):
+            parts.append("")
+        elif el.tag == qn("w:br") and el.get(qn("w:type")) == "page":
+            parts.append("")
+        elif el.tag == qn("w:tab"):
+            parts[-1] += "\t"
+        elif el.tag == qn("w:t") and el.text:
+            parts[-1] += el.text
+    return parts
+
+
+def _table_text(table: Table) -> str:
+    rows: list[str] = []
+    for row in table.rows:
+        cells = [_clean(cell.text) for cell in row.cells]
+        if any(cells):
+            rows.append(" | ".join(cells))
+    return "\n".join(rows)
+
+
+def load_docx(path: Path) -> LoadedDocument:
+    document = Document(str(path))
+    buf: list[str] = []
+    pages: list[DocumentPage] = []
+
+    def flush() -> None:
+        text = _clean("\n".join(buf))
+        buf.clear()
+        if text:
+            pages.append(
+                DocumentPage(source=str(path), page=len(pages) + 1, text=text)
+            )
+
+    for child in document.element.body.iterchildren():
+        if child.tag == qn("w:p"):
+            paragraph = Paragraph(child, document)
+            if _page_break_before(paragraph) and buf:
+                flush()
+            parts = _split_paragraph(paragraph)
+            for i, part in enumerate(parts):
+                if i > 0:
+                    flush()
+                cleaned = part.strip()
+                if cleaned:
+                    buf.append(cleaned)
+        elif child.tag == qn("w:tbl"):
+            rendered = _table_text(Table(child, document))
+            if rendered:
+                buf.append(rendered)
+    flush()
+    if not pages:
+        raise ValueError(f"No extractable text in Word document: {path}")
+    return LoadedDocument(source=str(path), pages=pages)
+
+
 def load_file(path: Path) -> LoadedDocument:
     suffix = path.suffix.lower()
     if suffix == ".pdf":
         return load_pdf(path)
+    if suffix == ".docx":
+        return load_docx(path)
+    if suffix == ".doc":
+        raise ValueError(f"Legacy .doc is not supported, save as .docx: {path.name}")
     if suffix in {".txt", ".md"}:
         return load_txt(path)
-    raise ValueError(f"Unsupported file type for phase-1: {path.suffix}")
+    raise ValueError(f"Unsupported file type: {path.suffix}")
+
+
+_SOURCE_SUFFIXES = {".pdf", ".txt", ".md", ".docx", ".doc"}
 
 
 def iter_source_files(root: Path) -> list[Path]:
     if root.is_file():
         return [root]
     files: list[Path] = []
-    for pattern in ("**/*.pdf", "**/*.txt", "**/*.md"):
-        files.extend(sorted(root.glob(pattern)))
+    for path in sorted(root.rglob("*")):
+        if path.is_file() and path.suffix.lower() in _SOURCE_SUFFIXES:
+            files.append(path)
     # de-dupe while preserving order
     seen: set[Path] = set()
     out: list[Path] = []
