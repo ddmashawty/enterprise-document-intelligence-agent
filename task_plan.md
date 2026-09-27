@@ -1,10 +1,12 @@
-# 任务计划：企业文档智能处理 Agent — 后端落地
+# 任务计划：企业文档智能处理 Agent → 考研（硕士研招）信息 Agent
 
 ## 目标
-落地可运行的后端：本地文档 ingest → Chroma RAG → LangGraph Agent（规划/工具/反思）→ FastAPI 服务接口，支撑年报对比、制度问答、参数抽取等演示场景。
+- 阶段 1–6（已完成）：本地文档 ingest → Chroma RAG → LangGraph Agent（规划/工具/反思）→ FastAPI + Streamlit，支撑年报对比、制度问答、参数抽取等演示场景。
+- 阶段 K0–K7（本轮）：保留上述骨架，改造成面向硕士研招信息的 Agent：采集（礼貌爬取 + 变化检测）→ 多格式解析 → 结构化抽取入 `data/kaoyan.db`（每个数值带来源文档 / 页码 / 年份 / 口径）→ 按条件筛选、查复试线、对比、导出；每个数字有出处，不知道就说不知道。首批：中大 / 华工 / 暨南 / 华师泛计算机（种子包 `data/kaoyan/`）。企业演示作为“通用文档模式”保留。
+- 需求原文：`data/kaoyan/CURSOR_PROMPT.md`；数据说明：`data/kaoyan/README.md`。
 
 ## 当前阶段
-后端阶段 1–5 完成；下一动作为阶段 6（Streamlit 前端，见 `docs/frontend_implementation_plan.md`）
+K0 已确认（2026-09-27）；K1 完成（2026-09-27，分支 `feat/kaoyan`，待提交）；下一步 **K2 多格式解析层**。
 
 ## 各阶段
 
@@ -48,15 +50,91 @@
 - **状态：** complete
 
 ### 阶段 6：Streamlit 前端（可视化）
-- [ ] F1 骨架联通（health + 同步 chat）
-- [ ] F2 全流程可视化（trace/异步/任务中心）
-- [ ] F3 Ingest + 演示剧本 + 验证清单
-- [ ] （可选）F4 文档列表 API / 导出下载
-- **状态：** pending
+- [x] F1 骨架联通（health + 同步 chat）— `frontend/app.py`、`frontend/api_client.py`
+- [x] F2 全流程可视化（trace/异步/任务中心）— `components/chat_panel.py`、`trace_panel.py`、`tasks_panel.py`
+- [x] F3 Ingest + 演示剧本 + 验证清单 — `components/ingest_panel.py`、`DEMO_QUESTIONS`、`docs/frontend_verification_checklist.md`
+- [ ] （可选）F4 文档列表 API / 导出下载 — 未做（trace 面板只显示导出路径，无下载；无文档列表接口）
+- **状态：** complete（代码，见提交 `a14f23d`、`7a439fb`）；`tests/test_frontend_client.py` 4 条通过；**人工验收结果未落文档**（有 checklist，无 result）
 - **计划文档：** `docs/frontend_implementation_plan.md`
+- **说明：** 2026-09-27 按代码核对后更正（原状态 pending 已过时）
+
+### 阶段 K0：考研改造 — 阅读、基线、计划（不写代码）
+- [x] 通读仓库文档、`src/doc_agent/` 全部模块、`tests/`、`scripts/`、`frontend/`
+- [x] 通读种子包：`data/kaoyan/README.md`、`sources.md`、`sources.json`（schools 4 / documents 97）、`majors.csv`（37 行）、`raw/manifest.csv`
+- [x] 基线：`PYTHONPATH=src pytest -q` → **21 passed**（旧文档写 13，之后新增了 docx/frontend 测试）
+- [x] 种子包复制到 `data/kaoyan/`；`git status` 只出现 80 个未跟踪文件（11 个包文件 + 69 个 raw），28 条忽略规则生效
+- [x] manifest 校验：97 条中 95 个本地存在且 sha256 一致；缺 2 个 >3MB 文件（`scut_2026_拟录取硕士名单_不含推免.pdf`、`sysu_2026_硕士招生学科专业目录.pdf`，lite 包本就不含）
+- [x] `majors.csv` 来源 URL 按 ` ; ` 切分 + 去括号说明后，全部能精确匹配 `sources.json` 的 `page_url/attachment_url`
+- [x] 写出 K0–K7 计划（本文件）
+- [x] 用户确认计划（2026-09-27）
+- **状态：** complete
+
+### 阶段 K1：种子库 + golden（不联网、不调 LLM）
+- **新增：** `src/doc_agent/kaoyan/{__init__.py, schema.sql, db.py, models.py, normalize.py, seed.py}`、`scripts/seed_kaoyan.py`、`scripts/verify_kaoyan_bundle.py`、`data/gold/kaoyan_qa.json`（第 6 节 18 条）、`tests/test_kaoyan_normalize.py`、`tests/test_kaoyan_seed.py`
+- **修改：** `config.py`（`kaoyan_db`、`kaoyan_data_dir`，其余 K 阶段配置在用到时再加）、`.env.example`、`data/README.md`（指向 `data/kaoyan/README.md`）、`requirements-embedding.txt`（补齐已漂移的 `python-docx`、`openpyxl`）
+- **做法：**
+  - `schema.sql`：`schools / colleges / documents / programs / directions / exam_subjects / plans / score_lines / admission_stats / crawl_runs` + 视图 `v_program_facts`；每条事实带 `source_doc_id, page, year, definition, evidence_text, extraction_method, verified`
+  - `KaoyanStore`：sqlite3 + `threading.Lock`（仿 `memory.TaskStore`），`init_schema()`、upsert、查询；种子幂等（先删 `extraction_method in (manual_seed, seed_note_regex)` 的事实再重写，或按自然键 upsert）
+  - `normalize.py`：`48(17)`、`同上`、`≤41`、`（0812合计≤19）`、科目串拆分（①②③④ / 换行 / 空格；“408…基础综合”≡408）、格内换行的专业代码、单科线（`政治50/外语50/业务课一60/业务课二60`、`业务一53/业务二53`、`业务课70/70（学校基本线）`）、学校别名
+  - `seed.py`：列 → 事实映射按 CURSOR_PROMPT 第 4 节；推免数默认口径（中大 = 学院细则已招推免 / 华师 = 目录“总(推免)” / 暨南 = 2027 推免复试方案）写入 `definition`
+  - 备注窄正则：已把 37 行备注全过一遍，在 CURSOR_PROMPT 列出的变体之外还需覆盖（每个变体都配真实字符串单测）：
+    - 细则计划：`学院细则：总8/已招推免7/公开1`、`学院细则：总15/推免15/公开0`
+    - 专项：`另退役大学生计划1名（线335）`、`少数民族骨干1名，线270（40/40/55/55）`、`另退役3；退役线288（…）`
+    - 华师：`复试方案中计划为54（推免5）`（无“含联培”）、`拟招22/已招推免1`、`拟招20/推免0`
+    - 华工：`统考计划18，另有中法南特联培项目5`、`统考可用计划10（学校2025-10-22 PDF）`、`统考可用计划21。`
+    - 暨南 2026 口径（用例 7、15 需要）：`2026：目录53；统招计划29，复试58人，1:2.00` → `plans(year=2026, catalog_total / public_exam)` + `admission_stats(retest_count)`；`2026目录中分专业计划：081201 5、081202 3、081203 6、0812Z3 10`
+    - 人数统计（用例 17 需要，只存统计）：`统考拟录取36人`、`统考拟录取23人（含南特5）`、`复试名单56人（339–416）` → `admission_stats`
+- **验收：** 37 个 program；`documents` 97 条且无 `seed_only`；CURSOR_PROMPT K1 列出的 7 组断言全部成立（中大 670 085404 线 379 且来源 `cse.sysu.edu.cn/article/3475`；暨大 052 085412 348 / 2027 目录 62 / 推免 25；华师 019 085404 348 + 退役 288；华工 085404 科目 unknown、校线 305、`college_exam_plan` 35 与 `available_exam` 21 并存；暨大 010 0812 四个二级学科 `catalog_total` 空、`tm` 为一级学科合计上限 19；中大 757 083900 `no_exam`）；`verify_kaoyan_bundle.py` 输出 96 ok / 1 missing(warn) / 0 bad（中大 2026 目录 PDF 已联网下载并校验 sha256）
+- **测试：** `test_kaoyan_normalize.py`、`test_kaoyan_seed.py`（种子写到 `tmp_path`，不碰 `data/kaoyan.db`）；旧 21 条不变
+- **结果：** 70 passed（21 + 49）；种子 4 校 / 16 学院 / 97 文档 / 37 专业 / 144 plans / 49 score_lines / 60 admission_stats，`seed_only` 0，二次种子计数不变。“0812 `catalog_total` 空”按 **2027 无专业级数值** 落实（2027 只有 `pool_scope='0812'` 合计 24；2026 分专业计划按 2026 年保存，golden #7 允许补充）。详见 `docs/kaoyan_phase1_notes.md`
+- **状态：** complete
+
+### 阶段 K2：多格式解析层
+- **新增：** `src/doc_agent/ingest/tables.py`（`Table`：cells、合并单元格展开、page、bbox；HTML / PDF / xlsx / xls 抽表）、`src/doc_agent/ingest/ocr.py`（`OCRBackend` 接口，本阶段只实现 `none`）、`src/doc_agent/collect/__init__.py`、`src/doc_agent/collect/attachments.py`（`<a href>`、`div[pdfsrc]`+`sudyfile-attr`、`<img src>`、data URI、相对路径）、`tests/test_kaoyan_tables.py`、`tests/test_kaoyan_attachments.py`
+- **修改：** `ingest/loaders.py`：新增 `ParsedDocument(LoadedDocument)`（多 `tables / images / meta`）；`load_file()` 分发 `.html/.htm/.xlsx/.xls/.jpg/.png`；无字符层 PDF 页 → `needs_ocr`；`.doc` 仍抛错；`.csv` 不进 `_SOURCE_SUFFIXES`。`ingest/pipeline.py`：`needs_ocr` 文档不报错，结果里带标记。`config.py` 加 `ocr_backend`；`requirements.txt` 加 `pdfplumber`、`beautifulsoup4`、`lxml`、`xlrd`
+- **测试（全部用已入库夹具，断言值先开文件核对）：** CURSOR_PROMPT K2 列出的 8 条（中大 cse 细则表行 379/50/50/60/60；暨南 2027 目录 085412=62、052 学院行 116、010 备注“指标为24个”；华师 019 目录 `48(17)`、`50(4)`；华师 2027 推免 xls ffill 后 019/041 的 085410 推免 3/8；中大校线 PDF“工学[08] 280 45 60”；sece data URI PNG sha256=`19cedf27…6209`；华工 cs 页 2 个 `pdfsrc` 附件“2026学硕.pdf / 2026专硕.pdf”；`iter_source_files` 新后缀 + 仍跳过 csv）
+- **验收：** `POST /v1/ingest {"paths":["data/kaoyan/raw"]}` 可跑通，失败文件在 `docs_failed` 带原因；图片 / 扫描件在 `ocr_backend=none` 时标 `needs_ocr` 不报错；`tests/test_docx_loader.py` 不改仍通过
+- **状态：** pending
+
+### 阶段 K3：检索元数据 + 考研索引
+- **修改：** `ingest/chunking.py`（`TextChunk` 加可选 `doc_id/school/college/year/doc_type/title/url`；考研 chunk_id 用 `doc_id` 前缀；表格按行切、每块重复表名 + 表头）、`rag/embeddings.py`（`Hit.metadata`）、`rag/store.py`（BM25 路径和 Chroma `where` 支持 school/year/doc_type 过滤；`get_store(profile="enterprise"|"kaoyan")` 按 profile 缓存实例，默认行为不变）、`rag/query_expand.py`（考研意图扩展 + 学校别名表，按 profile 选择；企业规则原样保留）、`tools/registry.py`（`rag_search` 加可选 `school/year/doc_type`，旧调用不变）、`config.py`（`kaoyan_chroma_dir=data/chroma_kaoyan`、`kaoyan_collection=kaoyan_docs`）、根 `.gitignore`（加 `data/chroma_kaoyan/`）
+- **新增：** `scripts/ingest_kaoyan.py`（从 `kaoyan.db.documents` / `sources.json` 带元数据导入；**默认跳过 `contains_personal_data=true` 的文件**，见决策表）、`tests/test_kaoyan_retrieval.py`
+- **测试（纯 BM25，不需要 Ollama）：** `school='jnu'` 只回暨南；`year=2027 + doc_type='catalog'` 命中 2027 目录；表格块保留表头；企业 profile 检索结果与改动前一致
+- **验收：** 以上测试通过；有 key 时 `scripts/smoke_chat.py` 仍 3/3
+- **状态：** pending
+
+### 阶段 K4：结构化抽取
+- **新增：** `src/doc_agent/kaoyan/extract/`（`base.py` 抽取器协议 + `Fact` 输出；规则抽取器：`jnu_catalog_html.py`、`scnu_zsml_html.py`、`scnu_tm_xls.py`、`sysu_retest_html.py`、`sysu_baseline_pdf.py`、`scut_plan_html.py`；`llm_fallback.py`：JSON 输出，必须给证据原文片段，否则丢弃）、`scripts/extract_kaoyan.py`、`scripts/eval_extraction.py`（→ `docs/kaoyan_extraction_report.md`）、`tests/test_kaoyan_extract.py`
+- **验收：** 已入库文字类文档中、`majors.csv` 覆盖到的事实，规则抽取与种子完全一致（中大各学院复试线、暨南 2027 目录计划、华师目录总(推免)、华师 2027 推免数）；每条事实有 `source_doc_id + evidence_text`；冲突只记录不覆盖
+- **测试：** 规则抽取对夹具断言；LLM 兜底用假模型；依赖本地专用文件（暨南 2026 各学院复试方案 xlsx，含名单）的用例缺文件时 `pytest.skip`
+- **注意：** 暨南 2026 学院复试线只在本地专用 xlsx 里；中大 2026 目录 PDF（5.2MB）本机缺失 → 中大目录计划的规则抽取在本机无法验证（见开放问题 2）
+- **状态：** pending
+
+### 阶段 K5：Agent 工具、提示词、API
+- **新增：** `tools/kaoyan.py`（`search_programs`、`get_score_lines`、`get_exam_subjects`、`compare_programs`、`get_document`、`list_sources`，全部返回 JSON 且每条事实带 source）、`api/routes_kaoyan.py`、`api/schemas_kaoyan.py`、`scripts/smoke_kaoyan.py`、`tests/test_kaoyan_tools.py`、`tests/test_kaoyan_api.py`、`tests/test_kaoyan_guardrails.py`
+- **修改：** `tools/registry.py`（注册新工具）、`agent/prompts.py`（考研版规则，CURSOR_PROMPT 3.6 / 第 7 节全部写入）、`agent/nodes.py`（第 0 轮按意图先调结构化工具，叙述类才 `rag_search(goal)`；`_run_tool` 从新工具输出收集 citations；`finalize_node` 前后数字校验，失败重生成一次，再失败删数字写“依据不足”）、`agent/guardrails.py`（考研意图识别 + 数字校验；企业别名逻辑改为仅 enterprise profile 生效，不删）、`agent/state.py`（`intent`、`facts`，`run_agent` 给默认值）、`api/__init__.py`（标题 / 描述换考研，`version=__version__`）、`api/schemas.py`（`HealthResponse` 加可选 `kaoyan_db/programs/documents`）、`api/routes.py`（`/health` 只加字段）、`src/doc_agent/__init__.py`（`__version__ = "0.4.0"`）
+- **“统招”取值：** 优先明确的 `public_exam / college_exam_plan / available_exam`（逐条标口径）；否则 `catalog_total − tm`（两者都精确）；`tm` 为上限时只给下限（如“≥13”），不算满足 “>20”；取不到进 `unknown` 并写原因
+- **测试：** 工具函数直查临时 `kaoyan.db`；数字校验单测；新接口 TestClient（含 404 / 422 错误信封）；`tests/test_api_errors.py` 不改仍通过
+- **验收：** 有 `LLM_API_KEY` 时 `smoke_kaoyan.py`：数值类 ≥90%，“必须回答未知”100%，PII 用例 100% 拒绝，每个答案都有引用
+- **状态：** pending
+
+### 阶段 K6：采集层
+- **新增：** `collect/base.py`（`SiteAdapter` 协议、`FetchResult`、`DiscoveredDoc`）、`collect/http.py`（UA、超时、指数退避最多 2 次、4xx 不重试、按 host 串行限速 ≥3s、robots、ETag / If-Modified-Since、页数上限、`dry_run`）、`collect/dedupe.py`、`collect/generic_list.py`、`collect/adapters/{sysu,scut,jnu,scnu}.py`、`collect/sites.json`（由 `sources.json.schools[]` 生成）、`scripts/crawl_kaoyan.py`、`tests/test_kaoyan_collect.py`
+- **修改：** `api/routes_kaoyan.py`（`POST /v1/crawl` 默认 `dry_run=true` → `run_id`；`GET /v1/crawl/{run_id}`，记录在 `kaoyan.db.crawl_runs`）、`config.py`（`crawl_*`）
+- **测试（全部 `httpx.MockTransport`）：** 限速、robots、重试、URL 规范化 / 文章 ID / sha256 去重、SCUT 多栏目 a{ID} 去重、SYSU 分页 URL 修正、SCNU WebForms 回发参数、JNU 年份探测、`yanzhao.scut.edu.cn` 302 → `blocked` 且不重试
+- **验收：** 用户手动跑一次真实 `probe`（每校列表第 1 页、间隔 ≥3 秒），结果与耗时写进 `progress.md`；新文档进 `documents`，已有的按 sha256 识别为未变化
+- **状态：** pending
+
+### 阶段 K7：OCR / 视觉 + 前端 + 文档
+- **修改 / 新增：** `ingest/ocr.py` 接 `rapidocr`（`requirements-ocr.txt`）和 `vision`（OpenAI 兼容多模态，`vision_*` 配置）；OCR 结果按 sha256 缓存到 `data/kaoyan/ocr_cache/`；6 张图片表格 OCR 产出 `verified=0`，与种子一致才标已核对；扫描名单只统计人数。前端：新增“专业筛选”页（调 `/v1/programs`，显示口径和来源链接），演示剧本换成第 6 节问题，`frontend/api_client.py` 新方法配测试。README / `data/README.md` / `docs/` 更新
+- **可选：** 包改名（单独 PR，等用户决定）
+- **状态：** pending
 
 ## 开放问题
 1. （无）Embedding 已定为本地 Ollama `qwen3-embedding:0.6b`；仍保留未配置时 BM25 兜底。
+2. ~~【K4】中大 2026 目录 PDF 缺失~~ → 已解决（2026-09-27）：按 manifest `source_url` 下载 1 次，sha256 `497d86ba…b7b0` 一致，放在 `data/kaoyan/raw/sysu/`（被忽略，不入库）。
+3. ~~提交方式~~ → 已确认：分支 `feat/kaoyan`，每阶段一个提交，提交前先给 diff 摘要；不 push。
+4. ~~个人信息文件是否进索引~~ → 已确认：脱敏后可进索引（见决策表）。
 
 ## 已做决策
 | 决策 | 理由 |
@@ -77,6 +155,17 @@
 | 统一 error 信封 `{error:{code,message,details}}` | 前端/脚本易解析 |
 | API Key 仅存 `.env`，不入库 | 防泄露；聊天中已暴露建议轮换 |
 | 阶段 5 后端优先，Streamlit 拆阶段 6 | 对齐 PRD 可视化但仍分阶段交付 |
+| 【K】包名 `doc_agent`、仓库名暂不改；`__version__` 升 0.4.0 | tests / scripts / frontend / `PYTHONPATH=src` 都依赖包名；改名另开 PR 由用户决定 |
+| 【K】结构化数据单独放 `data/kaoyan.db`，不动 `memory.db` 表 | 与聊天轨迹解耦；根 `.gitignore` 的 `*.db` 已覆盖 |
+| 【K】考研索引独立：`data/chroma_kaoyan/` + `kaoyan_docs`；`get_store(profile)` | 企业演示索引、`ingest_demo.py`、`smoke_chat.py` 不受影响 |
+| 【K】新接口放 `api/routes_kaoyan.py` / `schemas_kaoyan.py`；`/health` 只加可选字段 | 现有契约被 `frontend/api_client.py`、`test_api_errors.py` 依赖 |
+| 【K】`load_file()` 返回 `ParsedDocument`（`LoadedDocument` 子类） | 旧调用方与 `test_docx_loader.py` 无需改动 |
+| 【K】含个人信息的文件可进 RAG 索引，但入索引前脱敏：姓名 → “姓+某”（如 李某），考生编号整列删除 | 用户 2026-09-27 确认；约束 4：答案 / 日志 / 导出不出现可识别考生信息；统计抽取仍读原文件 |
+| 【K】同一 (program, year, kind) 多来源全部保留，按口径并列返回 | 口径冲突是常态（目录 vs 细则 vs 统考可用计划），不能挑一个 |
+| 【K】派生值（如 210−165=45）由工具显式输出 `derived{value, formula, inputs}` | 数字校验只认证据里出现的数；派生值不写出来会被误删 |
+| 【K】数字校验豁免：年份、专业代码、科目代码、方向序号、页码 | 其余数字必须能在工具证据中找到 |
+| 【K】种子 `verified=1`；`ocr` / `llm` 抽取默认 `verified=0` | 种子为人工核对；机器抽取需与种子对上才标已核对 |
+| 【K】华工 `yanzhao.scut.edu.cn` 标 `blocked`，走手动导入 | 统一认证 302；不绕过登录 |
 
 ## 遇到的错误
 | 错误 | 尝试次数 | 解决方案 |
@@ -88,6 +177,11 @@
 | 年报章节召回偏审计页 | 1 | hybrid RRF + 意图扩展 + 文档过滤 |
 | 查询扩展被主营意图占满 | 1 | 多意图 round-robin 扩展 |
 | 短语加权跨意图误加分 | 1 | 按意图族分别加权 |
+| 【K0】task_plan 阶段 6 标 pending 与代码不符 | 1 | 按代码核对后更正为 complete（代码），注明人工验收结果未落文档 |
+| 【K0】`requirements-embedding.txt` 缺 `python-docx`、`openpyxl` | 1 | K1 已同步 |
+| 【K1】同一页面 URL 对应多个文档，来源挑错（推免列指到分数线图片、华工 085404 复试名单指到 081200 名单） | 2 | 按事实类型设 doc_type 优先级打分；标题里写了别的专业代码 −50；只扣分不加分，避免把图片正文换成外壳 HTML |
+| 【K1】暨南 0812 一级学科复试人数挂到每个二级学科上看不出是合计 | 1 | `admission_stats` 加 `pool_scope` 列 |
+| 【K1】“统考拟录取13（普通）+2（退役）”被回溯抽成 1 | 1 | 正则加 `(?!\d)`；拆分口径不抽，留 notes |
 
 ## 备注
 - 规划文件位于项目根目录，不在 skill 安装目录
@@ -97,3 +191,5 @@
 - 一期默认检索：hybrid（Ollama Embedding + BM25）；需 `requirements-embedding.txt` + Ollama `qwen3-embedding:0.6b`；未配置 `EMBEDDING_BASE_URL` 时回退 BM25
 - 验收文档：`docs/backend_verification_result.md`；二期：`docs/phase4_notes.md`；三期：`docs/phase5_notes.md`
 - 前端计划：`docs/frontend_implementation_plan.md`
+- 考研阶段说明文档：`docs/kaoyan_phaseN_notes.md`（每阶段完成时写，仿 `docs/phase5_notes.md`）
+- 每个 K 阶段结束：`PYTHONPATH=src pytest -q` 全绿；更新本文件、`progress.md`、必要时 `findings.md`

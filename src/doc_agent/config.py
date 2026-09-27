@@ -30,6 +30,9 @@ class Settings(BaseSettings):
     memory_db: str = "data/memory.db"
     collection_name: str = "enterprise_docs"
 
+    kaoyan_db: str = "data/kaoyan.db"
+    kaoyan_data_dir: str = "data/kaoyan"
+
     chunk_size: int = 800
     chunk_overlap: int = 120
     top_k: int = 8
@@ -59,6 +62,14 @@ class Settings(BaseSettings):
     @property
     def memory_path(self) -> Path:
         return self.resolve(self.memory_db)
+
+    @property
+    def kaoyan_db_path(self) -> Path:
+        return self.resolve(self.kaoyan_db)
+
+    @property
+    def kaoyan_data_path(self) -> Path:
+        return self.resolve(self.kaoyan_data_dir)
 
     @property
     def embedding_enabled(self) -> bool:
