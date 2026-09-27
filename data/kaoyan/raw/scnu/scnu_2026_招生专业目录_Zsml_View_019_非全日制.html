@@ -1,0 +1,196 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head><link href="../App_Themes/Gwork/StyleSheet.css" type="text/css" rel="stylesheet" /><script src='/js/Gwork.js' type='text/javascript'></script><meta content="webkit" name="renderer"/><meta content="text/html;charset=utf-8" http-equiv="content-type"/><meta content="upgrade-insecure-requests" http-equiv="Content-Security-Policy"/><title>
+	硕士研究生招生系统
+</title><style type="text/css">
+        a, a:visited {
+            font-size: 12px;
+            text-decoration: none;
+            color: #515151;
+        }
+
+            a:hover {
+                text-decoration: none;
+                color: #FF6600;
+            }
+    </style>
+    <link rel="stylesheet" type="text/css" href="/js/jqueryeasyui/etongui.css" /><script type="text/javascript" src="/js/jquery/jquery.js"></script>
+    <script type="text/javascript" src="/js/jqueryeasyui/jquery.easyui.min.js"></script>
+    <script type="text/javascript" src="/js/lhgdialog/lhgdialog.min.js"></script>
+    
+    <script type="text/javascript">
+        function initForm() {
+            $('#btSearch').linkbutton();
+        }
+    </script>
+<script type="text/javascript">
+        $(document).ready(function () { if (typeof (initForm) == "function") { initForm() } })
+        $(document).ready(function () { if (typeof (reload) == "function") { reload() } })
+    </script>
+</head>
+<body>
+    <form method="post" action="Zsml_View.aspx" id="ctl00_Form1">
+<script type="text/javascript">//<![CDATA[
+	var theForm;
+	if (document.getElementById) { theForm = document.getElementById ('ctl00_Form1'); }
+	else { theForm = document.ctl00_Form1; }
+//]]></script>
+
+<div class="aspNetHidden">
+
+
+<input type="hidden" name="__EVENTARGUMENT" id="__EVENTARGUMENT" value="" /><input type="hidden" name="__VIEWSTATE" id="__VIEWSTATE" value="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AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAJWi+YcNUi520lZ87j7k5RQ3IxzwEdKXpfLSGCbY9/r2" /><input type="hidden" name="__EVENTTARGET" id="__EVENTTARGET" value="" />
+</div>
+
+<script type="text/javascript">//<![CDATA[
+window._form = theForm;
+window.__doPostBack = function (eventTarget, eventArgument) {
+	if(theForm.onsubmit && theForm.onsubmit() == false) return;
+	theForm.__EVENTTARGET.value = eventTarget;
+	theForm.__EVENTARGUMENT.value = eventArgument;
+	theForm.submit();
+}
+//]]></script>
+
+<script src="/WebResource.axd?d=T0Zcd2Y%2fqdpJegF6Zg8fsarP1RIlINxMJS6pFP%2fhyG0%3d_STFZU4JV442Xz4HepfukwORfafej7ihTN0bv1gLUkv0%3d_f&t=638859463760000000" type="text/javascript"></script>
+<script type="text/javascript">//<![CDATA[
+WebForm_Initialize(window);
+//]]></script>
+
+<script src="/ScriptResource.axd?d=T0Zcd2Y%2fqdpJegF6Zg8fsarP1RIlINxMJS6pFP%2fhyG0%3d_RXCsn%2b5jdWrIjuKJgRoRydoId8%2faqdGseXtL5%2f9%2fHA0%3dfd_t&t=638859463760000000&n=f" type="text/javascript"></script>
+<script type="text/javascript">//<![CDATA[
+if (typeof(Sys) === 'undefined') throw new Error('ASP.NET Ajax client-side framework failed to load.');
+//]]></script>
+<script src="/ScriptResource.axd?d=T0Zcd2Y%2fqdpJegF6Zg8fsarP1RIlINxMJS6pFP%2fhyG0%3d_FQOl4y1lhOo1%2bM2ERUP6K9kfm8m%2fwB%2bMa9tUKjhFc9Q%3dfd_t&t=638859463760000000&n=f" type="text/javascript"></script>
+
+        <script type="text/javascript">
+//<![CDATA[
+Sys.WebForms.PageRequestManager._initialize('ctl00$ScriptManager1', document.getElementById('ctl00_Form1'));
+Sys.WebForms.PageRequestManager.getInstance()._updateControls(['tctl00$contentParent$UpdatePanel1','tctl00$contentParent$UpdatePanel2'], ['ctl00$contentParent$drpNd','ctl00$contentParent$drpYx','ctl00$contentParent$drpXxfs','ctl00$contentParent$drpZylx'], [], 90);
+//]]
+</script>
+
+        <div style="width: 1100px">
+            <div style="height: 80px; width: 100%; padding: 0px; background-color: #035ca2">
+                <div style="float: left;">
+                    <img src="/images/login/banner.png" height="80px" />
+                </div>
+                <div style="float: left; vertical-align: middle; padding-top: 30px">
+                    <span style="font-size: 24px; font-weight: bolder; color: White; font-family: 楷体,楷体_GB2312;"> 硕士研究生招生系统</span>                 
+                </div>
+            </div>
+            <table border="0" cellpadding="0" cellspacing="0" style="width: 100%;">
+                <tr>
+                    <td style="text-align: center; vertical-align: top; border-right: #cccccc 1px solid; border-left: #cccccc 1px solid; padding: 10px">
+                        
+    <div style="background-color: White; width: 1000px;">
+        <span id="ctl00_contentParent_UpdatePanel1">
+                <div style="background-color: White; height: 40px; width: 940px; border-right: none; border-top: none; border-left: none; border-bottom: none; text-align: center; padding-top: 15px;padding-bottom: 15px">                  
+                    <span style="font-family: 黑体; font-size: 6mm; line-height: 8mm; vertical-align: middle;">
+                        2026年硕士研究生招生专业目录
+                    </span>
+                </div>
+                <div style="margin-bottom: 15px; background-color: White; width: 940px; line-height: 150%; text-align: left; vertical-align: top">
+                    年度：<select name="ctl00$contentParent$drpNd" onchange="setTimeout(&#39;__doPostBack(\&#39;ctl00$contentParent$drpNd\&#39;,\&#39;\&#39;)&#39;, 0)" id="ctl00_contentParent_drpNd">
+	<option selected="selected" value="2026">2026</option>
+	<option value="2025">2025</option>
+	<option value="2024">2024</option>
+
+</select>
+                    &nbsp;&nbsp;院系：<select name="ctl00$contentParent$drpYx" onchange="setTimeout(&#39;__doPostBack(\&#39;ctl00$contentParent$drpYx\&#39;,\&#39;\&#39;)&#39;, 0)" id="ctl00_contentParent_drpYx">
+	<option value="">--请选择--</option>
+	<option value="001">001|哲学与社会发展学院</option>
+	<option value="002">002|政治与公共管理学院</option>
+	<option value="003">003|经济与管理学院</option>
+	<option value="004">004|法学院</option>
+	<option value="005">005|教育科学学院</option>
+	<option value="006">006|教育信息技术学院</option>
+	<option value="007">007|体育科学学院</option>
+	<option value="008">008|文学院</option>
+	<option value="009">009|外国语言文化学院</option>
+	<option value="010">010|音乐学院</option>
+	<option value="011">011|美术学院</option>
+	<option value="012">012|历史文化学院</option>
+	<option value="013">013|数学科学学院</option>
+	<option value="014">014|物理学院</option>
+	<option value="016">016|化学学院</option>
+	<option value="017">017|地理科学学院</option>
+	<option value="018">018|生命科学学院</option>
+	<option selected="selected" value="019">019|计算机学院</option>
+	<option value="022">022|国际文化学院</option>
+	<option value="023">023|旅游管理学院</option>
+	<option value="024">024|心理学院</option>
+	<option value="025">025|华南先进光电子研究院</option>
+	<option value="029">029|国际商学院</option>
+	<option value="030">030|脑科学与康复医学研究院</option>
+	<option value="033">033|马克思主义学院</option>
+	<option value="034">034|环境学院</option>
+	<option value="035">035|教师教育学部</option>
+	<option value="037">037|量子物质研究院</option>
+	<option value="038">038|科学技术与社会研究院</option>
+	<option value="041">041|人工智能学院</option>
+	<option value="043">043|材料与新能源学院</option>
+	<option value="046">046|数据科学与工程学院</option>
+	<option value="047">047|光电科学与工程学院</option>
+	<option value="048">048|电子科学与工程学院（微电子学院）</option>
+	<option value="049">049|教育科学学院（汕尾）</option>
+
+</select>
+                    &nbsp;&nbsp;专业类型：<select name="ctl00$contentParent$drpZylx" onchange="setTimeout(&#39;__doPostBack(\&#39;ctl00$contentParent$drpZylx\&#39;,\&#39;\&#39;)&#39;, 0)" id="ctl00_contentParent_drpZylx">
+	<option selected="selected" value="">--请选择--</option>
+	<option value="1">学术型</option>
+	<option value="2">专业型</option>
+
+</select>
+                    <br />
+                    <br />
+                    专业：<select name="ctl00$contentParent$drpZy" onchange="setTimeout(&#39;__doPostBack(\&#39;ctl00$contentParent$drpZy\&#39;,\&#39;\&#39;)&#39;, 0)" id="ctl00_contentParent_drpZy">
+	<option selected="selected" value="">--请选择--</option>
+	<option value="081200">081200|计算机科学与技术</option>
+	<option value="083500">083500|软件工程</option>
+	<option value="085404">085404|计算机技术</option>
+	<option value="085405">085405|软件工程</option>
+
+</select>
+                    &nbsp;&nbsp;<span style="color:red; font-weight:bold">学习方式：</span><select name="ctl00$contentParent$drpXxfs" onchange="setTimeout(&#39;__doPostBack(\&#39;ctl00$contentParent$drpXxfs\&#39;,\&#39;\&#39;)&#39;, 0)" id="ctl00_contentParent_drpXxfs">
+	<option value="1">全日制</option>
+	<option selected="selected" value="2">非全日制</option>
+
+</select>
+                    &nbsp;&nbsp;
+                </div>
+            </span>
+        <div style="margin-bottom: 15px; padding-bottom: 50px; margin-top: 0px; background-color: White; width: 940px; line-height: 25px; text-align: center; vertical-align: top">
+            <span id="ctl00_contentParent_UpdatePanel2">
+                    <div>
+	<table class="Grid_Line" cellspacing="0" rules="all" border="1" id="ctl00_contentParent_dgData" style="width:100%;border-collapse:collapse;">
+		<tr style="height:25px;white-space:nowrap;">
+			<th align="center" scope="col" style="width:60px;">编码</th><th align="center" scope="col" style="width:150px;">名称</th><th align="center" scope="col" style="width:30px;"> 拟招<br/>人数</th><th align="center" scope="col" style="width:220px;">考试科目<br/><span style='color:red; font-weight:bold'>点击考试科目名称（自命题）可查询考试大纲</span></th><th align="center" scope="col">复试科目</th><th align="center" scope="col">备注</th>
+		</tr><tr onMouseOver="SetRowBgColor(this,true)" onMouseOut="SetRowBgColor(this,false)" style="height:25px;">
+			<td colspan="6">没有信息数据</td>
+		</tr>
+	</table>
+</div>
+                </span>
+        </div>
+    </div>
+
+                    </td>
+                </tr>
+            </table>
+            <div style="line-height: 35px; height: 35px; width: 100%; text-align: center; padding: 0px; background-image: url(../../images/title_bg.gif)">
+                Copyright &copy;
+                    2026&nbsp;华南师范大学&nbsp;<br />
+            </div>
+        </div>
+    
+<div class="aspNetHidden">
+<input type="hidden" name="__EVENTVALIDATION" id="__EVENTVALIDATION" value="/wEdAAEAAAD/////AQAAAAAAAAAPAQAAADMAAAAIL6o8WrtIM+uA1JmjstJYH49CS8sCZ9ljZ/2ktAp4ZXGE3tBeddVB+0CPqEP7L4/rWat/vEwJHW2bjxvGXy2jo9w93UXpJ9NQNB3+QAEERk8kgixNNyamaMeDdIWcSjQAjfShkO5GD08vh2H+4SNzKfUePQiXo5Knp42RZ+t4jc/2iRTPkQxfZ1qv5VE0h341sWWoZRPQmoAcwKbZs0lBbuhU9K8z2qqSyH066Gx6I0bzgbu8oXW1lRrE5WARFmrSqOpASHNkHnWIw44PCwAAAAAAAAAAAAAAAAAAAAAAAAAAAHS8Y7GN345aBIqzAN/Db3p7QmjaorubVY/WeHNRHS9+" />
+</div>
+
+<script type="text/javascript">//<![CDATA[
+Sys.Application.initialize();
+//]]></script>
+</form>
+</body>
+</html>
