@@ -1,9 +1,28 @@
 # 进度日志
 
+## 会话：2026-09-28（考研改造 K2：多格式解析层）
+
+### K2
+- **状态：** complete（待提交到 `feat/kaoyan`）
+- 新增 `ingest/{tables,ocr,redact}.py`、`kaoyan/privacy.py`、`collect/attachments.py`；`loaders.py` 支持 html / xlsx / xls / 图片与 PDF 抽表，`ParsedDocument` 带表格 / 图片 / `needs_ocr`
+- 个人信息：名单文件在 `load_document` 里脱敏（姓+某、删编号列）；泄漏扫描发现并修复公示正文“拟录取X等N人”首名
+- 临时库 ingest `data/kaoyan/raw`：96 文件，90 indexed / 0 failed / 7 needs_ocr / 26 redacted；4187 个姓名 0 泄漏
+- `PYTHONPATH=src pytest -q`：100 passed（70 + 30）
+- 文档：`docs/kaoyan_phase2_notes.md`
+
+## 五问重启检查（K2）
+| 问题 | 答案 |
+|------|------|
+| 我在哪里？ | K2 完成，等用户看 diff 摘要后提交 |
+| 我要去哪里？ | K3：chunk 元数据（school / year / doc_type）、独立考研索引、表格按行切块 |
+| 目标是什么？ | 考研信息 Agent：每个数字带来源 / 年份 / 口径，不知道就说不知道 |
+| 我学到了什么？ | 名单以外的公示正文也会带姓名；泄漏扫描要扫全库而不是只扫名单文件 |
+| 我做了什么？ | 多格式解析 + 表格模型、附件发现、OCR 接口、脱敏与统一入口、30 条新测试 |
+
 ## 会话：2026-09-27（考研改造 K1：种子库 + golden）
 
 ### K1
-- **状态：** complete（待提交到 `feat/kaoyan`）
+- **状态：** complete（已提交 `125b5a0`）
 - 新增 `src/doc_agent/kaoyan/`（schema / db / models / normalize / seed）、`scripts/seed_kaoyan.py`、`scripts/verify_kaoyan_bundle.py`、`data/gold/kaoyan_qa.json`（18 条）、两组测试
 - 联网下载中大 2026 目录 PDF（5.2MB，sha256 与 manifest 一致，本地专用不入库）；verify：96 ok / 1 missing(warn) / 0 bad
 - 种子：37 专业、97 文档、`seed_only` 0；K1 七组断言全部通过；幂等

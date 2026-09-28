@@ -32,6 +32,7 @@ class Settings(BaseSettings):
 
     kaoyan_db: str = "data/kaoyan.db"
     kaoyan_data_dir: str = "data/kaoyan"
+    ocr_backend: str = "none"
 
     chunk_size: int = 800
     chunk_overlap: int = 120

@@ -7,7 +7,7 @@ from typing import Any
 from langchain_core.tools import tool
 
 from doc_agent.config import get_settings
-from doc_agent.ingest.loaders import load_file
+from doc_agent.ingest.pipeline import load_document
 from doc_agent.rag.store import get_store
 from doc_agent.tools.compare import compare_docs, extract_fields
 from doc_agent.tools.export import export_excel, export_markdown
@@ -42,7 +42,7 @@ def rag_search(query: str, top_k: int = 8, doc_name: str = "") -> str:
 
 @tool
 def parse_document(path: str, max_chars: int = 6000) -> str:
-    """Parse a local PDF, DOCX, TXT, or Markdown file and return truncated plain text with page markers."""
+    """Parse a local PDF, DOCX, TXT, Markdown, HTML, or spreadsheet file and return truncated plain text with page markers."""
     settings = get_settings()
     file_path = settings.resolve(path)
     if not file_path.exists():
@@ -51,7 +51,7 @@ def parse_document(path: str, max_chars: int = 6000) -> str:
             return f"文件不存在: {path}"
         file_path = matches[0]
     try:
-        doc = load_file(file_path)
+        doc = load_document(file_path, settings)
     except Exception as exc:  # noqa: BLE001
         return f"解析失败: {exc}"
     parts: list[str] = []

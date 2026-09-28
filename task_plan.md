@@ -6,7 +6,7 @@
 - 需求原文：`data/kaoyan/CURSOR_PROMPT.md`；数据说明：`data/kaoyan/README.md`。
 
 ## 当前阶段
-K0 已确认（2026-09-27）；K1 完成（2026-09-27，分支 `feat/kaoyan`，待提交）；下一步 **K2 多格式解析层**。
+K0 已确认（2026-09-27）；K1 完成并提交（`125b5a0`）；K2 完成（2026-09-28，待提交）；下一步 **K3 检索元数据 + 考研索引**。
 
 ## 各阶段
 
@@ -94,11 +94,13 @@ K0 已确认（2026-09-27）；K1 完成（2026-09-27，分支 `feat/kaoyan`，�
 - **修改：** `ingest/loaders.py`：新增 `ParsedDocument(LoadedDocument)`（多 `tables / images / meta`）；`load_file()` 分发 `.html/.htm/.xlsx/.xls/.jpg/.png`；无字符层 PDF 页 → `needs_ocr`；`.doc` 仍抛错；`.csv` 不进 `_SOURCE_SUFFIXES`。`ingest/pipeline.py`：`needs_ocr` 文档不报错，结果里带标记。`config.py` 加 `ocr_backend`；`requirements.txt` 加 `pdfplumber`、`beautifulsoup4`、`lxml`、`xlrd`
 - **测试（全部用已入库夹具，断言值先开文件核对）：** CURSOR_PROMPT K2 列出的 8 条（中大 cse 细则表行 379/50/50/60/60；暨南 2027 目录 085412=62、052 学院行 116、010 备注“指标为24个”；华师 019 目录 `48(17)`、`50(4)`；华师 2027 推免 xls ffill 后 019/041 的 085410 推免 3/8；中大校线 PDF“工学[08] 280 45 60”；sece data URI PNG sha256=`19cedf27…6209`；华工 cs 页 2 个 `pdfsrc` 附件“2026学硕.pdf / 2026专硕.pdf”；`iter_source_files` 新后缀 + 仍跳过 csv）
 - **验收：** `POST /v1/ingest {"paths":["data/kaoyan/raw"]}` 可跑通，失败文件在 `docs_failed` 带原因；图片 / 扫描件在 `ocr_backend=none` 时标 `needs_ocr` 不报错；`tests/test_docx_loader.py` 不改仍通过
-- **状态：** pending
+- **计划外新增（脱敏决策落地）：** `ingest/redact.py`（表头驱动：姓名 → 姓+某、编号列删除、续页表沿用表头、文本兜底、“拟录取X等N人”首名）、`kaoyan/privacy.py`（读 `contains_personal_data`）、`pipeline.load_document()`（ingest 与 `parse_document` 共用）、`tests/test_redact.py`；`IngestResponse` 加 `docs_needs_ocr`、`docs_redacted`
+- **结果：** 100 passed（70 + 30）。临时库 ingest `data/kaoyan/raw`：96 文件，90 indexed / 0 failed / 7 needs_ocr / 26 redacted，1344 chunks；26 个名单文件 4187 个姓名 0 泄漏、0 个 15 位编号。PDF 默认仍走 pypdf，只有 `data/kaoyan/` 下的文件抽表。详见 `docs/kaoyan_phase2_notes.md`
+- **状态：** complete
 
 ### 阶段 K3：检索元数据 + 考研索引
 - **修改：** `ingest/chunking.py`（`TextChunk` 加可选 `doc_id/school/college/year/doc_type/title/url`；考研 chunk_id 用 `doc_id` 前缀；表格按行切、每块重复表名 + 表头）、`rag/embeddings.py`（`Hit.metadata`）、`rag/store.py`（BM25 路径和 Chroma `where` 支持 school/year/doc_type 过滤；`get_store(profile="enterprise"|"kaoyan")` 按 profile 缓存实例，默认行为不变）、`rag/query_expand.py`（考研意图扩展 + 学校别名表，按 profile 选择；企业规则原样保留）、`tools/registry.py`（`rag_search` 加可选 `school/year/doc_type`，旧调用不变）、`config.py`（`kaoyan_chroma_dir=data/chroma_kaoyan`、`kaoyan_collection=kaoyan_docs`）、根 `.gitignore`（加 `data/chroma_kaoyan/`）
-- **新增：** `scripts/ingest_kaoyan.py`（从 `kaoyan.db.documents` / `sources.json` 带元数据导入；**默认跳过 `contains_personal_data=true` 的文件**，见决策表）、`tests/test_kaoyan_retrieval.py`
+- **新增：** `scripts/ingest_kaoyan.py`（从 `kaoyan.db.documents` / `sources.json` 带元数据导入；`contains_personal_data=true` 的文件经 `load_document` 脱敏后入索引，见决策表；chunk 元数据带 `redacted` 标记）、`tests/test_kaoyan_retrieval.py`
 - **测试（纯 BM25，不需要 Ollama）：** `school='jnu'` 只回暨南；`year=2027 + doc_type='catalog'` 命中 2027 目录；表格块保留表头；企业 profile 检索结果与改动前一致
 - **验收：** 以上测试通过；有 key 时 `scripts/smoke_chat.py` 仍 3/3
 - **状态：** pending
@@ -166,6 +168,8 @@ K0 已确认（2026-09-27）；K1 完成（2026-09-27，分支 `feat/kaoyan`，�
 | 【K】数字校验豁免：年份、专业代码、科目代码、方向序号、页码 | 其余数字必须能在工具证据中找到 |
 | 【K】种子 `verified=1`；`ocr` / `llm` 抽取默认 `verified=0` | 种子为人工核对；机器抽取需与种子对上才标已核对 |
 | 【K】华工 `yanzhao.scut.edu.cn` 标 `blocked`，走手动导入 | 统一认证 302；不绕过登录 |
+| 【K2】PDF 抽表（pdfplumber）只对 `data/kaoyan/` 下文件开启，默认仍用 pypdf 文本 | 企业索引文本不变；抽表慢（大名单 PDF 约 18 s） |
+| 【K2】脱敏放在 `load_document`，切片 / 索引 / 工具只见脱敏版 | 策略一处实现；个人信息文件自动识别（姓名列 + 编号列）对任意目录生效 |
 
 ## 遇到的错误
 | 错误 | 尝试次数 | 解决方案 |
@@ -182,6 +186,9 @@ K0 已确认（2026-09-27）；K1 完成（2026-09-27，分支 `feat/kaoyan`，�
 | 【K1】同一页面 URL 对应多个文档，来源挑错（推免列指到分数线图片、华工 085404 复试名单指到 081200 名单） | 2 | 按事实类型设 doc_type 优先级打分；标题里写了别的专业代码 −50；只扣分不加分，避免把图片正文换成外壳 HTML |
 | 【K1】暨南 0812 一级学科复试人数挂到每个二级学科上看不出是合计 | 1 | `admission_stats` 加 `pool_scope` 列 |
 | 【K1】“统考拟录取13（普通）+2（退役）”被回溯抽成 1 | 1 | 正则加 `(?!\d)`；拆分口径不抽，留 notes |
+| 【K2】sandbox 内 `pip install` 到 `.venv` 报 Read-only file system | 1 | 沙箱外执行安装 |
+| 【K2】`git ls-files` 把中文路径转义，个人文件 / 大文件检查漏判 | 1 | 改用 `git -c core.quotepath=false ls-files -z` |
+| 【K2】未标个人信息的华工公示正文含“拟录取X等2582人”首名 | 1 | 泄漏扫描发现；加首名打码规则，对所有考研文档生效 |
 
 ## 备注
 - 规划文件位于项目根目录，不在 skill 安装目录

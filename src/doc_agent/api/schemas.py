@@ -13,6 +13,8 @@ class IngestRequest(BaseModel):
 class IngestResponse(BaseModel):
     docs_indexed: int
     docs_failed: list[dict[str, str]] = Field(default_factory=list)
+    docs_needs_ocr: list[str] = Field(default_factory=list)
+    docs_redacted: int = 0
     chunks_added: int
     chunks_total: int
     collection: str
