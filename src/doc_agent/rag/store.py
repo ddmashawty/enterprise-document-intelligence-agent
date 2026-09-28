@@ -8,9 +8,15 @@ from typing import Any
 from rank_bm25 import BM25Okapi
 
 from doc_agent.config import Settings, get_settings
-from doc_agent.ingest.chunking import TextChunk
+from doc_agent.ingest.chunking import CHUNK_META_FIELDS, TextChunk
 from doc_agent.rag.embeddings import Hit, get_remote_embeddings
-from doc_agent.rag.query_expand import expand_queries, infer_doc_name, keyword_boost
+from doc_agent.rag.query_expand import (
+    expand_queries,
+    infer_doc_name,
+    infer_school,
+    kaoyan_prior,
+    keyword_boost,
+)
 
 
 def _tokenize(text: str) -> list[str]:
@@ -23,11 +29,39 @@ def _tokenize(text: str) -> list[str]:
     return tokens
 
 
-class DocumentStore:
-    """Phase-1 store: BM25 always; Chroma dense vectors when remote embedding configured."""
+def _chunk_meta(row: dict[str, Any]) -> dict[str, Any]:
+    return {k: row[k] for k in CHUNK_META_FIELDS if row.get(k)}
 
-    def __init__(self, settings: Settings | None = None):
-        self.settings = settings or get_settings()
+
+def _normalize_filters(school: str | None, year: int | str | None, doc_type: str | None) -> dict[str, Any]:
+    filters: dict[str, Any] = {}
+    if school:
+        from doc_agent.kaoyan.normalize import resolve_school
+
+        filters["school"] = resolve_school(school) or school
+    if year:
+        filters["year"] = int(year)
+    if doc_type:
+        filters["doc_type"] = doc_type
+    return filters
+
+
+def _matches(meta: dict[str, Any], doc_name: str | None, filters: dict[str, Any]) -> bool:
+    if doc_name and meta.get("doc_name") != doc_name:
+        return False
+    return all(meta.get(k) == v for k, v in filters.items())
+
+
+class DocumentStore:
+    """Phase-1 store: BM25 always; Chroma dense vectors when remote embedding configured.
+
+    ``profile="kaoyan"`` points at the 考研 index (own chroma dir / collection) and
+    switches query expansion to the 考研 rules.
+    """
+
+    def __init__(self, settings: Settings | None = None, profile: str = "enterprise"):
+        self.profile = profile
+        self.settings = (settings or get_settings()).for_profile(profile)
         self.meta_path = self.settings.chroma_path / "chunks.jsonl"
         self.bm25_path = self.settings.chroma_path / "bm25_corpus.json"
         self.settings.chroma_path.mkdir(parents=True, exist_ok=True)
@@ -91,6 +125,7 @@ class DocumentStore:
                     "page": c.page,
                     "doc_name": c.doc_name,
                     "text": c.text,
+                    **c.metadata(),
                 }
                 self._chunks.append(row)
                 f.write(json.dumps(row, ensure_ascii=False) + "\n")
@@ -118,6 +153,7 @@ class DocumentStore:
                     "source": c.source,
                     "page": c.page,
                     "doc_name": c.doc_name,
+                    **c.metadata(),
                 }
                 for c in chunks
             ],
@@ -133,6 +169,7 @@ class DocumentStore:
                     "source": c["source"],
                     "chunks": 0,
                     "pages": set(),
+                    "meta": _chunk_meta(c),
                 }
             docs[name]["chunks"] += 1
             docs[name]["pages"].add(c["page"])
@@ -144,6 +181,7 @@ class DocumentStore:
                     "source": d["source"],
                     "chunks": d["chunks"],
                     "pages": len(d["pages"]),
+                    **d["meta"],
                 }
             )
         return sorted(out, key=lambda x: x["doc_name"])
@@ -153,16 +191,29 @@ class DocumentStore:
         query: str,
         top_k: int | None = None,
         doc_name: str | None = None,
+        *,
+        school: str | None = None,
+        year: int | str | None = None,
+        doc_type: str | None = None,
     ) -> list[Hit]:
+        """Hybrid search. ``school`` / ``year`` / ``doc_type`` filter on chunk metadata;
+        in the kaoyan profile a query naming exactly one school is pinned to it."""
         k = top_k or self.settings.top_k
         if not self._chunks:
             return []
 
-        doc_filter = doc_name or infer_doc_name(
-            query, [d["doc_name"] for d in self.list_documents()]
-        )
-        queries = expand_queries(query)
-        pool = max(k * 4, 20)
+        if self.profile == "enterprise":
+            doc_filter = doc_name or infer_doc_name(
+                query, [d["doc_name"] for d in self.list_documents()]
+            )
+        else:
+            doc_filter = doc_name
+            school = school or infer_school(query)
+        filters = _normalize_filters(school, year, doc_type)
+        queries = expand_queries(query, profile=self.profile)
+        # name-list chunks repeat program codes on every row; a wider pool lets the
+        # metadata priors below reach the documents that actually answer the query
+        pool = max(k * 4, 20) if self.profile == "enterprise" else max(k * 8, 60)
         fused: dict[str, dict[str, Any]] = {}
 
         embedder = get_remote_embeddings(self.settings)
@@ -170,16 +221,18 @@ class DocumentStore:
             # Prefer the original query slightly over expansions.
             w = 1.0 if qi == 0 else 0.9
             if embedder is not None:
-                for rank, hit in enumerate(self._search_dense(q, pool, embedder, doc_filter)):
+                for rank, hit in enumerate(self._search_dense(q, pool, embedder, doc_filter, filters)):
                     self._rrf_add(fused, hit, w / (60 + rank + 1), backend="hybrid")
-            for rank, hit in enumerate(self._search_bm25(q, pool, doc_filter)):
+            for rank, hit in enumerate(self._search_bm25(q, pool, doc_filter, filters)):
                 self._rrf_add(fused, hit, w / (60 + rank + 1), backend="hybrid")
 
         if not fused:
             return []
 
         for item in fused.values():
-            item["score"] += keyword_boost(query, item["hit"].text)
+            item["score"] += keyword_boost(query, item["hit"].text, profile=self.profile)
+            if self.profile == "kaoyan":
+                item["score"] *= kaoyan_prior(query, item["hit"].metadata)
 
         ranked = sorted(fused.values(), key=lambda x: x["score"], reverse=True)[:k]
         out: list[Hit] = []
@@ -194,6 +247,7 @@ class DocumentStore:
                     text=h.text,
                     score=float(item["score"]),
                     backend=item.get("backend", h.backend),
+                    metadata=h.metadata,
                 )
             )
         return out
@@ -220,6 +274,7 @@ class DocumentStore:
         query: str,
         k: int,
         doc_name: str | None = None,
+        filters: dict[str, Any] | None = None,
     ) -> list[Hit]:
         if not self._bm25:
             return []
@@ -233,7 +288,7 @@ class DocumentStore:
             if score <= 0:
                 continue
             c = self._chunks[idx]
-            if doc_name and c.get("doc_name") != doc_name:
+            if not _matches(c, doc_name, filters or {}):
                 continue
             hits.append(
                 Hit(
@@ -244,6 +299,7 @@ class DocumentStore:
                     text=c["text"],
                     score=float(score),
                     backend="bm25",
+                    metadata=_chunk_meta(c),
                 )
             )
             if len(hits) >= k:
@@ -256,6 +312,7 @@ class DocumentStore:
         k: int,
         embedder: Any,
         doc_name: str | None = None,
+        filters: dict[str, Any] | None = None,
     ) -> list[Hit]:
         import chromadb
         from chromadb.config import Settings as ChromaSettings
@@ -273,8 +330,12 @@ class DocumentStore:
             "query_embeddings": [qvec],
             "n_results": min(k, max(collection.count(), 1)),
         }
-        if doc_name:
-            kwargs["where"] = {"doc_name": doc_name}
+        filters = filters or {}
+        conditions = ([{"doc_name": doc_name}] if doc_name else []) + [{k: v} for k, v in filters.items()]
+        if len(conditions) == 1:
+            kwargs["where"] = conditions[0]
+        elif conditions:
+            kwargs["where"] = {"$and": conditions}
         try:
             result = collection.query(**kwargs)
         except Exception:  # noqa: BLE001
@@ -288,6 +349,8 @@ class DocumentStore:
         dists = (result.get("distances") or [[]])[0]
         for i, chunk_id in enumerate(ids):
             meta = metas[i] or {}
+            if not _matches(meta, doc_name, filters):
+                continue
             dist = float(dists[i]) if i < len(dists) else 1.0
             hits.append(
                 Hit(
@@ -298,6 +361,7 @@ class DocumentStore:
                     text=docs[i] or "",
                     score=1.0 - dist,
                     backend="chroma",
+                    metadata=_chunk_meta(meta),
                 )
             )
         return hits
@@ -313,16 +377,18 @@ class DocumentStore:
         return "bm25"
 
 
-_store: DocumentStore | None = None
+_stores: dict[tuple[str, str, str], DocumentStore] = {}
 
 
-def get_store(settings: Settings | None = None) -> DocumentStore:
-    global _store
-    if _store is None:
-        _store = DocumentStore(settings)
-    return _store
+def get_store(settings: Settings | None = None, profile: str = "enterprise") -> DocumentStore:
+    """Cached store per (profile, chroma dir, collection); default is the enterprise index."""
+    s = (settings or get_settings()).for_profile(profile)
+    key = (profile, str(s.chroma_path), s.collection_name)
+    if key not in _stores:
+        _stores[key] = DocumentStore(settings or get_settings(), profile=profile)
+    return _stores[key]
 
 
-def reset_store() -> None:
-    global _store
-    _store = None
+def reset_store(profile: str | None = None) -> None:
+    for key in [k for k in _stores if profile is None or k[0] == profile]:
+        del _stores[key]

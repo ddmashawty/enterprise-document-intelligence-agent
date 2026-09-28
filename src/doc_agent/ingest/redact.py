@@ -10,7 +10,7 @@ from __future__ import annotations
 
 import re
 from dataclasses import replace
-from typing import Iterable
+from typing import Callable, Iterable
 
 from doc_agent.ingest.loaders import DocumentPage, ParsedDocument
 from doc_agent.ingest.tables import Table, render_page
@@ -104,12 +104,25 @@ def mask_lead_names(text: str) -> str:
     return _LEAD_NAME.sub(sub, text)
 
 
+def text_redactor(names: Iterable[str] = ()) -> Callable[[str], str]:
+    """Build a redact function for one document (names compiled into one pattern)."""
+    known = sorted({n for n in names if len(n) >= 2}, key=len, reverse=True)
+    pattern = re.compile("|".join(map(re.escape, known))) if known else None
+
+    def redact(text: str) -> str:
+        if not text:
+            return text
+        if pattern is not None:
+            text = pattern.sub(lambda m: mask_name(m.group(0)), text)
+        text = mask_lead_names(text)
+        text = _ID_NO.sub("", text)
+        return _EXAM_NO.sub("", text)
+
+    return redact
+
+
 def redact_text(text: str, names: Iterable[str] = ()) -> str:
-    for name in sorted({n for n in names if len(n) >= 2}, key=len, reverse=True):
-        text = text.replace(name, mask_name(name))
-    text = mask_lead_names(text)
-    text = _ID_NO.sub("", text)
-    return _EXAM_NO.sub("", text)
+    return text_redactor(names)(text)
 
 
 def mask_notice_names(doc: ParsedDocument) -> ParsedDocument:
@@ -120,28 +133,26 @@ def mask_notice_names(doc: ParsedDocument) -> ParsedDocument:
     meta = dict(doc.meta)
     if meta.get("prose"):
         meta["prose"] = {p: mask_lead_names(v) for p, v in meta["prose"].items()}
-    return ParsedDocument(source=doc.source, pages=pages, tables=doc.tables, images=list(doc.images), meta=meta)
+    tables = [replace(t, cells=[[mask_lead_names(c) for c in row] for row in t.cells]) for t in doc.tables]
+    return ParsedDocument(source=doc.source, pages=pages, tables=tables, images=list(doc.images), meta=meta)
 
 
 def redact_document(doc: ParsedDocument) -> ParsedDocument:
     """New document with redacted tables and pages; ``meta["redacted"] = True``."""
     tables, names = redact_tables(doc.tables)
-    # a masked name inside a table without a detectable header still gets caught here
-    tables = [
-        replace(t, cells=[[mask_name(cell) if re.sub(r"\s+", "", cell) in names else cell for cell in row] for row in t.cells])
-        for t in tables
-    ]
-    prose = dict(doc.meta.get("prose") or {})
+    redact = text_redactor(names)
+    # cells are chunked directly later, so the text safety net runs on every cell too
+    tables = [replace(t, cells=[[redact(cell) for cell in row] for row in t.cells]) for t in tables]
+    prose = {p: redact(v) for p, v in (doc.meta.get("prose") or {}).items()}
     pages: list[DocumentPage] = []
     for page in doc.pages:
         if page.page in prose:
             text = render_page(prose[page.page], [t for t in tables if t.page == page.page])
         else:
-            text = page.text
-        text = redact_text(text, names)
+            text = redact(page.text)
         if text.strip():
             pages.append(DocumentPage(source=page.source, page=page.page, text=text))
     meta = dict(doc.meta)
-    meta["prose"] = {p: redact_text(v, names) for p, v in prose.items()}
+    meta["prose"] = prose
     meta["redacted"] = True
     return ParsedDocument(source=doc.source, pages=pages, tables=tables, images=list(doc.images), meta=meta)

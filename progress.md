@@ -1,9 +1,29 @@
 # 进度日志
 
+## 会话：2026-09-28（考研改造 K3：检索元数据 + 考研索引）
+
+### K3
+- **状态：** complete（待提交到 `feat/kaoyan`）
+- chunk 带 doc_id / school / college / year / doc_type / title / url / redacted；表格按行切块，重复标题 + 表头 + 学院 / 专业行
+- 独立考研索引 `data/chroma_kaoyan/`（`scripts/ingest_kaoyan.py`）：90 文档、1926 chunk、hybrid；检索可按学校 / 年份 / 类型过滤，问题里只有一所学校时自动过滤
+- 考研排序先验（名单降权、文档类型 / 学院匹配）；golden hit@5：BM25 16/18、hybrid 15/18
+- 企业语料：chunks 逐字节相同、检索结果与工具输出一致、`smoke_chat.py` 3/3
+- `PYTHONPATH=src pytest -q`：113 passed（100 + 13）
+- 文档：`docs/kaoyan_phase3_notes.md`
+
+## 五问重启检查（K3）
+| 问题 | 答案 |
+|------|------|
+| 我在哪里？ | K3 完成，等用户看 diff 摘要后提交 |
+| 我要去哪里？ | K4：规则抽取器（暨南目录、华师目录 / 推免 xls、中大细则 / 校线）+ LLM 兜底，与种子逐条比对 |
+| 目标是什么？ | 考研信息 Agent：每个数字带来源 / 年份 / 口径，不知道就说不知道 |
+| 我学到了什么？ | 名单类文档在词频检索里天然占优，必须用元数据先验压下去；先验只在候选池里生效，池子要够大 |
+| 我做了什么？ | chunk 元数据、按行切表、考研索引与过滤、查询扩展与先验、单元格级脱敏、13 条新测试 |
+
 ## 会话：2026-09-28（考研改造 K2：多格式解析层）
 
 ### K2
-- **状态：** complete（待提交到 `feat/kaoyan`）
+- **状态：** complete（已提交 `f6ea30f`）
 - 新增 `ingest/{tables,ocr,redact}.py`、`kaoyan/privacy.py`、`collect/attachments.py`；`loaders.py` 支持 html / xlsx / xls / 图片与 PDF 抽表，`ParsedDocument` 带表格 / 图片 / `needs_ocr`
 - 个人信息：名单文件在 `load_document` 里脱敏（姓+某、删编号列）；泄漏扫描发现并修复公示正文“拟录取X等N人”首名
 - 临时库 ingest `data/kaoyan/raw`：96 文件，90 indexed / 0 failed / 7 needs_ocr / 26 redacted；4187 个姓名 0 泄漏

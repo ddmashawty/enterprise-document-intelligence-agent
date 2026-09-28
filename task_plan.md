@@ -6,7 +6,7 @@
 - 需求原文：`data/kaoyan/CURSOR_PROMPT.md`；数据说明：`data/kaoyan/README.md`。
 
 ## 当前阶段
-K0 已确认（2026-09-27）；K1 完成并提交（`125b5a0`）；K2 完成（2026-09-28，待提交）；下一步 **K3 检索元数据 + 考研索引**。
+K0 已确认（2026-09-27）；K1 已提交（`125b5a0`）；K2 已提交（`f6ea30f`）；K3 完成（2026-09-28，待提交）；下一步 **K4 结构化抽取**。
 
 ## 各阶段
 
@@ -103,7 +103,9 @@ K0 已确认（2026-09-27）；K1 完成并提交（`125b5a0`）；K2 完成（2
 - **新增：** `scripts/ingest_kaoyan.py`（从 `kaoyan.db.documents` / `sources.json` 带元数据导入；`contains_personal_data=true` 的文件经 `load_document` 脱敏后入索引，见决策表；chunk 元数据带 `redacted` 标记）、`tests/test_kaoyan_retrieval.py`
 - **测试（纯 BM25，不需要 Ollama）：** `school='jnu'` 只回暨南；`year=2027 + doc_type='catalog'` 命中 2027 目录；表格块保留表头；企业 profile 检索结果与改动前一致
 - **验收：** 以上测试通过；有 key 时 `scripts/smoke_chat.py` 仍 3/3
-- **状态：** pending
+- **实际做法补充：** 元数据来自 `sources.json`（`kaoyan/index.py` `ingest_kaoyan()`，不依赖先跑种子）；块开头额外重复当前学院行 / 专业行；考研 profile 的排序先验（名单 ×0.5、文档类型匹配意图 ×1.2、学院名命中 ×1.2、候选池 `max(8k,60)`）；`RAG_PROFILE` 配置；`redact_document` 兜底落到单元格（按单元格切块后仍然有效）
+- **结果：** 113 passed（100 + 13）。正式索引 90 文档 / 1926 chunk / hybrid，26 个名单文件自身 0 泄漏；golden 18 题 hit@5：BM25 16、hybrid 15（#6 图片待 K7；#17 名单降权属设计；hybrid 另漏 #13、#14）。企业语料：`chunks.jsonl` 逐字节相同，8 个问题检索结果 / 分数 / 工具输出一致；`smoke_chat.py` 3/3。详见 `docs/kaoyan_phase3_notes.md`
+- **状态：** complete
 
 ### 阶段 K4：结构化抽取
 - **新增：** `src/doc_agent/kaoyan/extract/`（`base.py` 抽取器协议 + `Fact` 输出；规则抽取器：`jnu_catalog_html.py`、`scnu_zsml_html.py`、`scnu_tm_xls.py`、`sysu_retest_html.py`、`sysu_baseline_pdf.py`、`scut_plan_html.py`；`llm_fallback.py`：JSON 输出，必须给证据原文片段，否则丢弃）、`scripts/extract_kaoyan.py`、`scripts/eval_extraction.py`（→ `docs/kaoyan_extraction_report.md`）、`tests/test_kaoyan_extract.py`
@@ -170,6 +172,9 @@ K0 已确认（2026-09-27）；K1 完成并提交（`125b5a0`）；K2 完成（2
 | 【K】华工 `yanzhao.scut.edu.cn` 标 `blocked`，走手动导入 | 统一认证 302；不绕过登录 |
 | 【K2】PDF 抽表（pdfplumber）只对 `data/kaoyan/` 下文件开启，默认仍用 pypdf 文本 | 企业索引文本不变；抽表慢（大名单 PDF 约 18 s） |
 | 【K2】脱敏放在 `load_document`，切片 / 索引 / 工具只见脱敏版 | 策略一处实现；个人信息文件自动识别（姓名列 + 编号列）对任意目录生效 |
+| 【K3】考研查询扩展拼接在原问题后，不单独成查询 | 单独查“复试分数线”会召回四校所有分数线，丢掉专业代码 |
+| 【K3】`rag_search` 带任一考研过滤条件就查考研索引，否则按 `RAG_PROFILE` | 旧调用与企业演示不受影响；K5 可把默认切到 kaoyan |
+| 【K3】名单类 chunk 只降权不过滤 | 统计类问题仍可能需要；名单内容已脱敏 |
 
 ## 遇到的错误
 | 错误 | 尝试次数 | 解决方案 |
@@ -189,6 +194,8 @@ K0 已确认（2026-09-27）；K1 完成并提交（`125b5a0`）；K2 完成（2
 | 【K2】sandbox 内 `pip install` 到 `.venv` 报 Read-only file system | 1 | 沙箱外执行安装 |
 | 【K2】`git ls-files` 把中文路径转义，个人文件 / 大文件检查漏判 | 1 | 改用 `git -c core.quotepath=false ls-files -z` |
 | 【K2】未标个人信息的华工公示正文含“拟录取X等2582人”首名 | 1 | 泄漏扫描发现；加首名打码规则，对所有考研文档生效 |
+| 【K3】按单元格切块绕过了页面级脱敏兜底 | 1 | `redact_document` 把兜底落到每个单元格；本地泄漏测试同时查单元格 |
+| 【K3】名单 chunk 每行重复专业代码，BM25 下挤占前几名 | 2 | 名单降权 + 文档类型 / 学院先验；候选池放大，否则先验够不到正确文档 |
 
 ## 备注
 - 规划文件位于项目根目录，不在 skill 安装目录

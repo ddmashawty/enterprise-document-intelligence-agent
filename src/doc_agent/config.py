@@ -32,6 +32,9 @@ class Settings(BaseSettings):
 
     kaoyan_db: str = "data/kaoyan.db"
     kaoyan_data_dir: str = "data/kaoyan"
+    kaoyan_chroma_dir: str = "data/chroma_kaoyan"
+    kaoyan_collection: str = "kaoyan_docs"
+    rag_profile: str = "enterprise"
     ocr_backend: str = "none"
 
     chunk_size: int = 800
@@ -71,6 +74,16 @@ class Settings(BaseSettings):
     @property
     def kaoyan_data_path(self) -> Path:
         return self.resolve(self.kaoyan_data_dir)
+
+    def for_profile(self, profile: str) -> "Settings":
+        """Settings whose chroma_dir / collection_name point at the given index."""
+        if profile == "enterprise":
+            return self
+        if profile == "kaoyan":
+            return self.model_copy(
+                update={"chroma_dir": self.kaoyan_chroma_dir, "collection_name": self.kaoyan_collection}
+            )
+        raise ValueError(f"Unknown RAG profile: {profile!r} (expected 'enterprise' or 'kaoyan')")
 
     @property
     def embedding_enabled(self) -> bool:

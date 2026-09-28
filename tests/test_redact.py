@@ -134,7 +134,9 @@ def test_no_names_or_exam_numbers_leak_from_local_lists() -> None:
         raw = load_file(path, tables=True)
         _, names = redact_tables(raw.tables)
         names = {n for n in names if len(n) >= 2 and not NAME_HEADER.match(n)}
-        text = load_document(path, s).text
+        doc = load_document(path, s)
+        # K3 chunks tables straight from cells, so cells are checked as well as page text
+        text = doc.text + "\n" + "\n".join(t.to_text() for t in doc.tables)
         leaked = sum(1 for n in names if n in text)
         exam_nos = len(re.findall(r"(?<!\d)\d{15}(?!\d)", text))
         if not names or leaked or exam_nos:
