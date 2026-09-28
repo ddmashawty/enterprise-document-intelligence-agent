@@ -17,6 +17,7 @@ build/
 
 # App runtime data
 data/chroma/
+data/chroma_kaoyan/
 data/memory.db
 data/exports/
 data/uploads/

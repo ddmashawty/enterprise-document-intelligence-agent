@@ -7,7 +7,7 @@ from typing import Any
 from langchain_core.tools import tool
 
 from doc_agent.config import get_settings
-from doc_agent.ingest.loaders import load_file
+from doc_agent.ingest.pipeline import load_document
 from doc_agent.rag.store import get_store
 from doc_agent.tools.compare import compare_docs, extract_fields
 from doc_agent.tools.export import export_excel, export_markdown
@@ -16,23 +16,39 @@ from doc_agent.tools.export import export_excel, export_markdown
 @tool
 def list_documents() -> str:
     """List documents already ingested into the local knowledge base."""
-    docs = get_store().list_documents()
+    settings = get_settings()
+    docs = get_store(settings, profile=settings.rag_profile).list_documents()
     if not docs:
         return "知识库为空，请先调用 ingest 导入文档。"
     return json.dumps(docs, ensure_ascii=False, indent=2)
 
 
 @tool
-def rag_search(query: str, top_k: int = 8, doc_name: str = "") -> str:
+def rag_search(
+    query: str,
+    top_k: int = 8,
+    doc_name: str = "",
+    school: str = "",
+    year: int = 0,
+    doc_type: str = "",
+) -> str:
     """Search private documents and return relevant grounded snippets with citations.
 
     Optional doc_name pins search to one ingested file name (exact match), e.g.
     '600519_贵州茅台_贵州茅台2024年年度报告.pdf'.
+    Optional 考研 filters search the 考研 index: school (sysu / scut / jnu / scnu or
+    中大 / 华工 / 暨大 / 华师), year (intake year, e.g. 2027), doc_type (catalog,
+    retest_rules, score_line, tm_catalog, notice, brochure, ...).
     """
-    hits = get_store().search(
+    settings = get_settings()
+    profile = "kaoyan" if (school or year or doc_type) else settings.rag_profile
+    hits = get_store(settings, profile=profile).search(
         query,
         top_k=top_k,
         doc_name=doc_name or None,
+        school=school or None,
+        year=year or None,
+        doc_type=doc_type or None,
     )
     if not hits:
         return "未检索到相关内容。请确认已 ingest，或换一种问法。"
@@ -42,7 +58,7 @@ def rag_search(query: str, top_k: int = 8, doc_name: str = "") -> str:
 
 @tool
 def parse_document(path: str, max_chars: int = 6000) -> str:
-    """Parse a local PDF, DOCX, TXT, or Markdown file and return truncated plain text with page markers."""
+    """Parse a local PDF, DOCX, TXT, Markdown, HTML, or spreadsheet file and return truncated plain text with page markers."""
     settings = get_settings()
     file_path = settings.resolve(path)
     if not file_path.exists():
@@ -51,7 +67,7 @@ def parse_document(path: str, max_chars: int = 6000) -> str:
             return f"文件不存在: {path}"
         file_path = matches[0]
     try:
-        doc = load_file(file_path)
+        doc = load_document(file_path, settings)
     except Exception as exc:  # noqa: BLE001
         return f"解析失败: {exc}"
     parts: list[str] = []

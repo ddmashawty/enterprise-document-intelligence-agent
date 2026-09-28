@@ -1,0 +1,526 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head><link href="../App_Themes/Gwork/StyleSheet.css" type="text/css" rel="stylesheet" /><script src='/js/Gwork.js' type='text/javascript'></script><meta content="webkit" name="renderer"/><meta content="text/html;charset=utf-8" http-equiv="content-type"/><meta content="upgrade-insecure-requests" http-equiv="Content-Security-Policy"/><title>
+	硕士研究生招生系统
+</title><style type="text/css">
+        a, a:visited {
+            font-size: 12px;
+            text-decoration: none;
+            color: #515151;
+        }
+
+            a:hover {
+                text-decoration: none;
+                color: #FF6600;
+            }
+    </style>
+    <link rel="stylesheet" type="text/css" href="/js/jqueryeasyui/etongui.css" /><script type="text/javascript" src="/js/jquery/jquery.js"></script>
+    <script type="text/javascript" src="/js/jqueryeasyui/jquery.easyui.min.js"></script>
+    <script type="text/javascript" src="/js/lhgdialog/lhgdialog.min.js"></script>
+    
+    <script type="text/javascript">
+        function initForm() {
+            $('#btSearch').linkbutton();
+        }
+    </script>
+<script type="text/javascript">
+        $(document).ready(function () { if (typeof (initForm) == "function") { initForm() } })
+        $(document).ready(function () { if (typeof (reload) == "function") { reload() } })
+    </script>
+</head>
+<body>
+    <form method="post" action="Zsml_View.aspx" id="ctl00_Form1">
+<script type="text/javascript">//<![CDATA[
+	var theForm;
+	if (document.getElementById) { theForm = document.getElementById ('ctl00_Form1'); }
+	else { theForm = document.ctl00_Form1; }
+//]]></script>
+
+<div class="aspNetHidden">
+
+
+<input type="hidden" name="__EVENTARGUMENT" id="__EVENTARGUMENT" value="" /><input type="hidden" name="__VIEWSTATE" id="__VIEWSTATE" value="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" /><input type="hidden" name="__EVENTTARGET" id="__EVENTTARGET" value="" />
+</div>
+
+<script type="text/javascript">//<![CDATA[
+window._form = theForm;
+window.__doPostBack = function (eventTarget, eventArgument) {
+	if(theForm.onsubmit && theForm.onsubmit() == false) return;
+	theForm.__EVENTTARGET.value = eventTarget;
+	theForm.__EVENTARGUMENT.value = eventArgument;
+	theForm.submit();
+}
+//]]></script>
+
+<script src="/WebResource.axd?d=T0Zcd2Y%2fqdpJegF6Zg8fsarP1RIlINxMJS6pFP%2fhyG0%3d_STFZU4JV442Xz4HepfukwORfafej7ihTN0bv1gLUkv0%3d_f&t=638859463760000000" type="text/javascript"></script>
+<script type="text/javascript">//<![CDATA[
+WebForm_Initialize(window);
+//]]></script>
+
+<script src="/ScriptResource.axd?d=T0Zcd2Y%2fqdpJegF6Zg8fsarP1RIlINxMJS6pFP%2fhyG0%3d_RXCsn%2b5jdWrIjuKJgRoRydoId8%2faqdGseXtL5%2f9%2fHA0%3dfd_t&t=638859463760000000&n=f" type="text/javascript"></script>
+<script type="text/javascript">//<![CDATA[
+if (typeof(Sys) === 'undefined') throw new Error('ASP.NET Ajax client-side framework failed to load.');
+//]]></script>
+<script src="/ScriptResource.axd?d=T0Zcd2Y%2fqdpJegF6Zg8fsarP1RIlINxMJS6pFP%2fhyG0%3d_FQOl4y1lhOo1%2bM2ERUP6K9kfm8m%2fwB%2bMa9tUKjhFc9Q%3dfd_t&t=638859463760000000&n=f" type="text/javascript"></script>
+
+        <script type="text/javascript">
+//<![CDATA[
+Sys.WebForms.PageRequestManager._initialize('ctl00$ScriptManager1', document.getElementById('ctl00_Form1'));
+Sys.WebForms.PageRequestManager.getInstance()._updateControls(['tctl00$contentParent$UpdatePanel1','tctl00$contentParent$UpdatePanel2'], ['ctl00$contentParent$drpNd','ctl00$contentParent$drpYx','ctl00$contentParent$drpXxfs','ctl00$contentParent$drpZylx'], [], 90);
+//]]
+</script>
+
+        <div style="width: 1100px">
+            <div style="height: 80px; width: 100%; padding: 0px; background-color: #035ca2">
+                <div style="float: left;">
+                    <img src="/images/login/banner.png" height="80px" />
+                </div>
+                <div style="float: left; vertical-align: middle; padding-top: 30px">
+                    <span style="font-size: 24px; font-weight: bolder; color: White; font-family: 楷体,楷体_GB2312;"> 硕士研究生招生系统</span>                 
+                </div>
+            </div>
+            <table border="0" cellpadding="0" cellspacing="0" style="width: 100%;">
+                <tr>
+                    <td style="text-align: center; vertical-align: top; border-right: #cccccc 1px solid; border-left: #cccccc 1px solid; padding: 10px">
+                        
+    <div style="background-color: White; width: 1000px;">
+        <span id="ctl00_contentParent_UpdatePanel1">
+                <div style="background-color: White; height: 40px; width: 940px; border-right: none; border-top: none; border-left: none; border-bottom: none; text-align: center; padding-top: 15px;padding-bottom: 15px">                  
+                    <span style="font-family: 黑体; font-size: 6mm; line-height: 8mm; vertical-align: middle;">
+                        2026年硕士研究生招生专业目录
+                    </span>
+                </div>
+                <div style="margin-bottom: 15px; background-color: White; width: 940px; line-height: 150%; text-align: left; vertical-align: top">
+                    年度：<select name="ctl00$contentParent$drpNd" onchange="setTimeout(&#39;__doPostBack(\&#39;ctl00$contentParent$drpNd\&#39;,\&#39;\&#39;)&#39;, 0)" id="ctl00_contentParent_drpNd">
+	<option selected="selected" value="2026">2026</option>
+	<option value="2025">2025</option>
+	<option value="2024">2024</option>
+
+</select>
+                    &nbsp;&nbsp;院系：<select name="ctl00$contentParent$drpYx" onchange="setTimeout(&#39;__doPostBack(\&#39;ctl00$contentParent$drpYx\&#39;,\&#39;\&#39;)&#39;, 0)" id="ctl00_contentParent_drpYx">
+	<option value="">--请选择--</option>
+	<option value="001">001|哲学与社会发展学院</option>
+	<option value="002">002|政治与公共管理学院</option>
+	<option value="003">003|经济与管理学院</option>
+	<option value="004">004|法学院</option>
+	<option value="005">005|教育科学学院</option>
+	<option value="006">006|教育信息技术学院</option>
+	<option value="007">007|体育科学学院</option>
+	<option value="008">008|文学院</option>
+	<option value="009">009|外国语言文化学院</option>
+	<option value="010">010|音乐学院</option>
+	<option value="011">011|美术学院</option>
+	<option value="012">012|历史文化学院</option>
+	<option value="013">013|数学科学学院</option>
+	<option value="014">014|物理学院</option>
+	<option value="016">016|化学学院</option>
+	<option value="017">017|地理科学学院</option>
+	<option value="018">018|生命科学学院</option>
+	<option selected="selected" value="019">019|计算机学院</option>
+	<option value="022">022|国际文化学院</option>
+	<option value="023">023|旅游管理学院</option>
+	<option value="024">024|心理学院</option>
+	<option value="025">025|华南先进光电子研究院</option>
+	<option value="029">029|国际商学院</option>
+	<option value="030">030|脑科学与康复医学研究院</option>
+	<option value="033">033|马克思主义学院</option>
+	<option value="034">034|环境学院</option>
+	<option value="035">035|教师教育学部</option>
+	<option value="037">037|量子物质研究院</option>
+	<option value="038">038|科学技术与社会研究院</option>
+	<option value="041">041|人工智能学院</option>
+	<option value="043">043|材料与新能源学院</option>
+	<option value="046">046|数据科学与工程学院</option>
+	<option value="047">047|光电科学与工程学院</option>
+	<option value="048">048|电子科学与工程学院（微电子学院）</option>
+	<option value="049">049|教育科学学院（汕尾）</option>
+
+</select>
+                    &nbsp;&nbsp;专业类型：<select name="ctl00$contentParent$drpZylx" onchange="setTimeout(&#39;__doPostBack(\&#39;ctl00$contentParent$drpZylx\&#39;,\&#39;\&#39;)&#39;, 0)" id="ctl00_contentParent_drpZylx">
+	<option selected="selected" value="">--请选择--</option>
+	<option value="1">学术型</option>
+	<option value="2">专业型</option>
+
+</select>
+                    <br />
+                    <br />
+                    专业：<select name="ctl00$contentParent$drpZy" onchange="setTimeout(&#39;__doPostBack(\&#39;ctl00$contentParent$drpZy\&#39;,\&#39;\&#39;)&#39;, 0)" id="ctl00_contentParent_drpZy">
+	<option selected="selected" value="">--请选择--</option>
+	<option value="081200">081200|计算机科学与技术</option>
+	<option value="083500">083500|软件工程</option>
+	<option value="085404">085404|计算机技术</option>
+	<option value="085405">085405|软件工程</option>
+
+</select>
+                    &nbsp;&nbsp;<span style="color:red; font-weight:bold">学习方式：</span><select name="ctl00$contentParent$drpXxfs" onchange="setTimeout(&#39;__doPostBack(\&#39;ctl00$contentParent$drpXxfs\&#39;,\&#39;\&#39;)&#39;, 0)" id="ctl00_contentParent_drpXxfs">
+	<option selected="selected" value="1">全日制</option>
+	<option value="2">非全日制</option>
+
+</select>
+                    &nbsp;&nbsp;
+                </div>
+            </span>
+        <div style="margin-bottom: 15px; padding-bottom: 50px; margin-top: 0px; background-color: White; width: 940px; line-height: 25px; text-align: center; vertical-align: top">
+            <span id="ctl00_contentParent_UpdatePanel2">
+                    <div>
+	<table class="Grid_Line" cellspacing="0" rules="all" border="1" id="ctl00_contentParent_dgData" style="width:100%;border-collapse:collapse;">
+		<tr style="height:25px;white-space:nowrap;">
+			<th align="center" scope="col" style="width:60px;">编码</th><th align="center" scope="col" style="width:150px;">名称</th><th align="center" scope="col" style="width:30px;"> 拟招<br/>人数</th><th align="center" scope="col" style="width:220px;">考试科目<br/><span style='color:red; font-weight:bold'>点击考试科目名称（自命题）可查询考试大纲</span></th><th align="center" scope="col">复试科目</th><th align="center" scope="col">备注</th>
+		</tr><tr onMouseOver="SetRowBgColor(this,true)" onMouseOut="SetRowBgColor(this,false)" style="height:25px;">
+			<td align="center" style="white-space:nowrap;">
+                                    <span id="ctl00_contentParent_dgData_ctl02_lblBh_0" style="font-weight:bold;">019</span>
+                                </td><td align="left" style="width:150px;">
+                                    <a id="ctl00_contentParent_dgData_ctl02_hykMc_0" class="none" href="YxzyView.aspx?EID=R4s8U52WPSqQQdvL2MDtjpY2XTJ0sQka04csyGiD2E8=" target="_blank" style="font-weight:bold;">计算机学院</a>
+                                </td><td align="center" style="width:30px;">
+                                    <span id="ctl00_contentParent_dgData_ctl02_lblNzsrs_0" style="font-weight:bold;">141(30)</span>
+                                </td><td align="left" rowspan="1" style="width:220px;">
+                                    
+                                    
+                                </td><td align="left" rowspan="1">
+                                 
+                                     
+                                    
+                                                                                                     
+                                </td><td align="left" rowspan="2">
+                                    <span style="font-weight: bold">
+                                        
+                                    </span>
+                                </td>
+		</tr><tr onMouseOver="SetRowBgColor(this,true)" onMouseOut="SetRowBgColor(this,false)" style="height:25px;">
+			<td align="center" style="white-space:nowrap;">
+                                    <span id="ctl00_contentParent_dgData_ctl03_lblBh_1" style="font-weight:bold;">081200</span>
+                                </td><td align="left" style="width:150px;">
+                                    <a id="ctl00_contentParent_dgData_ctl03_hykMc_1" class="none" href="ZyView.aspx?EID=R4s8U52WPSoVNNq2JoHqMn3d5QzJGpmlXiFVLaA9eBkxDw2jlURrpw==" target="_blank" style="font-weight:bold;">计算机科学与技术</a>
+                                </td><td align="center" style="width:30px;">
+                                    <span id="ctl00_contentParent_dgData_ctl03_lblNzsrs_1" style="font-weight:bold;">48(17)</span>
+                                </td><td align="left" style="width:220px;">
+                                    
+                                    
+                                </td><td align="left">
+                                 
+                                     
+                                    
+                                                                                                     
+                                </td>
+		</tr><tr onMouseOver="SetRowBgColor(this,true)" onMouseOut="SetRowBgColor(this,false)" style="height:25px;">
+			<td align="center" style="white-space:nowrap;">
+                                    <span id="ctl00_contentParent_dgData_ctl04_lblBh_2">01</span>
+                                </td><td align="left" style="width:150px;">
+                                    <a id="ctl00_contentParent_dgData_ctl04_hykMc_2" class="none" href="ZyYjfxView.aspx?EID=R4s8U52WPSpNZomdu34Uvdeu-CvUWp8SlmDXcpSGlDvgMEr9W2NfBg==" target="_blank">计算机软件</a>
+                                </td><td align="center" style="width:30px;">
+                                    <span id="ctl00_contentParent_dgData_ctl04_lblNzsrs_2" style="font-weight:bold;"></span>
+                                </td><td align="left" rowspan="4" style="width:220px;">
+                                    
+                                    <span id="ctl00_contentParent_dgData_ctl04_dlistCskm_2"><span>
+                                            <span id="ctl00_contentParent_dgData_ctl04_dlistCskm_2_ctl00_dlist_0"><span>
+                                                    
+                                                    &nbsp;<a id="ctl00_contentParent_dgData_ctl04_dlistCskm_2_ctl00_dlist_0_ctl00_hykKskmmc_0" class="none" target="_blank" style="color:#515151;">①&nbsp;101|思想政治理论</a><input type="hidden" id="ctl00_contentParent_dgData_ctl04_dlistCskm_2_ctl00_dlist_0_ctl00_hdKind_0" name="ctl00$contentParent$dgData$ctl04$dlistCskm$ctl00$dlist$ctl00$hdKind" />
+                                                </span><span>
+                                                    
+                                                    &nbsp;<a id="ctl00_contentParent_dgData_ctl04_dlistCskm_2_ctl00_dlist_0_ctl01_hykKskmmc_1" class="none" target="_blank" style="color:#515151;">②&nbsp;201|英语（一）</a><input type="hidden" id="ctl00_contentParent_dgData_ctl04_dlistCskm_2_ctl00_dlist_0_ctl01_hdKind_1" name="ctl00$contentParent$dgData$ctl04$dlistCskm$ctl00$dlist$ctl01$hdKind" />
+                                                </span><span>
+                                                    
+                                                    &nbsp;<a id="ctl00_contentParent_dgData_ctl04_dlistCskm_2_ctl00_dlist_0_ctl02_hykKskmmc_2" class="none" target="_blank" style="color:#515151;">③&nbsp;301|数学（一）</a><input type="hidden" id="ctl00_contentParent_dgData_ctl04_dlistCskm_2_ctl00_dlist_0_ctl02_hdKind_2" name="ctl00$contentParent$dgData$ctl04$dlistCskm$ctl00$dlist$ctl02$hdKind" />
+                                                </span><span>
+                                                    
+                                                    &nbsp;<a id="ctl00_contentParent_dgData_ctl04_dlistCskm_2_ctl00_dlist_0_ctl03_hykKskmmc_3" class="none" target="_blank" style="color:#515151;">④&nbsp;408|计算机学科专业基础</a><input type="hidden" id="ctl00_contentParent_dgData_ctl04_dlistCskm_2_ctl00_dlist_0_ctl03_hdKind_3" name="ctl00$contentParent$dgData$ctl04$dlistCskm$ctl00$dlist$ctl03$hdKind" />
+                                                </span></span>
+                                            
+                                        </span></span>
+                                </td><td align="left" rowspan="4">
+                                 
+                                     
+                                    
+                                         <span id="ctl00_contentParent_dgData_ctl04_dlistFskm_2"><span>
+                                            <span id="ctl00_contentParent_dgData_ctl04_dlistFskm_2_ctl00_dlist_0"><span>
+                                                    
+                                                    &nbsp;<a id="ctl00_contentParent_dgData_ctl04_dlistFskm_2_ctl00_dlist_0_ctl00_hykKskmmc_0" class="none" href="KskmDgView.aspx?EID=R4s8U52WPSrImA1UosPMir2rrLGkSBlt8sLCRHwyjh0=" target="_blank">01901|数据库原理与C++程序设计</a><input type="hidden" id="ctl00_contentParent_dgData_ctl04_dlistFskm_2_ctl00_dlist_0_ctl00_hdKind_0" name="ctl00$contentParent$dgData$ctl04$dlistFskm$ctl00$dlist$ctl00$hdKind" value="0" />
+                                                </span></span>
+                                            
+                                        </span></span>                                                            
+                                </td><td align="left" rowspan="1">
+                                    <span style="font-weight: bold">
+                                        本专业拟招48名，拟接收推免生17名。<br/>
+                                    </span>
+                                </td>
+		</tr><tr onMouseOver="SetRowBgColor(this,true)" onMouseOut="SetRowBgColor(this,false)" style="height:25px;">
+			<td align="center" style="white-space:nowrap;">
+                                    <span id="ctl00_contentParent_dgData_ctl05_lblBh_3">02</span>
+                                </td><td align="left" style="width:150px;">
+                                    <a id="ctl00_contentParent_dgData_ctl05_hykMc_3" class="none" href="ZyYjfxView.aspx?EID=R4s8U52WPSrRz66Rpke9OUZTlkj3wyLiwFGkLPzJZ5uEo-vOTnCKJQ==" target="_blank">人工智能</a>
+                                </td><td align="center" style="width:30px;">
+                                    <span id="ctl00_contentParent_dgData_ctl05_lblNzsrs_3" style="font-weight:bold;"></span>
+                                </td><td align="left" rowspan="3">
+                                    <span style="font-weight: bold">
+                                        同上<br/>
+                                    </span>
+                                </td>
+		</tr><tr onMouseOver="SetRowBgColor(this,true)" onMouseOut="SetRowBgColor(this,false)" style="height:25px;">
+			<td align="center" style="white-space:nowrap;">
+                                    <span id="ctl00_contentParent_dgData_ctl06_lblBh_4">03</span>
+                                </td><td align="left" style="width:150px;">
+                                    <a id="ctl00_contentParent_dgData_ctl06_hykMc_4" class="none" href="ZyYjfxView.aspx?EID=R4s8U52WPSryuRFSOlviVeSlz1fZ1!xFTmjIw8Gx9KBFxM9vPB9G7A==" target="_blank">计算机应用技术</a>
+                                </td><td align="center" style="width:30px;">
+                                    <span id="ctl00_contentParent_dgData_ctl06_lblNzsrs_4" style="font-weight:bold;"></span>
+                                </td>
+		</tr><tr onMouseOver="SetRowBgColor(this,true)" onMouseOut="SetRowBgColor(this,false)" style="height:25px;">
+			<td align="center" style="white-space:nowrap;">
+                                    <span id="ctl00_contentParent_dgData_ctl07_lblBh_5">04</span>
+                                </td><td align="left" style="width:150px;">
+                                    <a id="ctl00_contentParent_dgData_ctl07_hykMc_5" class="none" href="ZyYjfxView.aspx?EID=R4s8U52WPSpX1a9TOc3fKLflqv-qY78M5cbs-KzAzJblNbrwqndH1A==" target="_blank">计算机网络与安全</a>
+                                </td><td align="center" style="width:30px;">
+                                    <span id="ctl00_contentParent_dgData_ctl07_lblNzsrs_5" style="font-weight:bold;"></span>
+                                </td>
+		</tr><tr onMouseOver="SetRowBgColor(this,true)" onMouseOut="SetRowBgColor(this,false)" style="height:25px;">
+			<td align="center" style="white-space:nowrap;">
+                                    <span id="ctl00_contentParent_dgData_ctl08_lblBh_6" style="font-weight:bold;">083500</span>
+                                </td><td align="left" style="width:150px;">
+                                    <a id="ctl00_contentParent_dgData_ctl08_hykMc_6" class="none" href="ZyView.aspx?EID=R4s8U52WPSqekXwhhZuahjbw!1z4Gob1nGBPWgoOfhcNeA-qHX-8Sw==" target="_blank" style="font-weight:bold;">软件工程</a>
+                                </td><td align="center" style="width:30px;">
+                                    <span id="ctl00_contentParent_dgData_ctl08_lblNzsrs_6" style="font-weight:bold;">20(6)</span>
+                                </td><td align="left" rowspan="1" style="width:220px;">
+                                    
+                                    
+                                </td><td align="left" rowspan="1">
+                                 
+                                     
+                                    
+                                                                                                     
+                                </td><td align="left" rowspan="1">
+                                    <span style="font-weight: bold">
+                                        
+                                    </span>
+                                </td>
+		</tr><tr onMouseOver="SetRowBgColor(this,true)" onMouseOut="SetRowBgColor(this,false)" style="height:25px;">
+			<td align="center" style="white-space:nowrap;">
+                                    <span id="ctl00_contentParent_dgData_ctl09_lblBh_7">01</span>
+                                </td><td align="left" style="width:150px;">
+                                    <a id="ctl00_contentParent_dgData_ctl09_hykMc_7" class="none" href="ZyYjfxView.aspx?EID=R4s8U52WPSpORNjwo2nfCAiKyNBT86Ayj7CPSQdMk6Tfeb-BwjEwTA==" target="_blank">软件工程理论与方法</a>
+                                </td><td align="center" style="width:30px;">
+                                    <span id="ctl00_contentParent_dgData_ctl09_lblNzsrs_7" style="font-weight:bold;"></span>
+                                </td><td align="left" rowspan="3" style="width:220px;">
+                                    
+                                    <span id="ctl00_contentParent_dgData_ctl09_dlistCskm_7"><span>
+                                            <span id="ctl00_contentParent_dgData_ctl09_dlistCskm_7_ctl00_dlist_0"><span>
+                                                    
+                                                    &nbsp;<a id="ctl00_contentParent_dgData_ctl09_dlistCskm_7_ctl00_dlist_0_ctl00_hykKskmmc_0" class="none" target="_blank" style="color:#515151;">①&nbsp;101|思想政治理论</a><input type="hidden" id="ctl00_contentParent_dgData_ctl09_dlistCskm_7_ctl00_dlist_0_ctl00_hdKind_0" name="ctl00$contentParent$dgData$ctl09$dlistCskm$ctl00$dlist$ctl00$hdKind" />
+                                                </span><span>
+                                                    
+                                                    &nbsp;<a id="ctl00_contentParent_dgData_ctl09_dlistCskm_7_ctl00_dlist_0_ctl01_hykKskmmc_1" class="none" target="_blank" style="color:#515151;">②&nbsp;201|英语（一）</a><input type="hidden" id="ctl00_contentParent_dgData_ctl09_dlistCskm_7_ctl00_dlist_0_ctl01_hdKind_1" name="ctl00$contentParent$dgData$ctl09$dlistCskm$ctl00$dlist$ctl01$hdKind" />
+                                                </span><span>
+                                                    
+                                                    &nbsp;<a id="ctl00_contentParent_dgData_ctl09_dlistCskm_7_ctl00_dlist_0_ctl02_hykKskmmc_2" class="none" target="_blank" style="color:#515151;">③&nbsp;301|数学（一）</a><input type="hidden" id="ctl00_contentParent_dgData_ctl09_dlistCskm_7_ctl00_dlist_0_ctl02_hdKind_2" name="ctl00$contentParent$dgData$ctl09$dlistCskm$ctl00$dlist$ctl02$hdKind" />
+                                                </span><span>
+                                                    
+                                                    &nbsp;<a id="ctl00_contentParent_dgData_ctl09_dlistCskm_7_ctl00_dlist_0_ctl03_hykKskmmc_3" class="none" target="_blank" style="color:#515151;">④&nbsp;408|计算机学科专业基础</a><input type="hidden" id="ctl00_contentParent_dgData_ctl09_dlistCskm_7_ctl00_dlist_0_ctl03_hdKind_3" name="ctl00$contentParent$dgData$ctl09$dlistCskm$ctl00$dlist$ctl03$hdKind" />
+                                                </span></span>
+                                            
+                                        </span></span>
+                                </td><td align="left" rowspan="3">
+                                 
+                                     
+                                    
+                                         <span id="ctl00_contentParent_dgData_ctl09_dlistFskm_7"><span>
+                                            <span id="ctl00_contentParent_dgData_ctl09_dlistFskm_7_ctl00_dlist_0"><span>
+                                                    
+                                                    &nbsp;<a id="ctl00_contentParent_dgData_ctl09_dlistFskm_7_ctl00_dlist_0_ctl00_hykKskmmc_0" class="none" href="KskmDgView.aspx?EID=R4s8U52WPSp7BkKrdqvDTal5S1Z1n493dTMfhndC!Ug=" target="_blank">01901|数据库原理与C++程序设计</a><input type="hidden" id="ctl00_contentParent_dgData_ctl09_dlistFskm_7_ctl00_dlist_0_ctl00_hdKind_0" name="ctl00$contentParent$dgData$ctl09$dlistFskm$ctl00$dlist$ctl00$hdKind" value="0" />
+                                                </span></span>
+                                            
+                                        </span></span>                                                            
+                                </td><td align="left" rowspan="1">
+                                    <span style="font-weight: bold">
+                                        本专业拟招20名，拟接收推免生6名。<br/>
+                                    </span>
+                                </td>
+		</tr><tr onMouseOver="SetRowBgColor(this,true)" onMouseOut="SetRowBgColor(this,false)" style="height:25px;">
+			<td align="center" style="white-space:nowrap;">
+                                    <span id="ctl00_contentParent_dgData_ctl10_lblBh_8">02</span>
+                                </td><td align="left" style="width:150px;">
+                                    <a id="ctl00_contentParent_dgData_ctl10_hykMc_8" class="none" href="ZyYjfxView.aspx?EID=R4s8U52WPSrJ3tXmbSCfqb2CWuBC6NA3KmaArbyDOB71KeLLAkQJhA==" target="_blank">软件服务工程</a>
+                                </td><td align="center" style="width:30px;">
+                                    <span id="ctl00_contentParent_dgData_ctl10_lblNzsrs_8" style="font-weight:bold;"></span>
+                                </td><td align="left" rowspan="2">
+                                    <span style="font-weight: bold">
+                                        同上<br/>
+                                    </span>
+                                </td>
+		</tr><tr onMouseOver="SetRowBgColor(this,true)" onMouseOut="SetRowBgColor(this,false)" style="height:25px;">
+			<td align="center" style="white-space:nowrap;">
+                                    <span id="ctl00_contentParent_dgData_ctl11_lblBh_9">03</span>
+                                </td><td align="left" style="width:150px;">
+                                    <a id="ctl00_contentParent_dgData_ctl11_hykMc_9" class="none" href="ZyYjfxView.aspx?EID=R4s8U52WPSrsITTvmf1gJwQyIJgEOw4gxrjOeq!VbF9VQJ!2E8CHpw==" target="_blank">领域软件工程与工业软件</a>
+                                </td><td align="center" style="width:30px;">
+                                    <span id="ctl00_contentParent_dgData_ctl11_lblNzsrs_9" style="font-weight:bold;"></span>
+                                </td>
+		</tr><tr onMouseOver="SetRowBgColor(this,true)" onMouseOut="SetRowBgColor(this,false)" style="height:25px;">
+			<td align="center" style="white-space:nowrap;">
+                                    <span id="ctl00_contentParent_dgData_ctl12_lblBh_10" style="font-weight:bold;">085404</span>
+                                </td><td align="left" style="width:150px;">
+                                    <a id="ctl00_contentParent_dgData_ctl12_hykMc_10" class="none" href="ZyView.aspx?EID=R4s8U52WPSptNpdshG0FSSwsOEF3SKFXCuTmjZsM21PNh3qV5c5DOw==" target="_blank" style="font-weight:bold;">计算机技术</a>
+                                </td><td align="center" style="width:30px;">
+                                    <span id="ctl00_contentParent_dgData_ctl12_lblNzsrs_10" style="font-weight:bold;">50(4)</span>
+                                </td><td align="left" rowspan="1" style="width:220px;">
+                                    
+                                    
+                                </td><td align="left" rowspan="1">
+                                 
+                                     
+                                    
+                                                                                                     
+                                </td><td align="left" rowspan="1">
+                                    <span style="font-weight: bold">
+                                        
+                                    </span>
+                                </td>
+		</tr><tr onMouseOver="SetRowBgColor(this,true)" onMouseOut="SetRowBgColor(this,false)" style="height:25px;">
+			<td align="center" style="white-space:nowrap;">
+                                    <span id="ctl00_contentParent_dgData_ctl13_lblBh_11">01</span>
+                                </td><td align="left" style="width:150px;">
+                                    <a id="ctl00_contentParent_dgData_ctl13_hykMc_11" class="none" href="ZyYjfxView.aspx?EID=R4s8U52WPSpavNvOBeIA4mvxoNZ-bCdldnrmj8Z9R922RljlfQ2lcg==" target="_blank">计算机应用技术</a>
+                                </td><td align="center" style="width:30px;">
+                                    <span id="ctl00_contentParent_dgData_ctl13_lblNzsrs_11" style="font-weight:bold;"></span>
+                                </td><td align="left" rowspan="2" style="width:220px;">
+                                    
+                                    <span id="ctl00_contentParent_dgData_ctl13_dlistCskm_11"><span>
+                                            <span id="ctl00_contentParent_dgData_ctl13_dlistCskm_11_ctl00_dlist_0"><span>
+                                                    
+                                                    &nbsp;<a id="ctl00_contentParent_dgData_ctl13_dlistCskm_11_ctl00_dlist_0_ctl00_hykKskmmc_0" class="none" target="_blank" style="color:#515151;">①&nbsp;101|思想政治理论</a><input type="hidden" id="ctl00_contentParent_dgData_ctl13_dlistCskm_11_ctl00_dlist_0_ctl00_hdKind_0" name="ctl00$contentParent$dgData$ctl13$dlistCskm$ctl00$dlist$ctl00$hdKind" />
+                                                </span><span>
+                                                    
+                                                    &nbsp;<a id="ctl00_contentParent_dgData_ctl13_dlistCskm_11_ctl00_dlist_0_ctl01_hykKskmmc_1" class="none" target="_blank" style="color:#515151;">②&nbsp;204|英语（二）</a><input type="hidden" id="ctl00_contentParent_dgData_ctl13_dlistCskm_11_ctl00_dlist_0_ctl01_hdKind_1" name="ctl00$contentParent$dgData$ctl13$dlistCskm$ctl00$dlist$ctl01$hdKind" />
+                                                </span><span>
+                                                    
+                                                    &nbsp;<a id="ctl00_contentParent_dgData_ctl13_dlistCskm_11_ctl00_dlist_0_ctl02_hykKskmmc_2" class="none" target="_blank" style="color:#515151;">③&nbsp;302|数学（二）</a><input type="hidden" id="ctl00_contentParent_dgData_ctl13_dlistCskm_11_ctl00_dlist_0_ctl02_hdKind_2" name="ctl00$contentParent$dgData$ctl13$dlistCskm$ctl00$dlist$ctl02$hdKind" />
+                                                </span><span>
+                                                    
+                                                    &nbsp;<a id="ctl00_contentParent_dgData_ctl13_dlistCskm_11_ctl00_dlist_0_ctl03_hykKskmmc_3" class="none" target="_blank" style="color:#515151;">④&nbsp;408|计算机学科专业基础</a><input type="hidden" id="ctl00_contentParent_dgData_ctl13_dlistCskm_11_ctl00_dlist_0_ctl03_hdKind_3" name="ctl00$contentParent$dgData$ctl13$dlistCskm$ctl00$dlist$ctl03$hdKind" />
+                                                </span></span>
+                                            
+                                        </span></span>
+                                </td><td align="left" rowspan="2">
+                                 
+                                     
+                                    
+                                         <span id="ctl00_contentParent_dgData_ctl13_dlistFskm_11"><span>
+                                            <span id="ctl00_contentParent_dgData_ctl13_dlistFskm_11_ctl00_dlist_0"><span>
+                                                    
+                                                    &nbsp;<a id="ctl00_contentParent_dgData_ctl13_dlistFskm_11_ctl00_dlist_0_ctl00_hykKskmmc_0" class="none" href="KskmDgView.aspx?EID=R4s8U52WPSrGljaYT9sPOIR358dSxbO079fFDM91mVA=" target="_blank">01902|程序设计上机考试（C、C++、Java语言任选一门）</a><input type="hidden" id="ctl00_contentParent_dgData_ctl13_dlistFskm_11_ctl00_dlist_0_ctl00_hdKind_0" name="ctl00$contentParent$dgData$ctl13$dlistFskm$ctl00$dlist$ctl00$hdKind" value="0" />
+                                                </span></span>
+                                            
+                                        </span></span>                                                            
+                                </td><td align="left" rowspan="1">
+                                    <span style="font-weight: bold">
+                                        本专业拟招50名（含退役大学生士兵计划3名），拟接收推免生4名。<br/>
+                                    </span>
+                                </td>
+		</tr><tr onMouseOver="SetRowBgColor(this,true)" onMouseOut="SetRowBgColor(this,false)" style="height:25px;">
+			<td align="center" style="white-space:nowrap;">
+                                    <span id="ctl00_contentParent_dgData_ctl14_lblBh_12">02</span>
+                                </td><td align="left" style="width:150px;">
+                                    <a id="ctl00_contentParent_dgData_ctl14_hykMc_12" class="none" href="ZyYjfxView.aspx?EID=R4s8U52WPSrKjZs6YmQm93jnuaQQMjaAjlgDpaRAmYPkxdVPNdAufA==" target="_blank">网络空间安全</a>
+                                </td><td align="center" style="width:30px;">
+                                    <span id="ctl00_contentParent_dgData_ctl14_lblNzsrs_12" style="font-weight:bold;"></span>
+                                </td><td align="left" rowspan="1">
+                                    <span style="font-weight: bold">
+                                        同上<br/>
+                                    </span>
+                                </td>
+		</tr><tr onMouseOver="SetRowBgColor(this,true)" onMouseOut="SetRowBgColor(this,false)" style="height:25px;">
+			<td align="center" style="white-space:nowrap;">
+                                    <span id="ctl00_contentParent_dgData_ctl15_lblBh_13" style="font-weight:bold;">085405</span>
+                                </td><td align="left" style="width:150px;">
+                                    <a id="ctl00_contentParent_dgData_ctl15_hykMc_13" class="none" href="ZyView.aspx?EID=R4s8U52WPSrc3DpalH6Z0SWd7ae33aakLgDjgypkUAgZHUaOVNSXrQ==" target="_blank" style="font-weight:bold;">软件工程</a>
+                                </td><td align="center" style="width:30px;">
+                                    <span id="ctl00_contentParent_dgData_ctl15_lblNzsrs_13" style="font-weight:bold;">23(3)</span>
+                                </td><td align="left" rowspan="1" style="width:220px;">
+                                    
+                                    
+                                </td><td align="left" rowspan="1">
+                                 
+                                     
+                                    
+                                                                                                     
+                                </td><td align="left" rowspan="1">
+                                    <span style="font-weight: bold">
+                                        
+                                    </span>
+                                </td>
+		</tr><tr onMouseOver="SetRowBgColor(this,true)" onMouseOut="SetRowBgColor(this,false)" style="height:25px;">
+			<td align="center" style="white-space:nowrap;">
+                                    <span id="ctl00_contentParent_dgData_ctl16_lblBh_14">01</span>
+                                </td><td align="left" style="width:150px;">
+                                    <a id="ctl00_contentParent_dgData_ctl16_hykMc_14" class="none" href="ZyYjfxView.aspx?EID=R4s8U52WPSrYJ0T!fkfWBuJ2mJzgmMqzntSsM6ycIxuIHg!ui0DKvg==" target="_blank">计算机软件技术</a>
+                                </td><td align="center" style="width:30px;">
+                                    <span id="ctl00_contentParent_dgData_ctl16_lblNzsrs_14" style="font-weight:bold;"></span>
+                                </td><td align="left" rowspan="2" style="width:220px;">
+                                    
+                                    <span id="ctl00_contentParent_dgData_ctl16_dlistCskm_14"><span>
+                                            <span id="ctl00_contentParent_dgData_ctl16_dlistCskm_14_ctl00_dlist_0"><span>
+                                                    
+                                                    &nbsp;<a id="ctl00_contentParent_dgData_ctl16_dlistCskm_14_ctl00_dlist_0_ctl00_hykKskmmc_0" class="none" target="_blank" style="color:#515151;">①&nbsp;101|思想政治理论</a><input type="hidden" id="ctl00_contentParent_dgData_ctl16_dlistCskm_14_ctl00_dlist_0_ctl00_hdKind_0" name="ctl00$contentParent$dgData$ctl16$dlistCskm$ctl00$dlist$ctl00$hdKind" />
+                                                </span><span>
+                                                    
+                                                    &nbsp;<a id="ctl00_contentParent_dgData_ctl16_dlistCskm_14_ctl00_dlist_0_ctl01_hykKskmmc_1" class="none" target="_blank" style="color:#515151;">②&nbsp;204|英语（二）</a><input type="hidden" id="ctl00_contentParent_dgData_ctl16_dlistCskm_14_ctl00_dlist_0_ctl01_hdKind_1" name="ctl00$contentParent$dgData$ctl16$dlistCskm$ctl00$dlist$ctl01$hdKind" />
+                                                </span><span>
+                                                    
+                                                    &nbsp;<a id="ctl00_contentParent_dgData_ctl16_dlistCskm_14_ctl00_dlist_0_ctl02_hykKskmmc_2" class="none" target="_blank" style="color:#515151;">③&nbsp;302|数学（二）</a><input type="hidden" id="ctl00_contentParent_dgData_ctl16_dlistCskm_14_ctl00_dlist_0_ctl02_hdKind_2" name="ctl00$contentParent$dgData$ctl16$dlistCskm$ctl00$dlist$ctl02$hdKind" />
+                                                </span><span>
+                                                    
+                                                    &nbsp;<a id="ctl00_contentParent_dgData_ctl16_dlistCskm_14_ctl00_dlist_0_ctl03_hykKskmmc_3" class="none" target="_blank" style="color:#515151;">④&nbsp;408|计算机学科专业基础</a><input type="hidden" id="ctl00_contentParent_dgData_ctl16_dlistCskm_14_ctl00_dlist_0_ctl03_hdKind_3" name="ctl00$contentParent$dgData$ctl16$dlistCskm$ctl00$dlist$ctl03$hdKind" />
+                                                </span></span>
+                                            
+                                        </span></span>
+                                </td><td align="left" rowspan="2">
+                                 
+                                     
+                                    
+                                         <span id="ctl00_contentParent_dgData_ctl16_dlistFskm_14"><span>
+                                            <span id="ctl00_contentParent_dgData_ctl16_dlistFskm_14_ctl00_dlist_0"><span>
+                                                    
+                                                    &nbsp;<a id="ctl00_contentParent_dgData_ctl16_dlistFskm_14_ctl00_dlist_0_ctl00_hykKskmmc_0" class="none" href="KskmDgView.aspx?EID=R4s8U52WPSojaEekywJPYYV5RirwJnYlXk-dmMpFeu8=" target="_blank">01902|程序设计上机考试（C、C++、Java语言任选一门）</a><input type="hidden" id="ctl00_contentParent_dgData_ctl16_dlistFskm_14_ctl00_dlist_0_ctl00_hdKind_0" name="ctl00$contentParent$dgData$ctl16$dlistFskm$ctl00$dlist$ctl00$hdKind" value="0" />
+                                                </span></span>
+                                            
+                                        </span></span>                                                            
+                                </td><td align="left" rowspan="1">
+                                    <span style="font-weight: bold">
+                                        本专业拟招23名（含退役大学生士兵计划2名），拟接收推免生3名。<br/>
+                                    </span>
+                                </td>
+		</tr><tr onMouseOver="SetRowBgColor(this,true)" onMouseOut="SetRowBgColor(this,false)" style="height:25px;">
+			<td align="center" style="white-space:nowrap;">
+                                    <span id="ctl00_contentParent_dgData_ctl17_lblBh_15">02</span>
+                                </td><td align="left" style="width:150px;">
+                                    <a id="ctl00_contentParent_dgData_ctl17_hykMc_15" class="none" href="ZyYjfxView.aspx?EID=R4s8U52WPSpOT9iH4ll07379HSMCUD!v6RFKZCOLXE8!lPgOAf!uZA==" target="_blank">软件服务工程与应用技术</a>
+                                </td><td align="center" style="width:30px;">
+                                    <span id="ctl00_contentParent_dgData_ctl17_lblNzsrs_15" style="font-weight:bold;"></span>
+                                </td><td align="left">
+                                    <span style="font-weight: bold">
+                                        同上<br/>
+                                    </span>
+                                </td>
+		</tr>
+	</table>
+</div>
+                </span>
+        </div>
+    </div>
+
+                    </td>
+                </tr>
+            </table>
+            <div style="line-height: 35px; height: 35px; width: 100%; text-align: center; padding: 0px; background-image: url(../../images/title_bg.gif)">
+                Copyright &copy;
+                    2026&nbsp;华南师范大学&nbsp;<br />
+            </div>
+        </div>
+    
+<div class="aspNetHidden">
+<input type="hidden" name="__EVENTVALIDATION" id="__EVENTVALIDATION" value="/wEdAAEAAAD/////AQAAAAAAAAAPAQAAAEcAAAAIL6o8WrtIM+uA1JmjstJYH49CS8sCZ9ljZ/2ktAp4ZXGE3tBeddVB+0CPqEP7L4/rWat/vEwJHW2bjxvGXy2jo9w93UXpJ9NQNB3+QAEERk8kgixNNyamaMeDdIWcSjQAjfShkO5GD08vh2H+4SNzKfUePQiXo5Knp42RZ+t4jc/2iRTPkQxfZ1qv5VE0h341sWWoZRPQmoAcwKbZs0lBbuhU9K8z2qqSyH066Gx6I0bzgbu8oXW1lRrE5WARFmrSqOpASHNkHnWIw44Plvm6actGp6ZBWVCZjY8510FxP7jHvAfwvKdLtavRLDMZ5JECeGu+rG1vBrwi/pF6CrOQDcclBLEWZfWIIiCCqBYxNLYzn5TaA8Zx4ZYAraoLAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAoYTOruyNUWyO9BW5jNdcYKdmbU5gHDJq+fTdo2j4tWQ==" />
+</div>
+
+<script type="text/javascript">//<![CDATA[
+Sys.Application.initialize();
+//]]></script>
+</form>
+</body>
+</html>

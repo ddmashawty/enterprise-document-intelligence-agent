@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from dataclasses import asdict, dataclass
+from dataclasses import asdict, dataclass, field
 from typing import Any
 
 from openai import OpenAI
@@ -17,9 +17,13 @@ class Hit:
     text: str
     score: float
     backend: str
+    metadata: dict[str, Any] = field(default_factory=dict)
 
     def to_dict(self) -> dict[str, Any]:
-        return asdict(self)
+        data = asdict(self)
+        if not data["metadata"]:
+            data.pop("metadata")
+        return data
 
 
 class RemoteEmbeddings:

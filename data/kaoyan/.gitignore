@@ -1,0 +1,37 @@
+# 放到仓库 data/kaoyan/ 后生效（Git 支持子目录 .gitignore）。由 bundle 构建脚本生成。
+# 规则：含考生个人信息（姓名/考生编号/成绩）的名单类文件 + 单文件 >3MB 的文件只留本地，不入库。
+# 需要时按 raw/manifest.csv 的 source_url 重新下载，并用 sha256 校验。
+
+/raw/jnu/jnu_2026_复试方案_010信息科学技术学院.xlsx
+/raw/jnu/jnu_2026_复试方案_044智能科学与工程学院.xlsx
+/raw/jnu/jnu_2026_复试方案_052网络空间安全学院.xlsx
+/raw/jnu/jnu_2026_复试方案_063珠海研究院.xlsx
+/raw/scnu/scnu_2026_019计算机学院_复试及拟录取情况汇总表.pdf
+/raw/scnu/scnu_2026_041人工智能学院_复试及拟录取情况汇总表.pdf
+/raw/scnu/scnu_2026_046数据科学与工程学院_复试及拟录取情况汇总表.pdf
+/raw/scnu/scnu_ai_2026_复试方案_20260320.html
+/raw/scnu/scnu_cs_2026_复试方案_20260321.html
+/raw/scnu/scnu_ds_2026_复试方案_20260318.html
+/raw/scut/scut_2026_拟录取硕士名单_不含推免.pdf
+/raw/scut/scut_2026_接收推免硕士名单.pdf
+/raw/scut/scut_cs_2026_复试名单_A.pdf
+/raw/scut/scut_cs_2026_复试名单_B.pdf
+/raw/scut/scut_cs_2026_统考拟录取名单.pdf
+/raw/scut/scut_ft_2026_统考拟录取名单.pdf
+/raw/scut/scut_sse_2026_统考复试名单.pdf
+/raw/scut/scut_sse_2026_统考拟录取名单.pdf
+/raw/sysu/sysu_2026_硕士招生学科专业目录.pdf
+/raw/sysu/sysu_cse_2026_复试名单.pdf
+/raw/sysu/sysu_cse_2026_统考复试结果公示.html
+/raw/sysu/sysu_sai_2026_复试名单.pdf
+/raw/sysu/sysu_sai_2026_复试结果.pdf
+/raw/sysu/sysu_scst_2026_复试名单.pdf
+/raw/sysu/sysu_scst_2026_复试结果.pdf
+/raw/sysu/sysu_sece_2026_复试名单.pdf
+/raw/sysu/sysu_sse_2026_复试名单.pdf
+/raw/sysu/sysu_ssse_2026_复试名单.xlsx
+
+# 运行期产物
+/kaoyan.db
+/cache/
+/ocr_cache/
