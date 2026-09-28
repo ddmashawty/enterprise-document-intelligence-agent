@@ -1,9 +1,28 @@
 # 进度日志
 
+## 会话：2026-09-28（考研改造 K4：结构化抽取）
+
+### K4
+- **状态：** complete（待提交到 `feat/kaoyan`）
+- 新增 `kaoyan/extract/`：10 个规则抽取器（中大细则 / 校线 / 目录 PDF、暨南目录 / 复试方案 xlsx / 推免 PDF、华师目录 / 推免 xls / 复试方案、华工计划）、`apply.py`（专业解析 + 与种子逐键比对 + 幂等写库）、`run.py`、`llm_fallback.py`（证据片段必须在原文中）、`evaluate.py`
+- 脚本 `scripts/extract_kaoyan.py`、`scripts/eval_extraction.py` → `docs/kaoyan_extraction_report.md`
+- 四类验收逐值一致、冲突 0；450 条种子复现 363 条，其余为名单统计 / 图片 / 种子判断；504 条规则事实全部带来源和证据；本机 `data/kaoyan.db` 已抽取
+- `PYTHONPATH=src pytest -q`：139 passed（113 + 26）
+- 文档：`docs/kaoyan_phase4_notes.md`
+
+## 五问重启检查（K4）
+| 问题 | 答案 |
+|------|------|
+| 我在哪里？ | K4 完成，等用户看 diff 摘要后提交 |
+| 我要去哪里？ | K5：考研结构化工具（search_programs / get_score_lines / …）、考研提示词与数字校验、`/v1/programs` 等接口 |
+| 目标是什么？ | 考研信息 Agent：每个数字带来源 / 年份 / 口径，不知道就说不知道 |
+| 我学到了什么？ | 真实表格的特殊行靠备注 / 括号说明区分，且备注常在双层表头的另一行；跳过考生表要看表头，不能看数据行 |
+| 我做了什么？ | 抽取协议、10 个规则抽取器、比对写库、LLM 证据校验、评估报告、26 条新测试 |
+
 ## 会话：2026-09-28（考研改造 K3：检索元数据 + 考研索引）
 
 ### K3
-- **状态：** complete（待提交到 `feat/kaoyan`）
+- **状态：** complete（已提交 `0aa958f`）
 - chunk 带 doc_id / school / college / year / doc_type / title / url / redacted；表格按行切块，重复标题 + 表头 + 学院 / 专业行
 - 独立考研索引 `data/chroma_kaoyan/`（`scripts/ingest_kaoyan.py`）：90 文档、1926 chunk、hybrid；检索可按学校 / 年份 / 类型过滤，问题里只有一所学校时自动过滤
 - 考研排序先验（名单降权、文档类型 / 学院匹配）；golden hit@5：BM25 16/18、hybrid 15/18

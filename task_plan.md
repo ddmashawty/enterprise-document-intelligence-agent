@@ -6,7 +6,7 @@
 - 需求原文：`data/kaoyan/CURSOR_PROMPT.md`；数据说明：`data/kaoyan/README.md`。
 
 ## 当前阶段
-K0 已确认（2026-09-27）；K1 已提交（`125b5a0`）；K2 已提交（`f6ea30f`）；K3 完成（2026-09-28，待提交）；下一步 **K4 结构化抽取**。
+K0 已确认（2026-09-27）；K1 已提交（`125b5a0`）；K2 已提交（`f6ea30f`）；K3 已提交（`0aa958f`）；K4 完成（2026-09-28，待提交）；下一步 **K5 Agent 工具、提示词、API**。
 
 ## 各阶段
 
@@ -111,8 +111,10 @@ K0 已确认（2026-09-27）；K1 已提交（`125b5a0`）；K2 已提交（`f6e
 - **新增：** `src/doc_agent/kaoyan/extract/`（`base.py` 抽取器协议 + `Fact` 输出；规则抽取器：`jnu_catalog_html.py`、`scnu_zsml_html.py`、`scnu_tm_xls.py`、`sysu_retest_html.py`、`sysu_baseline_pdf.py`、`scut_plan_html.py`；`llm_fallback.py`：JSON 输出，必须给证据原文片段，否则丢弃）、`scripts/extract_kaoyan.py`、`scripts/eval_extraction.py`（→ `docs/kaoyan_extraction_report.md`）、`tests/test_kaoyan_extract.py`
 - **验收：** 已入库文字类文档中、`majors.csv` 覆盖到的事实，规则抽取与种子完全一致（中大各学院复试线、暨南 2027 目录计划、华师目录总(推免)、华师 2027 推免数）；每条事实有 `source_doc_id + evidence_text`；冲突只记录不覆盖
 - **测试：** 规则抽取对夹具断言；LLM 兜底用假模型；依赖本地专用文件（暨南 2026 各学院复试方案 xlsx，含名单）的用例缺文件时 `pytest.skip`
-- **注意：** 暨南 2026 学院复试线只在本地专用 xlsx 里；中大 2026 目录 PDF（5.2MB）本机缺失 → 中大目录计划的规则抽取在本机无法验证（见开放问题 2）
-- **状态：** pending
+- **注意：** 暨南 2026 学院复试线只在本地专用 xlsx 里；中大 2026 目录 PDF（5.2MB）已下载到本机（被忽略，见开放问题 2），相关用例缺文件时 skip
+- **实际做法补充：** 规则抽取器共 10 个（计划外增加 `sysu_catalog_pdf`、`jnu_retest_xlsx`、`jnu_tm_pdf`、`scnu_retest_html`，覆盖种子引用的 PDF / xlsx 来源）；`apply.py` 解析专业 + 按自然键比对 + 幂等写库；`run.py` 运行器；`evaluate.py` 生成报告；schema 给 `directions / exam_subjects` 加 `evidence_text`（老库自动补列），`v_program_facts` 同值同文档去重
+- **结果：** 139 passed（113 + 26）。四类验收全部逐值一致（中大学院复试线 14/14、暨南 2027 目录 11/11、华师目录总(推免) 16/16、华师 2027 推免 7/7），冲突 0；450 条种子复现 363 条，未复现的是名单统计 57 / 图片 24 / 种子判断 5 / 招生简章 1 / 名单计数 1（有抽取器的文档内只剩 2 条）；504 条规则事实全部带来源和证据，二次运行不变。详见 `docs/kaoyan_phase4_notes.md`、`docs/kaoyan_extraction_report.md`
+- **状态：** complete
 
 ### 阶段 K5：Agent 工具、提示词、API
 - **新增：** `tools/kaoyan.py`（`search_programs`、`get_score_lines`、`get_exam_subjects`、`compare_programs`、`get_document`、`list_sources`，全部返回 JSON 且每条事实带 source）、`api/routes_kaoyan.py`、`api/schemas_kaoyan.py`、`scripts/smoke_kaoyan.py`、`tests/test_kaoyan_tools.py`、`tests/test_kaoyan_api.py`、`tests/test_kaoyan_guardrails.py`
@@ -175,6 +177,11 @@ K0 已确认（2026-09-27）；K1 已提交（`125b5a0`）；K2 已提交（`f6e
 | 【K3】考研查询扩展拼接在原问题后，不单独成查询 | 单独查“复试分数线”会召回四校所有分数线，丢掉专业代码 |
 | 【K3】`rag_search` 带任一考研过滤条件就查考研索引，否则按 `RAG_PROFILE` | 旧调用与企业演示不受影响；K5 可把默认切到 kaoyan |
 | 【K3】名单类 chunk 只降权不过滤 | 统计类问题仍可能需要；名单内容已脱敏 |
+| 【K4】机器抽取每条单独成行，不更新种子行；与同键种子逐字段相同才 `verified=1`，冲突写 `verified=0` 并进报告 | 冲突只记录不覆盖；多来源并列保留 |
+| 【K4】事实只挂到库里已有的专业，37 个目标专业以外的记 `unresolved` 不写库 | 专业表由种子维护；避免抽取器凭表格随意建专业 |
+| 【K4】验收只算文字类文档；图片来源（img / pdf-scan）留到 K7 | 需求原文“对文本文档…”；图片需 OCR |
+| 【K4】名单表整张跳过，名单计数类统计仍由种子提供 | 规则抽取不读个人信息；证据文本不含姓名 / 编号 / 个人分数 |
+| 【K4】LLM 兜底只处理无规则事实的非名单文字文档；证据片段必须在原文中且含该数值 | 不编数字；模型输出可核对 |
 
 ## 遇到的错误
 | 错误 | 尝试次数 | 解决方案 |
@@ -196,6 +203,11 @@ K0 已确认（2026-09-27）；K1 已提交（`125b5a0`）；K2 已提交（`f6e
 | 【K2】未标个人信息的华工公示正文含“拟录取X等2582人”首名 | 1 | 泄漏扫描发现；加首名打码规则，对所有考研文档生效 |
 | 【K3】按单元格切块绕过了页面级脱敏兜底 | 1 | `redact_document` 把兜底落到每个单元格；本地泄漏测试同时查单元格 |
 | 【K3】名单 chunk 每行重复专业代码，BM25 下挤占前几名 | 2 | 名单降权 + 文档类型 / 学院先验；候选池放大，否则先验够不到正确文档 |
+| 【K4】华师复试方案计划表被当成考生表跳过（数据行含“立功表彰免初试考生”） | 1 | 只按表头“考生姓名 / 初试成绩”识别考生表 |
+| 【K4】中大细则专项复试线落成普通学院线（“备注”只在双层表头的上一行） | 1 | 备注列向上查找表头行 |
+| 【K4】华师 046 目录专业行无“(推免)”，推免 0 只写在备注“不招推免生” | 1 | 备注含“不招推免生”且专业行无推免数 → 推免 0，证据取备注 |
+| 【K4】中大基本线“单独考试 公共卫生[1053]”与专业学位同代码，被判重复 | 1 | 只读学术学位 / 专业学位行 |
+| 【K4】sandbox 内 `uvx ruff` 无法写 `~/.local/share/uv` | 1 | `UV_CACHE_DIR / UV_TOOL_DIR` 指到工作区临时目录，用完删除 |
 
 ## 备注
 - 规划文件位于项目根目录，不在 skill 安装目录

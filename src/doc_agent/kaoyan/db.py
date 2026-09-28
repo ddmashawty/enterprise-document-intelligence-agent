@@ -10,11 +10,13 @@ from typing import Any, Iterator
 from pydantic import BaseModel
 
 from doc_agent.config import get_settings
-from doc_agent.kaoyan.models import SEED_METHODS
+from doc_agent.kaoyan.models import EXTRACTED_METHODS, SEED_METHODS
 
 SCHEMA_PATH = Path(__file__).with_name("schema.sql")
 
 _FACT_TABLES = ("directions", "exam_subjects", "plans", "score_lines", "admission_stats")
+# Columns added after K1; databases created earlier get them via ALTER TABLE.
+_ADDED_COLUMNS = (("directions", "evidence_text"), ("exam_subjects", "evidence_text"))
 
 
 def _row_values(model: BaseModel) -> dict[str, Any]:
@@ -53,6 +55,10 @@ class KaoyanStore:
     def init_schema(self) -> None:
         with self.transaction() as conn:
             conn.executescript(SCHEMA_PATH.read_text(encoding="utf-8"))
+            for table, column in _ADDED_COLUMNS:
+                cols = {r[1] for r in conn.execute(f"PRAGMA table_info({table})")}
+                if column not in cols:
+                    conn.execute(f"ALTER TABLE {table} ADD COLUMN {column} TEXT")
 
     # -- writes -----------------------------------------------------------
 
@@ -82,6 +88,27 @@ class KaoyanStore:
         marks = ", ".join("?" for _ in SEED_METHODS)
         for table in _FACT_TABLES:
             conn.execute(f"DELETE FROM {table} WHERE extraction_method IN ({marks})", SEED_METHODS)
+
+    @staticmethod
+    def delete_extracted_facts(
+        conn: sqlite3.Connection,
+        doc_ids: list[str] | set[str],
+        methods: tuple[str, ...] = EXTRACTED_METHODS,
+    ) -> int:
+        """Drop machine-extracted rows of the given documents (seed rows are never touched)."""
+        ids = sorted(doc_ids)
+        if not ids:
+            return 0
+        marks = ", ".join("?" for _ in methods)
+        docs = ", ".join("?" for _ in ids)
+        removed = 0
+        for table in _FACT_TABLES:
+            cur = conn.execute(
+                f"DELETE FROM {table} WHERE extraction_method IN ({marks}) AND source_doc_id IN ({docs})",
+                [*methods, *ids],
+            )
+            removed += cur.rowcount
+        return removed
 
     # -- reads ------------------------------------------------------------
 
