@@ -23,3 +23,7 @@ class AgentState(TypedDict):
     final_answer: str
     status: str
     error: str
+    # 考研: rule-based intent (guardrails.detect_kaoyan_intent) and derived notes /
+    # number-validation results ({"notes": [...], "validation": {...}}).
+    intent: dict[str, Any]
+    facts: dict[str, Any]

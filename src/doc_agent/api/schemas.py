@@ -60,6 +60,9 @@ class HealthResponse(BaseModel):
     chunks: int
     version: str
     memory_db: str = ""
+    kaoyan_db: str | None = None
+    programs: int | None = None
+    documents: int | None = None
 
 
 class TaskResponse(BaseModel):

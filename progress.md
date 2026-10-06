@@ -1,9 +1,28 @@
 # 进度日志
 
+## 会话：2026-09-29（考研改造 K5：Agent 工具、提示词、API）
+
+### K5
+- **状态：** complete（待提交到 `feat/kaoyan`）
+- 新增 `kaoyan/query.py`（查询服务：筛选、统招取值、复试线口径、科目、对比表行、文档元数据）、`tools/kaoyan.py`（6 个结构化工具 + citation / 导出行 / LLM 视图）、`agent/kaoyan_flow.py`（按意图确定性调工具、reflect、finalize 数字校验）、`api/routes_kaoyan.py` + `schemas_kaoyan.py`（`/v1/programs`、`/v1/programs/{id}`、`/v1/score-lines`、`/v1/documents`、`/v1/documents/{id}`）、`scripts/smoke_kaoyan.py`
+- 修改 `guardrails.py`（考研意图识别、数字校验）、`prompts.py`（考研 15 条规则）、`nodes.py`（按意图分流，企业路径不变）、`state.py` / `graph.py`（`intent`、`facts`）、`registry.py`（注册工具，`rag_search` 加 `profile`）、`/health` 加可选字段、`__version__` 0.4.0 并用于 `create_app()`
+- `PYTHONPATH=src pytest -q`：196 passed（139 + 57）；`test_api_errors.py` 未改
+- 真实 DeepSeek 冒烟 `smoke_kaoyan.py`：18/18（数值 14/14、未知 2/2、隐私 1/1、导出 1/1、引用 18/18）；企业 `smoke_chat.py` 3/3
+- 文档：`docs/kaoyan_phase5_notes.md`
+
+## 五问重启检查（K5）
+| 问题 | 答案 |
+|------|------|
+| 我在哪里？ | K5 完成，等用户看 diff 摘要后提交 |
+| 我要去哪里？ | K6：采集层（`collect/`、按 host 限速 ≥3s、robots、`POST /v1/crawl` 默认 dry-run），全部用 MockTransport 测试 |
+| 目标是什么？ | 考研信息 Agent：每个数字带来源 / 年份 / 口径，不知道就说不知道 |
+| 我学到了什么？ | 工具调用交给规则后，模型失误集中在措辞：会主动讲没问的缺口、用有歧义的“考 408”；数字校验要豁免学科代码这类“看起来像数字”的标识 |
+| 我做了什么？ | 查询服务、6 个工具、意图识别、数字校验、考研提示词、Agent 分流、5 个接口、57 条新测试、真实冒烟 18/18 |
+
 ## 会话：2026-09-28（考研改造 K4：结构化抽取）
 
 ### K4
-- **状态：** complete（待提交到 `feat/kaoyan`）
+- **状态：** complete（已提交 `d933603`）
 - 新增 `kaoyan/extract/`：10 个规则抽取器（中大细则 / 校线 / 目录 PDF、暨南目录 / 复试方案 xlsx / 推免 PDF、华师目录 / 推免 xls / 复试方案、华工计划）、`apply.py`（专业解析 + 与种子逐键比对 + 幂等写库）、`run.py`、`llm_fallback.py`（证据片段必须在原文中）、`evaluate.py`
 - 脚本 `scripts/extract_kaoyan.py`、`scripts/eval_extraction.py` → `docs/kaoyan_extraction_report.md`
 - 四类验收逐值一致、冲突 0；450 条种子复现 363 条，其余为名单统计 / 图片 / 种子判断；504 条规则事实全部带来源和证据；本机 `data/kaoyan.db` 已抽取
@@ -13,7 +32,7 @@
 ## 五问重启检查（K4）
 | 问题 | 答案 |
 |------|------|
-| 我在哪里？ | K4 完成，等用户看 diff 摘要后提交 |
+| 我在哪里？ | K4 完成并已提交（`d933603`） |
 | 我要去哪里？ | K5：考研结构化工具（search_programs / get_score_lines / …）、考研提示词与数字校验、`/v1/programs` 等接口 |
 | 目标是什么？ | 考研信息 Agent：每个数字带来源 / 年份 / 口径，不知道就说不知道 |
 | 我学到了什么？ | 真实表格的特殊行靠备注 / 括号说明区分，且备注常在双层表头的另一行；跳过考生表要看表头，不能看数据行 |

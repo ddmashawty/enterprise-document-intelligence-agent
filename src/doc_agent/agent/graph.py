@@ -88,6 +88,8 @@ def run_agent(
         "final_answer": "",
         "status": "started",
         "error": "",
+        "intent": {},
+        "facts": {},
     }
     final = graph.invoke(initial)
 
@@ -141,4 +143,6 @@ def run_agent(
         "reflection": reflection,
         "status": status,
         "iterations": iterations,
+        "intent": final.get("intent") or {},
+        "facts": final.get("facts") or {},
     }
