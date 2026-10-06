@@ -20,6 +20,7 @@ PlanKind = Literal[
 ]
 
 SEED_METHODS: tuple[str, ...] = ("manual_seed", "seed_note_regex")
+EXTRACTED_METHODS: tuple[str, ...] = ("rule", "llm", "ocr")
 
 
 class School(BaseModel):
@@ -85,6 +86,7 @@ class Direction(BaseModel):
     name: str
     note: str | None = None
     source_doc_id: str | None = None
+    evidence_text: str | None = None
     extraction_method: ExtractionMethod
     verified: bool = False
 
@@ -99,6 +101,7 @@ class ExamSubject(BaseModel):
     unknown_reason: str | None = None
     source_doc_id: str | None = None
     page: int | None = None
+    evidence_text: str | None = None
     extraction_method: ExtractionMethod
     verified: bool = False
 

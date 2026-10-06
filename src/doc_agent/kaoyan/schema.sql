@@ -71,6 +71,7 @@ CREATE TABLE IF NOT EXISTS directions (
     name TEXT NOT NULL,
     note TEXT,
     source_doc_id TEXT REFERENCES documents(id),
+    evidence_text TEXT,
     extraction_method TEXT NOT NULL,
     verified INTEGER NOT NULL DEFAULT 0
 );
@@ -86,6 +87,7 @@ CREATE TABLE IF NOT EXISTS exam_subjects (
     unknown_reason TEXT,
     source_doc_id TEXT REFERENCES documents(id),
     page INTEGER,
+    evidence_text TEXT,
     extraction_method TEXT NOT NULL,
     verified INTEGER NOT NULL DEFAULT 0
 );
@@ -158,32 +160,42 @@ CREATE TABLE IF NOT EXISTS crawl_runs (
 );
 
 -- One row per program: latest year per plan kind / score scope, with sources.
--- Multiple sources for the same kind are concatenated as "value@doc_id" (never overwritten).
+-- Multiple sources for the same kind are concatenated as "value@doc_id" (never overwritten);
+-- the same value from the same document (seed + rule extraction) is listed once.
 DROP VIEW IF EXISTS v_program_facts;
 CREATE VIEW v_program_facts AS
 WITH latest_plan AS (
     SELECT program_id, kind, MAX(year) AS year FROM plans GROUP BY program_id, kind
 ),
-plan_agg AS (
+plan_items AS (
     SELECT p.program_id, p.kind, p.year,
-           GROUP_CONCAT(
-               CASE WHEN p.is_upper_bound = 1 THEN '≤' ELSE '' END
-               || COALESCE(CAST(p.value AS TEXT), '?')
-               || CASE WHEN p.pool_scope IS NOT NULL THEN '[' || p.pool_scope || ']' ELSE '' END
-               || '@' || COALESCE(p.source_doc_id, '-'),
-               '; '
-           ) AS facts
+           CASE WHEN p.is_upper_bound = 1 THEN '≤' ELSE '' END
+           || COALESCE(CAST(p.value AS TEXT), '?')
+           || CASE WHEN p.pool_scope IS NOT NULL THEN '[' || p.pool_scope || ']' ELSE '' END
+           || '@' || COALESCE(p.source_doc_id, '-') AS item,
+           MIN(p.id) AS first_id
     FROM plans p
     JOIN latest_plan l ON l.program_id = p.program_id AND l.kind = p.kind AND l.year = p.year
-    GROUP BY p.program_id, p.kind, p.year
+    GROUP BY p.program_id, p.kind, p.year, item
 ),
-line_agg AS (
+plan_agg AS (
+    SELECT program_id, kind, year, GROUP_CONCAT(item, '; ') AS facts
+    FROM (SELECT * FROM plan_items ORDER BY first_id)
+    GROUP BY program_id, kind, year
+),
+line_items AS (
     SELECT s.program_id, s.scope, s.year,
-           GROUP_CONCAT(COALESCE(CAST(s.total AS TEXT), '?') || '@' || COALESCE(s.source_doc_id, '-'), '; ') AS facts
+           COALESCE(CAST(s.total AS TEXT), '?') || '@' || COALESCE(s.source_doc_id, '-') AS item,
+           MIN(s.id) AS first_id
     FROM score_lines s
     WHERE s.program_id IS NOT NULL
       AND s.year = (SELECT MAX(year) FROM score_lines x WHERE x.program_id = s.program_id AND x.scope = s.scope)
-    GROUP BY s.program_id, s.scope, s.year
+    GROUP BY s.program_id, s.scope, s.year, item
+),
+line_agg AS (
+    SELECT program_id, scope, year, GROUP_CONCAT(item, '; ') AS facts
+    FROM (SELECT * FROM line_items ORDER BY first_id)
+    GROUP BY program_id, scope, year
 )
 SELECT
     pr.id AS program_id,
@@ -204,6 +216,9 @@ SELECT
     (SELECT year || ':' || facts FROM line_agg WHERE program_id = pr.id AND scope = 'school_baseline') AS school_baseline_line,
     (SELECT GROUP_CONCAT(DISTINCT status) FROM exam_subjects WHERE program_id = pr.id) AS subject_status,
     (SELECT GROUP_CONCAT(code, '/') FROM (
-        SELECT code FROM exam_subjects WHERE program_id = pr.id AND status = 'known' ORDER BY slot
+        SELECT code FROM exam_subjects e
+        WHERE e.program_id = pr.id AND e.status = 'known'
+          AND e.year IS (SELECT MAX(year) FROM exam_subjects x WHERE x.program_id = pr.id AND x.status = 'known')
+        GROUP BY e.slot, e.code ORDER BY e.slot
     )) AS subject_codes
 FROM programs pr;

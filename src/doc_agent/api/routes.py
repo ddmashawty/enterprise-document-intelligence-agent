@@ -19,6 +19,7 @@ from doc_agent.api.schemas import (
 )
 from doc_agent.config import get_settings
 from doc_agent.ingest.pipeline import ingest_paths
+from doc_agent.kaoyan.db import get_kaoyan_store
 from doc_agent.memory import get_session_memory, get_task_store
 from doc_agent.rag.store import get_store
 from doc_agent.runtime_options import request_options
@@ -30,6 +31,10 @@ router = APIRouter()
 def health() -> HealthResponse:
     s = get_settings()
     store = get_store()
+    kaoyan: dict[str, object] = {}
+    if s.kaoyan_db_path.exists():
+        ky = get_kaoyan_store()
+        kaoyan = {"kaoyan_db": s.kaoyan_db, "programs": ky.count("programs"), "documents": ky.count("documents")}
     return HealthResponse(
         status="ok",
         llm="configured" if s.llm_configured else "missing",
@@ -37,6 +42,7 @@ def health() -> HealthResponse:
         chunks=store.chunk_count,
         version=__version__,
         memory_db=s.memory_db,
+        **kaoyan,
     )
 
 

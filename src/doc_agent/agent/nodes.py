@@ -6,9 +6,11 @@ from typing import Any
 
 from langchain_core.messages import AIMessage, HumanMessage, SystemMessage, ToolMessage
 
+from doc_agent.agent import kaoyan_flow
 from doc_agent.agent.guardrails import (
     citations_to_excel_rows,
     citations_to_markdown,
+    detect_kaoyan_intent,
     filter_redundant_tool_calls,
     infer_export_filename,
     is_list_documents_spin,
@@ -23,6 +25,7 @@ from doc_agent.agent.state import AgentState
 from doc_agent.config import get_settings
 from doc_agent.runtime_options import effective_max_tool_calls
 from doc_agent.llm.factory import get_chat_model
+from doc_agent.tools import kaoyan as kaoyan_tools
 from doc_agent.tools.registry import get_tool_list, parse_export_payload, tools_by_name
 
 
@@ -76,6 +79,7 @@ def _run_tool(
                         citations.extend(snippets)
         except json.JSONDecodeError:
             pass
+    citations.extend(kaoyan_tools.citations_from_output(name, output))
     export_meta = parse_export_payload(name, output)
     if export_meta:
         exports.append(export_meta)
@@ -154,6 +158,17 @@ def _force_compare(
 
 
 def plan_node(state: AgentState) -> dict[str, Any]:
+    intent = detect_kaoyan_intent(state.get("user_goal") or "")
+    intent["available"] = bool(intent["is_kaoyan"]) and kaoyan_tools.kaoyan_available()
+    if intent["available"]:
+        plan = kaoyan_flow.plan_steps(intent)
+        return {
+            "plan": plan,
+            "route": "tools",
+            "intent": intent,
+            "status": "planned",
+            "messages": [AIMessage(content=f"规划完成(考研): kinds={intent['kinds']}; plan={plan}")],
+        }
     llm = get_chat_model()
     history = state.get("session_context") or ""
     human = state["user_goal"]
@@ -185,6 +200,7 @@ def plan_node(state: AgentState) -> dict[str, Any]:
     return {
         "plan": plan_l,
         "route": route,
+        "intent": intent,
         "status": "planned",
         "messages": [AIMessage(content=f"规划完成: route={route}; plan={plan_l}")],
     }
@@ -198,7 +214,37 @@ def route_node(state: AgentState) -> str:
     return "act"
 
 
+def _kaoyan_act(state: AgentState) -> dict[str, Any]:
+    tool_map = tools_by_name()
+    results = list(state.get("tool_results") or [])
+    citations = list(state.get("citations") or [])
+    exports = list(state.get("exports") or [])
+    messages: list[Any] = []
+    iteration = state.get("iteration", 0)
+
+    def run(name: str, args: dict[str, Any]) -> None:
+        _run_tool(tool_map, name, args, results, messages, citations, exports)
+
+    if iteration == 0:
+        kaoyan_flow.bootstrap(dict(state), run)
+        if state["intent"].get("export"):
+            kaoyan_flow.export(dict(state), results, run)
+    else:
+        kaoyan_flow.continue_act(dict(state), results, exports, run)
+    return {
+        "messages": messages + [AIMessage(content=f"考研工具: {recent_tools(results, 8)}")],
+        "tool_results": results,
+        "citations": citations,
+        "exports": exports,
+        "iteration": iteration + 1,
+        "should_retry": False,
+        "status": "acted",
+    }
+
+
 def act_node(state: AgentState) -> dict[str, Any]:
+    if kaoyan_flow.is_kaoyan(state):
+        return _kaoyan_act(state)
     llm = get_chat_model().bind_tools(get_tool_list())
     tool_map = tools_by_name()
     results = list(state.get("tool_results") or [])
@@ -345,6 +391,9 @@ def reflect_node(state: AgentState) -> dict[str, Any]:
             "status": "reflected",
         }
 
+    if kaoyan_flow.is_kaoyan(state):
+        return kaoyan_flow.reflect(dict(state))
+
     citations = state.get("citations") or []
     exports = state.get("exports") or []
     results = state.get("tool_results") or []
@@ -440,6 +489,18 @@ def after_reflect(state: AgentState) -> str:
 
 def finalize_node(state: AgentState) -> dict[str, Any]:
     llm = get_chat_model()
+    if kaoyan_flow.is_kaoyan(state):
+        answer, validation = kaoyan_flow.finalize(dict(state), llm)
+        exports = state.get("exports") or []
+        paths = ", ".join(str(e.get("path")) for e in exports if e.get("path"))
+        if paths and "data/exports" not in answer:
+            answer = answer.rstrip() + f"\n\n**导出文件：** {paths}"
+        return {
+            "final_answer": answer,
+            "facts": {**(state.get("facts") or {}), "validation": validation},
+            "status": "done",
+            "messages": [AIMessage(content=answer)],
+        }
     evidence = {
         "plan": state.get("plan"),
         "citations": (state.get("citations") or [])[:8],

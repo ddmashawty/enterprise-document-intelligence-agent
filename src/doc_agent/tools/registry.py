@@ -11,6 +11,7 @@ from doc_agent.ingest.pipeline import load_document
 from doc_agent.rag.store import get_store
 from doc_agent.tools.compare import compare_docs, extract_fields
 from doc_agent.tools.export import export_excel, export_markdown
+from doc_agent.tools.kaoyan import KAOYAN_TOOLS
 
 
 @tool
@@ -31,6 +32,7 @@ def rag_search(
     school: str = "",
     year: int = 0,
     doc_type: str = "",
+    profile: str = "",
 ) -> str:
     """Search private documents and return relevant grounded snippets with citations.
 
@@ -39,9 +41,10 @@ def rag_search(
     Optional 考研 filters search the 考研 index: school (sysu / scut / jnu / scnu or
     中大 / 华工 / 暨大 / 华师), year (intake year, e.g. 2027), doc_type (catalog,
     retest_rules, score_line, tm_catalog, notice, brochure, ...).
+    profile ('enterprise' / 'kaoyan') picks the index explicitly; default follows the filters.
     """
     settings = get_settings()
-    profile = "kaoyan" if (school or year or doc_type) else settings.rag_profile
+    profile = profile or ("kaoyan" if (school or year or doc_type) else settings.rag_profile)
     hits = get_store(settings, profile=profile).search(
         query,
         top_k=top_k,
@@ -116,6 +119,7 @@ def get_tool_list():
         extract_fields,
         export_markdown,
         export_excel,
+        *KAOYAN_TOOLS,
     ]
 
 
