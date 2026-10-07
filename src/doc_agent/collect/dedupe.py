@@ -19,6 +19,8 @@ _VOLATILE = re.compile(
     r"(?:浏览|阅读|点击|访问)(?:次数|量|数)?\s*[:：]?\s*\d+\s*次?|"
     r"(?:当前时间|生成时间|更新时间)\s*[:：]\s*[\d\-/: ]+"
 )
+# Attributes that point at attachments / embedded files (WebPlus PDF players use pdfsrc).
+_LINK_ATTRS = ("href", "src", "pdfsrc", "data-src")
 
 
 def normalize_url(url: str) -> str:
@@ -59,8 +61,25 @@ def page_text(raw: bytes | str) -> str:
     return " ".join(_VOLATILE.sub(" ", soup.get_text(" ")).split())
 
 
-def text_fingerprint(raw: bytes | str) -> str:
-    return sha256_bytes(page_text(raw).encode("utf-8"))
+def content_text(raw: bytes | str, selector: str | None = None) -> str:
+    """Article body text plus the link / file URLs inside it, so sidebars and prev / next links
+    don't count as changes but a swapped attachment does. Whole-page text when the selector misses."""
+    if not selector:
+        return page_text(raw)
+    html = decode_html(raw) if isinstance(raw, bytes) else raw
+    soup = BeautifulSoup(html, "lxml")
+    root = soup.select_one(selector)
+    if root is None:
+        return page_text(html)
+    for tag in root(["script", "style", "noscript"]):
+        tag.decompose()
+    text = " ".join(_VOLATILE.sub(" ", root.get_text(" ")).split())
+    links = sorted({str(el[attr]) for el in root.find_all(True) for attr in _LINK_ATTRS if el.get(attr)})
+    return "\n".join([text, *links])
+
+
+def text_fingerprint(raw: bytes | str, selector: str | None = None) -> str:
+    return sha256_bytes(content_text(raw, selector).encode("utf-8"))
 
 
 _UNSAFE = re.compile(r'[\\/:*?"<>|\s]+')

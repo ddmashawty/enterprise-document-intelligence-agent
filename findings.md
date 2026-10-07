@@ -275,6 +275,7 @@ requirements.txt  .env.example  README.md
 - 华工：`yz.scut.edu.cn` 两个栏目 `sszs/`、`sszs_30381/`，同一文章在不同栏目 / `www2` 下 URL 不同，但都以 `a{ID}` 结尾；列表有“华南理工大学2027年硕士研究生招生章程及招生专业目录”（2026-09-30）及卡迪夫 / 南特联培 2027 简章。`yanzhao.scut.edu.cn/open/Master/Zsml_view.aspx` 本次直接 200（WebForms，年度下拉 2027，院系下拉 41 项），不再 302 到统一认证——`sources.json` 记为 blocked 的状态已过时，但访问条件可能随网络 / 时间变化
 - 暨南：列表 `tzgg/list{n}.htm` 每条是两个 `<a>`（`a.tit[title]` + 包着日期 / 标题 / 摘要的 `a[title]`），网站会把长标题截成“…”；`/2028nssyjszszyml/list.htm` 返回 410（2028 目录未发布）
 - 华师：`sources.json` 的 `/ssgg/`、`/ssjz/` 已 404；新路径 `/tongzhigonggao/ssgg/`（硕士公告）、`/zhaoshengjianzhang/quanrizhishuoshijianzhang/`（硕士简章）。文章 `a/20260928/686.html` 为“2027年硕士研究生招生专业目录”，`a/20260928/687.html` 为“2026年各专业硕士研究生报名人数统计表”；`yanzhao.scnu.edu.cn/Master/Zsml_View.aspx` 年份下拉 2027 / 2026 / 2025 / 2024
+- 文章页框架：华师 DedeCMS 文章页带“最新消息 / 本周图文 / 热门消息”边栏和“上一篇 / 下一篇”，有新文章时所有旧文章页都会跟着变，正文在 `.detail .article`；华工 / 暨南 WebPlus 正文在 `.wp_articlecontent`（有的只有 `pdfsrc` PDF 播放器，没有文字）；中大 Drupal 正文在 `<article>`
 - 以上只是列表 / 下拉层面的发现；2027 目录里的具体数字尚未抽取，不能当作已核对数据使用
 
 ## 视觉/浏览器发现

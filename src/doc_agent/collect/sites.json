@@ -1,6 +1,6 @@
 {
   "generated_from": "data/kaoyan/sources.json schools[]",
-  "rules_note": "adapter / lists_override / article_patterns / lists[].page_template / skip_url_patterns / probe 为手工维护，重新生成时保留",
+  "rules_note": "adapter / lists_override / article_patterns / lists[].page_template / skip_url_patterns / content_selector / probe 为手工维护，重新生成时保留",
   "sites": [
     {
       "school_id": "sysu",
@@ -37,6 +37,7 @@
           "key": "sece:{id}"
         }
       ],
+      "content_selector": "article",
       "blocked_hosts": [],
       "catalog_systems": [
         {
@@ -78,6 +79,7 @@
           "key": "a{id}"
         }
       ],
+      "content_selector": ".wp_articlecontent",
       "blocked_hosts": [
         "yanzhao.scut.edu.cn"
       ],
@@ -116,6 +118,7 @@
         "/32993/",
         "/33059/"
       ],
+      "content_selector": ".wp_articlecontent",
       "blocked_hosts": [],
       "catalog_systems": [
         {
@@ -172,6 +175,7 @@
           "key": "{sub}:{id}"
         }
       ],
+      "content_selector": ".detail .article",
       "blocked_hosts": [],
       "catalog_systems": [
         {

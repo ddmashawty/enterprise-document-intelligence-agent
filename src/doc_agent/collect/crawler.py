@@ -321,7 +321,7 @@ class Crawler:
             for d in fresh:
                 self._register_article(client, adapter, d, known, opts, rep)
             for d, _docs in seen:
-                self._recheck(client, d, known, rep)
+                self._recheck(client, adapter, d, known, rep)
             if opts.mode == "full" and isinstance(adapter, ScnuAdapter):
                 self._scnu_catalog(client, adapter, known, rep)
         rep.requests = client.pages
@@ -450,7 +450,9 @@ class Crawler:
         if opts.mode == "full":
             self._attachments(client, adapter, res, doc, known, rep)
 
-    def _recheck(self, client: PoliteClient, d: DiscoveredDoc, known: KnownDocs, rep: SchoolReport) -> None:
+    def _recheck(
+        self, client: PoliteClient, adapter: GenericListAdapter, d: DiscoveredDoc, known: KnownDocs, rep: SchoolReport
+    ) -> None:
         page = known.page_doc(d.key)
         if page is None:
             for doc in known.article_docs(d.key):
@@ -468,10 +470,13 @@ class Crawler:
             if sha == page.get("sha256"):
                 self._touch(page["id"])
                 rep.unchanged.append({"url": d.url, "doc_id": page["id"], "by": "sha256"})
-            elif local is not None and text_fingerprint(local.read_bytes()) == text_fingerprint(res.content):
+            elif local is not None and (
+                text_fingerprint(local.read_bytes(), selector := adapter.site.content_selector)
+                == text_fingerprint(res.content, selector)
+            ):
                 self._touch(page["id"])
                 rep.unchanged.append({"url": d.url, "doc_id": page["id"], "by": "text",
-                                      "note": "字节不同（计数器等），正文相同"})
+                                      "note": "字节不同（计数器、边栏、上一篇 / 下一篇等），正文相同"})
             else:
                 self._new_version(page, res, sha, known, rep)
         elif res.status in (404, 410):

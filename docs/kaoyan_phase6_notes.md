@@ -10,10 +10,10 @@
 | 能力 | 实现 |
 |------|------|
 | 礼貌 HTTP | `collect/http.py` `PoliteClient`：UA + 联系方式（`CRAWL_CONTACT`）；同 host 串行、间隔 ≥3 s（`HostThrottle`，进程内共享；配置低于 3 s 时强制 3 s）；robots.txt 按 RFC 9309（4xx 视为全部允许，5xx / 网络错误视为全部禁止）；5xx / 传输错误最多重试 2 次、指数退避，4xx 不重试；手动跟随重定向，跳到登录 / 统一认证路径时把该 host 标 `blocked`，之后不再请求；复查时用 ETag / If-Modified-Since（`cache/http_validators.json`）；每校请求上限（robots.txt 不计） |
-| 规范化 / 去重 | `collect/dedupe.py`：URL 规范化（https、小写 host、去默认端口 / 片段 / 末尾斜杠）、sha256、正文指纹（去脚本和浏览计数后比较） |
+| 规范化 / 去重 | `collect/dedupe.py`：URL 规范化（https、小写 host、去默认端口 / 片段 / 末尾斜杠）、sha256、正文指纹（只取 `content_selector` 内的文字 + 链接 / 附件地址，去脚本和浏览计数；取不到时用整页文字） |
 | 列表解析 | `collect/generic_list.py`：按 `sites.json` 的文章 URL 正则识别条目，生成文章 key；发布日期取 URL（`/YYYY/MMDD/`、`/a/YYYYMMDD/`）或链接附近文字；标题按 `title` 属性 > 内层 `.title` > 链接文字取；“下一页”链接或分页模板翻页 |
 | 站点适配器 | `collect/adapters/`：中大（分页 URL 修正、文章 ID 递增探测）、华工（多栏目 `a{ID}` 去重、目录系统可访问性 + 年度下拉）、暨南（只爬 `/tzgg/` 主列表，跳过空栏目 `/33003/`、`/32993/` 和已 410 的 `/33059/`；探测下一年目录栏目）、华师（WebForms `__VIEWSTATE` 回发、目录年份下拉、full 模式按学院抓目录分页） |
-| 站点配置 | `collect/sites.json` 由 `sources.json.schools[]` 生成（`collect/sites.py`），规则键 `adapter / lists_override / article_patterns / skip_url_patterns / probe` 在重新生成时保留；`--sync-sites` 重新生成 |
+| 站点配置 | `collect/sites.json` 由 `sources.json.schools[]` 生成（`collect/sites.py`），规则键 `adapter / lists_override / article_patterns / skip_url_patterns / content_selector / probe` 在重新生成时保留；`--sync-sites` 重新生成 |
 | 运行编排 | `collect/crawler.py` `Crawler.run()`：写 `crawl_runs`（mode、学校、状态、统计）；逐校：列表 → 探测 → （非 dry-run）登记新文章 → 复查已知文章 → （full）附件 / 华师目录 |
 | 登记 / 变化 | 新文章存到 `data/kaoyan/cache/<school>/<sha12>_<标题>`，id `{school}-w{sha1(key)[:8]}`，按标题猜 doc_type / 招生年份 / 是否含个人信息，标题先过 `redact_text`；复查：304 → 未变化，sha256 相同 → 未变化，正文指纹相同 → 未变化（只刷新 `last_seen`），否则登记新版本 `{id}-v{n}`（`parent_doc_id` 指向上一版）；404 / 410 → `removed`；被拦 → `blocked` |
 | 提醒 | 标题出现比库里最新简章 / 目录更新的年份（推免类跳过）；探测结果为 `new` |
@@ -42,7 +42,7 @@
 
 ### 单元测试
 
-`PYTHONPATH=src pytest -q`：**222 passed**（196 + 26）。新增 `tests/test_kaoyan_collect.py` 覆盖：限速与串行、robots 规则、重试 / 不重试、条件 GET、请求上限与 3 s 下限、华工 302 → blocked 且只请求一次 / 可访问时读年度下拉、URL 规范化、浏览计数忽略、华工多栏目去重、中大分页与日期、中大 ID 探测、华师 WebForms 回发与分页、华师年份下拉、WebPlus 双链接标题、暨南年份探测与跳过栏目、dry-run 不写库、登记与 sha256 未变化、正文未变 / 新版本 / 410 下架、full 模式附件（同 sha 去重）、预算用尽、未知学校、手动导入、标题规则、`sites.json` 与 `sources.json` 同步、crawl API。
+`PYTHONPATH=src pytest -q`：**223 passed**（196 + 27）。新增 `tests/test_kaoyan_collect.py` 覆盖：限速与串行、robots 规则、重试 / 不重试、条件 GET、请求上限与 3 s 下限、华工 302 → blocked 且只请求一次 / 可访问时读年度下拉、URL 规范化、浏览计数忽略、正文指纹忽略边栏 / 上一篇下一篇但能发现 PDF 替换、华工多栏目去重、中大分页与日期、中大 ID 探测、华师 WebForms 回发与分页、华师年份下拉、WebPlus 双链接标题、暨南年份探测与跳过栏目、dry-run 不写库、登记与 sha256 未变化、正文未变 / 新版本 / 410 下架、full 模式附件（同 sha 去重）、预算用尽、未知学校、手动导入、标题规则、`sites.json` 与 `sources.json` 同步、crawl API。
 
 ### 真实 probe（2026-10-07）
 
@@ -50,9 +50,10 @@
 |------|------|------|------------------|------|--------|------|----------------|
 | dry-run | 11 | 42.4 s | 93（79 / 14） | 0 | 0 | 7 | 0 / 0 |
 | 非 dry-run | 80 | 321.1 s | 93（79 / 14） | 67 | 2 | 7 | 0 / 0 |
+| 补跑非 dry-run（每校上限 40） | 104 | 437.4 s | 93（12 / 81） | 12 | 76 | 3 | 0 / 0 |
 
-- `documents` 97 → 164；华工 `scut-043`、`scut-051` 复查时 sha256 相同 → 未变化。
-- 每校 20 次请求都用完：新文章优先登记，暨南 2 篇、华师 10 篇未登记，其余学校的已知文章未复查，下次运行补上。
+- 第一次非 dry-run：`documents` 97 → 164；华工 `scut-043`、`scut-051` 复查时 sha256 相同 → 未变化。每校 20 次请求用完，暨南 2 篇、华师 10 篇未登记，其余已知文章未复查。
+- 补跑：12 篇全部登记（→ 176）；第一次登记的 67 篇复查全部未变化。华师 5 篇种子文档因边栏 / 上一篇下一篇不同被误判为变化，加 `content_selector` 后离线复核均为未变化，误建的版本记录已删除。
 - 首轮 dry-run 暴露的三个问题已修复：中大 robots.txt WAF 403、华师栏目改版 404（`lists_override`）、暨南标题混入摘要。分校明细见 `progress.md`，站点事实见 `findings.md`。
 
 ## 说明

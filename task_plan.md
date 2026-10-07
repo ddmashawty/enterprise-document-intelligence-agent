@@ -6,7 +6,7 @@
 - 需求原文：`data/kaoyan/CURSOR_PROMPT.md`；数据说明：`data/kaoyan/README.md`。
 
 ## 当前阶段
-K0 已确认（2026-09-27）；K1 已提交（`125b5a0`）；K2 已提交（`f6ea30f`）；K3 已提交（`0aa958f`）；K4 已提交（`d933603`）；K5 已提交（`a1c5ee7`）；K6 完成（2026-10-07，待提交）；下一步 **K7 OCR / 视觉 + 前端 + 文档**。
+K0 已确认（2026-09-27）；K1 已提交（`125b5a0`）；K2 已提交（`f6ea30f`）；K3 已提交（`0aa958f`）；K4 已提交（`d933603`）；K5 已提交（`a1c5ee7`）；K6 已提交（`13dab2a`），补跑与正文指纹修复待提交；下一步 **K7 OCR / 视觉 + 前端 + 文档**。
 
 ## 各阶段
 
@@ -132,7 +132,7 @@ K0 已确认（2026-09-27）；K1 已提交（`125b5a0`）；K2 已提交（`f6e
 - **测试（全部 `httpx.MockTransport`）：** 限速、robots、重试、URL 规范化 / 文章 ID / sha256 去重、SCUT 多栏目 a{ID} 去重、SYSU 分页 URL 修正、SCNU WebForms 回发参数、JNU 年份探测、`yanzhao.scut.edu.cn` 302 → `blocked` 且不重试
 - **验收：** 用户手动跑一次真实 `probe`（每校列表第 1 页、间隔 ≥3 秒），结果与耗时写进 `progress.md`；新文档进 `documents`，已有的按 sha256 识别为未变化
 - **实际做法补充：** 列表页按 `sites.json` 里的文章 URL 正则识别（不依赖 CSS 选择器），发布日期取 URL 中的日期，否则取链接附近文字；标题优先取 `title` 属性，其次取内层 `.title`，网站截断的标题（以“…”结尾）登记时用文章页标题补全。`collect/crawler.py` 负责编排：`crawl_runs` 记录、新文章下载到 `cache/<school>/` 并登记（id `{school}-w{hash8}`，按标题猜 doc_type / 年份 / 个人信息，标题过 `redact_text`），已知文章按 304 → sha256 → 正文指纹（忽略浏览计数）判断是否变化，变化时登记新版本 `{id}-v{n}`（`parent_doc_id`），404 / 410 标 `removed`；full 模式下载附件（同 sha 只记重复）并回发抓华师目录。标题提醒：出现比库里更新年份的“招生简章 / 章程 / 专业目录”。`import_manual` 走手动导入（id `{school}-m{sha8}`）。站点探测：中大文章 ID 递增、华工目录系统是否可访问及年度下拉、暨南下一年目录栏目、华师目录年份下拉。`sites.json` 的规则键（adapter / lists_override / article_patterns / skip_url_patterns / probe）在重新生成时保留
-- **结果：** 222 passed（196 + 26）。真实 dry-run probe：4 校 11 次请求、42.4 s，93 篇文章（79 新 / 14 已知），7 条提醒；真实非 dry-run probe：80 次请求、321.1 s，登记 67 篇（`documents` 97 → 164），华工 2 篇已知文章按 sha256 判为未变化，0 错误 0 blocked。详见 `progress.md`、`docs/kaoyan_phase6_notes.md`
+- **结果：** 223 passed（196 + 27）。真实 dry-run probe：4 校 11 次请求、42.4 s，93 篇文章（79 新 / 14 已知），7 条提醒；真实非 dry-run probe：80 次请求、321.1 s，登记 67 篇（`documents` 97 → 164），华工 2 篇已知文章按 sha256 判为未变化，0 错误 0 blocked；补跑（每校上限 40）104 次请求、437.4 s，再登记 12 篇（→ 176），76 篇已知文章未变化，修复正文指纹后 0 误判。详见 `progress.md`、`docs/kaoyan_phase6_notes.md`
 - **状态：** complete
 
 ### 阶段 K7：OCR / 视觉 + 前端 + 文档
@@ -198,6 +198,7 @@ K0 已确认（2026-09-27）；K1 已提交（`125b5a0`）；K2 已提交（`f6e
 | 【K6】抓取文档 id `{school}-w{sha1(key)[:8]}`，版本 `{id}-v{n}`，手动导入 `{school}-m{sha256[:8]}`；doc_type / 年份 / 个人信息按标题猜，标题先脱敏 | 与种子 id（`jnu-001`）不冲突、可重复计算；猜错只影响排序，K7 可人工修正 |
 | 【K6】栏目路径失效时在 `sites.json` 写 `lists_override`，不改 `sources.json` | `sources.json` 是种子包原文；覆盖项在重新生成时保留 |
 | 【K6】`crawl_min_interval_sec` 低于 3 秒时强制改为 3 秒 | 约束 3：同一 host ≥3 秒，配置写错也不能更快 |
+| 【K6】正文指纹只取 `content_selector`（中大 `article`、华工 / 暨南 `.wp_articlecontent`、华师 `.detail .article`）内的文字 + 链接 / 附件地址；选择器取不到时退回整页文字 | 边栏和上一篇 / 下一篇随新文章变化，整页比较会误建版本；正文只有 PDF 播放器时靠 `pdfsrc` 发现附件替换 |
 
 ## 遇到的错误
 | 错误 | 尝试次数 | 解决方案 |
@@ -232,6 +233,7 @@ K0 已确认（2026-09-27）；K1 已提交（`125b5a0`）；K2 已提交（`f6e
 | 【K6】华师两个列表栏目 404（`sources.json` 的 `/ssgg/`、`/ssjz/` 已改版） | 1 | 从首页导航找到新路径，写进 `sites.json` 的 `lists_override` |
 | 【K6】暨南列表标题混进摘要和日期（每条有两个 `<a>`，第二个包着日期 + 标题 + 摘要） | 1 | 标题按质量取：`title` 属性 > 内层 `.title` > 链接文字；同 key 保留最好的 |
 | 【K6】测试偶发失败（预算用尽） | 1 | 并行发起编辑和 pytest，测试跑在编辑落盘之前；改为编辑完成后再跑，10/10 通过 |
+| 【K6】补跑时华师 5 篇种子文档被误判为“内容变化”（边栏、上一篇 / 下一篇变了，正文没变） | 1 | 每校 `content_selector` 只比正文；离线复核后删除误建的 5 条版本记录 |
 | 【K6】测试失败输出里 `Settings` repr 带出 `.env` 的 LLM key（只在本机终端） | 1 | 测试用 `Settings(_env_file=None, llm_api_key="")`；建议轮换 key |
 
 ## 备注

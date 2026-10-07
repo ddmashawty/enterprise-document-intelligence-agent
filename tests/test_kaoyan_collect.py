@@ -30,7 +30,13 @@ from doc_agent.collect.crawler import (
     import_manual,
     looks_personal,
 )
-from doc_agent.collect.dedupe import normalize_url, page_text, safe_filename
+from doc_agent.collect.dedupe import (
+    content_text,
+    normalize_url,
+    page_text,
+    safe_filename,
+    text_fingerprint,
+)
 from doc_agent.collect.http import HostThrottle, PoliteClient, ValidatorCache
 from doc_agent.collect.sites import SITES_PATH, build_sites, load_sites
 from doc_agent.config import Settings
@@ -255,6 +261,27 @@ def test_page_text_ignores_view_counters() -> None:
     assert safe_filename('a/b:c*?.pdf') == "a_b_c_.pdf"
 
 
+def _scnu_article(body: str, sidebar: str, pager: str) -> str:
+    return (f'<div class="sidebar r"><p>最新消息</p><a href="/a/20260928/686.html">{sidebar}</a></div>'
+            f'<div class="detail"><div class="article">{body}</div>'
+            f'<div class="pagelist cl">下一篇：{pager}</div></div>')
+
+
+def test_content_fingerprint_ignores_sidebar_and_pager() -> None:
+    sel = SITES["scnu"].content_selector
+    old = _scnu_article("<p>复试办法正文</p>", "2025年硕士研究生招生简章", "最后一页")
+    new = _scnu_article("<p>复试办法正文</p>", "2027年硕士研究生招生专业目录", '<a href="/a/2.html">新文章</a>')
+    assert text_fingerprint(old) != text_fingerprint(new)
+    assert text_fingerprint(old, sel) == text_fingerprint(new, sel)
+    assert text_fingerprint(_scnu_article("<p>复试办法正文（修订）</p>", "", ""), sel) != text_fingerprint(old, sel)
+
+    jsel = SITES["jnu"].content_selector
+    def player(src: str) -> str:
+        return f'<div class="wp_articlecontent"><div class="wp_pdf_player" pdfsrc="{src}"></div></div>'
+    assert text_fingerprint(player("/_upload/a.pdf"), jsel) != text_fingerprint(player("/_upload/b.pdf"), jsel)
+    assert content_text("<p>没有正文容器</p>", jsel) == "没有正文容器"
+
+
 SCUT_LIST = """
 <ul class="news_list">
   <li><a href="/2026/0313/c30111a619995/page.htm" title="华南理工大学2026年硕士研究生复试初试成绩基本要求">华南理工大学2026年硕士…</a><span>2026-03-13</span></li>
@@ -444,13 +471,15 @@ def test_register_new_and_unchanged_by_sha256(store: KaoyanStore, settings: Sett
 
 def test_change_detection_text_vs_new_version(store: KaoyanStore, settings: Settings) -> None:
     raw = (RAW / "jnu" / "jnu_2026_各学院硕士复试方案_20260320.html").read_text(encoding="utf-8")
-    counter = raw.replace("</body>", "<span>浏览次数：999</span></body>")
-    site = jnu_site(**{JNU_KNOWN: ok(counter)})
+    body = "<div class='wp_articlecontent'>"
+    assert body in raw
+    furniture = raw.replace("</body>", "<span>浏览次数：999</span><a href='/a/2.htm'>最新消息</a></body>")
+    site = jnu_site(**{JNU_KNOWN: ok(furniture)})
     rep = crawler(store, settings, site).run(CrawlOptions(schools=["jnu"], dry_run=False))
     unchanged = rep["schools"]["jnu"]["unchanged"]
     assert unchanged and unchanged[0]["by"] == "text"
 
-    edited = raw.replace("</body>", "<p>补充通知：010 学院复试时间调整。</p></body>")
+    edited = raw.replace(body, body + "<p>补充通知：010 学院复试时间调整。</p>")
     site = jnu_site(**{JNU_KNOWN: ok(edited)})
     changed = crawler(store, settings, site).run(CrawlOptions(schools=["jnu"], dry_run=False))
     assert len(changed["schools"]["jnu"]["changed"]) == 1, changed["schools"]["jnu"]
@@ -546,6 +575,7 @@ def test_sites_json_in_sync_with_sources() -> None:
     assert set(SITES) == {"sysu", "scut", "jnu", "scnu"}
     assert SITES["scut"].blocked_hosts == ("yanzhao.scut.edu.cn",)
     assert SITES["scnu"].lists[0].url.endswith("/tongzhigonggao/ssgg/")  # lists_override wins
+    assert all(site.content_selector for site in SITES.values())
     fresh = build_sites({"schools": [{"id": "pku", "name": "北京大学", "notice_list_pages": [{"url": "https://x/list.htm"}]}]})
     assert fresh["sites"][0]["adapter"] == "generic" and fresh["sites"][0]["lists"][0]["url"] == "https://x/list.htm"
 

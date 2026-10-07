@@ -38,6 +38,7 @@ class SiteConfig:
     lists: tuple[ListSource, ...] = ()
     article_patterns: tuple[ArticlePattern, ...] = ()
     skip_url_patterns: tuple[str, ...] = ()
+    content_selector: str | None = None
     blocked_hosts: tuple[str, ...] = ()
     catalog_systems: tuple[dict[str, Any], ...] = ()
     probe: dict[str, Any] = field(default_factory=dict)
@@ -53,6 +54,7 @@ class SiteConfig:
             lists=tuple(ListSource(**x) for x in d.get("lists_override") or d.get("lists") or ()),
             article_patterns=tuple(ArticlePattern(**x) for x in d.get("article_patterns") or ()),
             skip_url_patterns=tuple(d.get("skip_url_patterns") or ()),
+            content_selector=d.get("content_selector") or None,
             blocked_hosts=tuple(d.get("blocked_hosts") or ()),
             catalog_systems=tuple(d.get("catalog_systems") or ()),
             probe=dict(d.get("probe") or {}),

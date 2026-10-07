@@ -17,7 +17,7 @@ from doc_agent.collect.base import SiteConfig
 from doc_agent.collect.dedupe import host_of
 
 SITES_PATH = Path(__file__).with_name("sites.json")
-_RULE_KEYS = ("adapter", "lists_override", "article_patterns", "skip_url_patterns", "probe")
+_RULE_KEYS = ("adapter", "lists_override", "article_patterns", "skip_url_patterns", "content_selector", "probe")
 
 
 def build_sites(sources: dict[str, Any], previous: dict[str, Any] | None = None) -> dict[str, Any]:
@@ -49,6 +49,7 @@ def build_sites(sources: dict[str, Any], previous: dict[str, Any] | None = None)
             "lists_override": old.get("lists_override", []),
             "article_patterns": old.get("article_patterns", []),
             "skip_url_patterns": old.get("skip_url_patterns", []),
+            "content_selector": old.get("content_selector", ""),
             "blocked_hosts": blocked,
             "catalog_systems": catalog,
             "probe": old.get("probe", {}),
@@ -56,8 +57,8 @@ def build_sites(sources: dict[str, Any], previous: dict[str, Any] | None = None)
         sites.append({k: site[k] for k in site if k not in _RULE_KEYS or site[k] or k == "adapter"})
     return {
         "generated_from": "data/kaoyan/sources.json schools[]",
-        "rules_note": "adapter / lists_override / article_patterns / lists[].page_template / skip_url_patterns / probe "
-                      "为手工维护，重新生成时保留",
+        "rules_note": "adapter / lists_override / article_patterns / lists[].page_template / skip_url_patterns / "
+                      "content_selector / probe 为手工维护，重新生成时保留",
         "sites": sites,
     }
 
