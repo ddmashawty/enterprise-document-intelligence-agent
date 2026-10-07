@@ -6,7 +6,7 @@
 - 需求原文：`data/kaoyan/CURSOR_PROMPT.md`；数据说明：`data/kaoyan/README.md`。
 
 ## 当前阶段
-K0 已确认（2026-09-27）；K1 已提交（`125b5a0`）；K2 已提交（`f6ea30f`）；K3 已提交（`0aa958f`）；K4 已提交（`d933603`）；K5 已提交（`a1c5ee7`）；K6 已提交（`13dab2a`），补跑与正文指纹修复待提交；下一步 **K7 OCR / 视觉 + 前端 + 文档**。
+K0 已确认（2026-09-27）；K1 已提交（`125b5a0`）；K2 已提交（`f6ea30f`）；K3 已提交（`0aa958f`）；K4 已提交（`d933603`）；K5 已提交（`a1c5ee7`）；K6 已提交（`13dab2a`，补跑与正文指纹修复 `6e11eac`）；K7 完成，待提交。包改名（可选，单独 PR）等用户决定。
 
 ## 各阶段
 
@@ -137,8 +137,10 @@ K0 已确认（2026-09-27）；K1 已提交（`125b5a0`）；K2 已提交（`f6e
 
 ### 阶段 K7：OCR / 视觉 + 前端 + 文档
 - **修改 / 新增：** `ingest/ocr.py` 接 `rapidocr`（`requirements-ocr.txt`）和 `vision`（OpenAI 兼容多模态，`vision_*` 配置）；OCR 结果按 sha256 缓存到 `data/kaoyan/ocr_cache/`；6 张图片表格 OCR 产出 `verified=0`，与种子一致才标已核对；扫描名单只统计人数。前端：新增“专业筛选”页（调 `/v1/programs`，显示口径和来源链接），演示剧本换成第 6 节问题，`frontend/api_client.py` 新方法配测试。README / `data/README.md` / `docs/` 更新
-- **可选：** 包改名（单独 PR，等用户决定）
-- **状态：** pending
+- **可选：** 包改名（单独 PR，等用户决定）——未做
+- **实际做法补充：** 表格不靠 OCR 猜结构：`ingest/ocr_table.py` 用长墨迹找线框，文字框按中心落格，缺线 = 合并格；vision 直接要 Markdown 表。OCR 结果按图片 sha256 缓存。名单文件在 `load_document` 里强制 `NoOCR`，人数统计走 `kaoyan/roster.py` + `scripts/roster_stats.py`（只打印，不写库）。新增华工两种图片表抽取器，中大细则抽取器同时匹配图片。前端展平逻辑放在不依赖 streamlit 的 `frontend/kaoyan_view.py`，便于单测
+- **结果：** 250 passed（223 + 27）。6 张图片 61 条事实：17 条与种子一致、15 条新（`verified=0`）、29 条超出 37 个专业、0 冲突；评估报告种子复现 363 → 380。vision 只做了假传输测试（无 `VISION_*`）；scut-044 本机缺失，名单计数只有离线测试。详见 `docs/kaoyan_phase7_notes.md`
+- **状态：** complete
 
 ## 开放问题
 1. （无）Embedding 已定为本地 Ollama `qwen3-embedding:0.6b`；仍保留未配置时 BM25 兜底。
@@ -198,6 +200,12 @@ K0 已确认（2026-09-27）；K1 已提交（`125b5a0`）；K2 已提交（`f6e
 | 【K6】抓取文档 id `{school}-w{sha1(key)[:8]}`，版本 `{id}-v{n}`，手动导入 `{school}-m{sha256[:8]}`；doc_type / 年份 / 个人信息按标题猜，标题先脱敏 | 与种子 id（`jnu-001`）不冲突、可重复计算；猜错只影响排序，K7 可人工修正 |
 | 【K6】栏目路径失效时在 `sites.json` 写 `lists_override`，不改 `sources.json` | `sources.json` 是种子包原文；覆盖项在重新生成时保留 |
 | 【K6】`crawl_min_interval_sec` 低于 3 秒时强制改为 3 秒 | 约束 3：同一 host ≥3 秒，配置写错也不能更快 |
+| 【K7】OCR 表格按线框还原（长墨迹 = 线，实心色带两边各算一条线，缺线 = 合并格），不让 OCR / 模型推断表结构 | 通知图片线框规整；合并格展开方式与 HTML `rowspan` 一致，抽取器可共用 |
+| 【K7】OCR 事实 `extraction_method=ocr`，入库规则同 K4（同键同值才 `verified=1`） | 约束：OCR 产出 `verified=0`，和种子对上才能标已核对 |
+| 【K7】华工校线图按学科门类出事实，不展开到专业；种子按专业展开的 5 条记为未复现 | 哪些专业适用哪条门类线是编辑口径，抽取器不替人决定 |
+| 【K7】名单文件永不 OCR 入库；扫描名单计数只打印、不写库 | 约束 4；全校按专业代码计数混合学院 / 联培，口径要人工确认 |
+| 【K7】OCR 依赖可选（`requirements-ocr.txt`），真实 OCR 测试 `importorskip` | 核心安装不变；CI / 别的机器没装也全绿 |
+| 【K7】不改包名 | CURSOR_PROMPT 3.8：单独 PR，由用户决定 |
 | 【K6】正文指纹只取 `content_selector`（中大 `article`、华工 / 暨南 `.wp_articlecontent`、华师 `.detail .article`）内的文字 + 链接 / 附件地址；选择器取不到时退回整页文字 | 边栏和上一篇 / 下一篇随新文章变化，整页比较会误建版本；正文只有 PDF 播放器时靠 `pdfsrc` 发现附件替换 |
 
 ## 遇到的错误
@@ -235,6 +243,11 @@ K0 已确认（2026-09-27）；K1 已提交（`125b5a0`）；K2 已提交（`f6e
 | 【K6】测试偶发失败（预算用尽） | 1 | 并行发起编辑和 pytest，测试跑在编辑落盘之前；改为编辑完成后再跑，10/10 通过 |
 | 【K6】补跑时华师 5 篇种子文档被误判为“内容变化”（边栏、上一篇 / 下一篇变了，正文没变） | 1 | 每校 `content_selector` 只比正文；离线复核后删除误建的 5 条版本记录 |
 | 【K6】测试失败输出里 `Settings` repr 带出 `.env` 的 LLM key（只在本机终端） | 1 | 测试用 `Settings(_env_file=None, llm_api_key="")`；建议轮换 key |
+| 【K7】蓝色表头带和第一行数据被并成一格（实心带不算细线，两行之间没有分隔） | 1 | 宽度 >6px 的实心带在上下边各产生一条零宽分隔线 |
+| 【K7】合并格文字中心正好压在线上，落不进任何格而丢失 | 1 | `_locate` 找不到包含的区间时归到最近的格 |
+| 【K7】OCR 把“英语（一）”识别成“英语 (一)”，科目解析不认 | 1 | `fix_cjk_punct` 统一全角并去掉括号两侧空格；全角括号旁的逗号也转全角（单测发现） |
+| 【K7】`test_every_rule_extractor_has_a_name` 写死 10 个抽取器 | 1 | 新增两个图片抽取器后改为 12 |
+| 【K7】Streamlit 侧栏地址用浏览器自动化填值不生效（React 状态未更新） | 1 | 把 API 起在默认 8000 端口再检查页面 |
 
 ## 备注
 - 规划文件位于项目根目录，不在 skill 安装目录

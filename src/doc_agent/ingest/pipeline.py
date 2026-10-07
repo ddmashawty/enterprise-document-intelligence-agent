@@ -6,7 +6,7 @@ from typing import Any
 from doc_agent.config import Settings, get_settings
 from doc_agent.ingest.chunking import chunk_document
 from doc_agent.ingest.loaders import ParsedDocument, iter_source_files, load_file
-from doc_agent.ingest.ocr import get_ocr_backend
+from doc_agent.ingest.ocr import NoOCR, get_ocr_backend
 from doc_agent.ingest.redact import looks_personal, mask_notice_names, redact_document
 from doc_agent.kaoyan.privacy import is_personal_file, is_within
 from doc_agent.rag.store import DocumentStore, get_store, reset_store
@@ -22,8 +22,11 @@ def load_document(path: Path, settings: Settings | None = None) -> ParsedDocumen
     """
     s = settings or get_settings()
     kaoyan_file = is_within(path, s.kaoyan_data_path)
-    doc = load_file(path, tables=kaoyan_file, ocr=get_ocr_backend(s.ocr_backend))
-    if (kaoyan_file and is_personal_file(path, s.kaoyan_data_path)) or looks_personal(doc.tables):
+    personal = kaoyan_file and is_personal_file(path, s.kaoyan_data_path)
+    # Scanned rosters are only counted (kaoyan.roster), never OCR'd into the index.
+    ocr = NoOCR() if personal else get_ocr_backend(s.ocr_backend, s)
+    doc = load_file(path, tables=kaoyan_file, ocr=ocr)
+    if personal or looks_personal(doc.tables):
         doc = redact_document(doc)
     elif kaoyan_file:
         doc = mask_notice_names(doc)

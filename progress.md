@@ -1,9 +1,30 @@
 # 进度日志
 
+## 会话：2026-10-07（考研改造 K7：OCR / 视觉 + 前端 + 文档）
+
+### K7
+- **状态：** complete（待用户看 diff 摘要后提交）
+- 新增 `ingest/ocr_table.py`（按线框还原表格、合并格展开）、`kaoyan/roster.py` + `scripts/roster_stats.py`（扫描名单只出每个专业代码的行数）、`kaoyan/extract/scut_baseline_img.py`、`scut_subjects_img.py`、`requirements-ocr.txt`、`frontend/kaoyan_view.py`、`frontend/components/programs_panel.py`、`tests/test_kaoyan_ocr.py`、`tests/test_frontend_kaoyan_view.py`、`docs/kaoyan_phase7_notes.md`
+- 修改 `ingest/ocr.py`（rapidocr / vision / 缓存）、`loaders.py`（图片 OCR、扫描 PDF 页渲染 + OCR）、`pipeline.py`（名单文件强制不 OCR）、`config.py` + `.env.example`（`OCR_CACHE_DIR`、`VISION_*`）、`extract/run.py`（`extraction_method=ocr`）、`extract/evaluate.py`（未复现原因）、`sysu_retest_html.py`（也匹配图片）、两个脚本加 `--ocr`、`requirements*.txt` 显式写出 Pillow / pypdfium2、前端 `api_client.py` / `app.py` / `ingest_panel.py`、README、`data/README.md`
+- `PYTHONPATH=src pytest -q`：250 passed（223 + 27；vision 用 MockTransport，rapidocr 真实识别在缺依赖 / 缺图片时 skip）
+- 6 张图片 OCR（rapidocr，首次 6.5 s、缓存 0.2 s）：61 条事实，17 条与种子一致（`verified=1`），15 条种子没有（`verified=0`），29 条在 37 个专业以外，0 冲突；评估报告种子复现 363 → 380
+- 本机 `data/kaoyan.db` 已用 `--ocr rapidocr` 重新抽取（写入 32 条 OCR 事实）；运行前备份 `/tmp/kaoyan_before_k7.db`
+- 前端：本机起 API + Streamlit 检查“专业筛选”页（37 个专业、口径 / 来源链接、详情）和 18 条演示问句
+- 未能真实验证：vision（`.env` 无 `VISION_*`）；scut-044 扫描名单本机没有（本地专用文件）
+
+## 五问重启检查（K7）
+| 问题 | 答案 |
+|------|------|
+| 我在哪里？ | K7 完成，等用户看 diff 摘要后提交；K0–K7 全部完成 |
+| 我要去哪里？ | 可选：包改名（单独 PR，等用户决定）；配置多模态模型后对比 vision 与 rapidocr；下载 scut-044 后人工核对名单计数 |
+| 目标是什么？ | 考研信息 Agent：每个数字带来源 / 年份 / 口径，不知道就说不知道 |
+| 我学到了什么？ | 政府 / 高校通知里的表格图片线框规整，用“长墨迹 = 线”就能还原合并格，比让 OCR 猜表结构可靠；彩色表头是实心带，要把它的两条边当分隔线；OCR 与种子键不同（门类线 vs 按专业展开）时宁可不命中，也不替人展开口径 |
+| 我做了什么？ | 两个 OCR 后端 + 缓存、表格还原、扫描页 OCR、名单计数、2 个图片抽取器、专业筛选页、4 个前端客户端方法、27 条新测试、README / data README / 阶段说明 |
+
 ## 会话：2026-10-07（考研改造 K6：采集层）
 
 ### K6
-- **状态：** complete（已提交 `13dab2a`；补跑与正文指纹修复待提交）
+- **状态：** complete（已提交 `13dab2a`；补跑与正文指纹修复已提交 `6e11eac`）
 - 新增 `collect/base.py`、`dedupe.py`、`http.py`（`PoliteClient`：按 host 串行 ≥3 s、robots、重试 / 退避、条件 GET、每校请求上限、登录跳转 → blocked）、`generic_list.py`、`adapters/{sysu,scut,jnu,scnu}.py`、`sites.py` + `sites.json`、`crawler.py`（运行编排、登记 / 版本 / 下架、附件、手动导入）、`scripts/crawl_kaoyan.py`
 - 修改 `config.py`（`crawl_*`）、`.env.example`、`api/routes_kaoyan.py` + `schemas_kaoyan.py`（`POST /v1/crawl` → 202 + `run_id`，`GET /v1/crawl/{run_id}`）
 - `PYTHONPATH=src pytest -q`：223 passed（196 + 27，全部 MockTransport，不联网）

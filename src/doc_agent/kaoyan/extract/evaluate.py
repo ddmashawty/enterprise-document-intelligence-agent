@@ -19,7 +19,7 @@ from doc_agent.kaoyan.models import SEED_METHODS
 
 IMAGE_FORMATS = ("img", "pdf-scan")
 
-# Seed facts of text documents that rules must reproduce exactly (image sources wait for OCR in K7).
+# Seed facts of text documents that rules must reproduce exactly (image sources need --ocr).
 ACCEPTANCE: dict[str, Callable[[dict[str, Any]], bool]] = {
     "中大各学院复试线": lambda r: r["_table"] == "score_lines"
     and r["school_id"] == "sysu"
@@ -106,8 +106,12 @@ def _missing_reason(row: dict[str, Any], doc_status: str, entry: dict[str, Any])
         return "本地无文件（local-only 未下载）"
     if doc_status == "not_listed":
         return "来源无本地文件（仅网页链接）"
-    if doc_status == "needs_ocr" or any(fmt.startswith(f) for f in IMAGE_FORMATS):
-        return "图片/扫描件，OCR 留到 K7"
+    if doc_status in ("needs_ocr", "no_extractor") and any(fmt.startswith(f) for f in IMAGE_FORMATS):
+        return "图片/扫描件，未运行 OCR（--ocr rapidocr）或无抽取器"
+    if any(fmt.startswith(f) for f in IMAGE_FORMATS):
+        if row["_table"] == "score_lines" and row.get("scope") == "school_baseline" and row.get("program_id"):
+            return "种子把校线按专业展开（OCR 抽到学科门类级同值校线）"
+        return "图中无此值（种子取自备注 / 同页另一张图）"
     if row["_table"] == "exam_subjects" and row.get("status") == "unknown":
         return "种子判断（科目未公布）"
     if entry.get("contains_personal_data") or (
@@ -207,7 +211,10 @@ def render_markdown(report: EvalReport) -> str:
         "",
         "## 验收：文本文档的种子事实须被规则逐值复现",
         "",
-        "图片来源（img / pdf-scan）的种子事实不计入验收，留到 K7 OCR。",
+        (
+            "图片来源（img / pdf-scan）的种子事实不计入验收；用 `--ocr rapidocr` 运行时 OCR 抽取结果同样逐值比对，"
+            "`extraction_method=ocr`，与种子同键同值才 verified=1。"
+        ),
         "",
         "| 类别 | 种子事实 | 规则命中 | 冲突 | 结果 |",
         "|---|---:|---:|---:|---|",

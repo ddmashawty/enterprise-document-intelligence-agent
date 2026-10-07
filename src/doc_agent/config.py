@@ -36,6 +36,11 @@ class Settings(BaseSettings):
     kaoyan_collection: str = "kaoyan_docs"
     rag_profile: str = "enterprise"
     ocr_backend: str = "none"
+    ocr_cache_dir: str = "data/kaoyan/ocr_cache"
+    vision_base_url: str = ""
+    vision_model: str = ""
+    vision_api_key: str = ""
+    vision_timeout: float = 60.0
 
     crawl_user_agent: str = "kaoyan-info-agent/0.4 (+https://github.com/ddmashawty/enterprise-document-intelligence-agent)"
     crawl_contact: str = ""
@@ -85,6 +90,10 @@ class Settings(BaseSettings):
     @property
     def kaoyan_data_path(self) -> Path:
         return self.resolve(self.kaoyan_data_dir)
+
+    @property
+    def ocr_cache_path(self) -> Path:
+        return self.resolve(self.ocr_cache_dir)
 
     @property
     def crawl_cache_path(self) -> Path:

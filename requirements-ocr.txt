@@ -1,0 +1,3 @@
+# Optional local OCR for OCR_BACKEND=rapidocr (images / scanned PDF pages).
+# Models ship inside the wheel; no download at runtime.
+rapidocr_onnxruntime>=1.4,<2

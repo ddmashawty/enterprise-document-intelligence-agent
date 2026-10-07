@@ -136,6 +136,44 @@ class DocAgentClient:
             timeout=300,
         )
 
+    def list_programs(self, **filters: Any) -> dict[str, Any]:
+        """GET /v1/programs; filters as in the API (school, code, is_408, min_public_plan, year, ...)."""
+        return self._request("GET", "/v1/programs", params=_params(filters), timeout=30)
+
+    def get_program(self, program_id: str) -> dict[str, Any]:
+        return self._request("GET", f"/v1/programs/{program_id}", timeout=30)
+
+    def score_lines(
+        self,
+        school: str,
+        *,
+        code: str | None = None,
+        college: str | None = None,
+        year: int | None = 2026,
+    ) -> dict[str, Any]:
+        params = _params({"school": school, "code": code, "college": college, "year": year})
+        return self._request("GET", "/v1/score-lines", params=params, timeout=30)
+
+    def list_documents(
+        self,
+        *,
+        school: str | None = None,
+        doc_type: str | None = None,
+        year: int | None = None,
+    ) -> dict[str, Any]:
+        params = _params({"school": school, "doc_type": doc_type, "year": year})
+        return self._request("GET", "/v1/documents", params=params, timeout=30)
+
+
+def _params(values: dict[str, Any]) -> dict[str, Any]:
+    """Query params without empty values; booleans as true / false."""
+    out: dict[str, Any] = {}
+    for key, value in values.items():
+        if value is None or value == "":
+            continue
+        out[key] = ("true" if value else "false") if isinstance(value, bool) else value
+    return out
+
 
 def _chat_body(
     message: str,

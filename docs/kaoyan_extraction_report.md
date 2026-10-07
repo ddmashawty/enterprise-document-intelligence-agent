@@ -5,16 +5,16 @@
 
 ## 概览
 
-- 种子事实：450，被规则逐值复现：363
-- 写入的抽取事实：504（缺 `source_doc_id` / `evidence_text` 的：0）
-- 抽取状态：match 363，new 141，unresolved 6817
+- 种子事实：450，被规则逐值复现：380
+- 写入的抽取事实：536（缺 `source_doc_id` / `evidence_text` 的：0）
+- 抽取状态：match 380，new 156，unresolved 6846
   - match = 与种子同键同值（写入 verified=1）；new = 种子没有的事实（verified=0）；
   - conflict = 同键不同值（只记录、写入 verified=0，不覆盖种子）；
   - unresolved = 专业不在 37 个目标专业内（不写库）；duplicate = 同文档同键重复出现（只保留首条）。
 
 ## 验收：文本文档的种子事实须被规则逐值复现
 
-图片来源（img / pdf-scan）的种子事实不计入验收，留到 K7 OCR。
+图片来源（img / pdf-scan）的种子事实不计入验收；用 `--ocr rapidocr` 运行时 OCR 抽取结果同样逐值比对，`extraction_method=ocr`，与种子同键同值才 verified=1。
 
 | 类别 | 种子事实 | 规则命中 | 冲突 | 结果 |
 |---|---:|---:|---:|---|
@@ -32,8 +32,9 @@
 | 原因 | 事实数 |
 |---|---:|
 | 名单类统计（种子计数，规则不读名单） | 57 |
-| 图片/扫描件，OCR 留到 K7 | 24 |
 | 种子判断（科目未公布） | 5 |
+| 种子把校线按专业展开（OCR 抽到学科门类级同值校线） | 5 |
+| 图中无此值（种子取自备注 / 同页另一张图） | 2 |
 | 暂无规则抽取器 | 1 |
 
 ## 按文档
@@ -59,15 +60,16 @@
 | scnu-036 | retest_rules | ok | scnu_retest_html | 7 | 7 | 2 | 0 | 0 |  |
 | scnu-037 | retest_rules | ok | scnu_retest_html | 14 | 14 | 2 | 0 | 0 |  |
 | scnu-038 | retest_rules | ok | scnu_retest_html | 4 | 3 | 0 | 0 | 0 | 名单类统计（种子计数，规则不读名单） 1 |
-| scut-040 | score_line | no_extractor |  | 7 | 0 | 0 | 0 | 0 | 图片/扫描件，OCR 留到 K7 7 |
+| scut-040 | score_line | ok | scut_baseline_img | 7 | 2 | 14 | 0 | 0 | 种子把校线按专业展开（OCR 抽到学科门类级同值校线） 5 |
 | scut-047 | brochure | no_extractor |  | 5 | 0 | 0 | 0 | 0 | 种子判断（科目未公布） 4；暂无规则抽取器 1 |
 | scut-048 | plan_quota | ok | scut_plan_html | 5 | 5 | 0 | 0 | 128 |  |
+| scut-049 | subject_change | ok | scut_subjects_img | 0 | 0 | 0 | 0 | 24 |  |
 | scut-053 | retest_list | no_extractor |  | 3 | 0 | 0 | 0 | 0 | 名单类统计（种子计数，规则不读名单） 3 |
 | scut-054 | retest_list | no_extractor |  | 3 | 0 | 0 | 0 | 0 | 名单类统计（种子计数，规则不读名单） 3 |
 | scut-055 | plan_quota | ok | scut_plan_html | 2 | 2 | 0 | 0 | 0 |  |
 | scut-058 | admission_list | no_extractor |  | 7 | 0 | 0 | 0 | 0 | 名单类统计（种子计数，规则不读名单） 7 |
 | scut-060 | plan_quota | ok | scut_plan_html | 1 | 1 | 0 | 0 | 0 |  |
-| scut-061 | subject_change | no_extractor |  | 4 | 0 | 0 | 0 | 0 | 图片/扫描件，OCR 留到 K7 4 |
+| scut-061 | subject_change | ok | scut_subjects_img | 4 | 4 | 0 | 0 | 4 |  |
 | scut-063 | admission_list | no_extractor |  | 4 | 0 | 0 | 0 | 0 | 名单类统计（种子计数，规则不读名单） 4 |
 | scut-065 | retest_list | no_extractor |  | 6 | 0 | 0 | 0 | 0 | 名单类统计（种子计数，规则不读名单） 6 |
 | scut-067 | admission_list | no_extractor |  | 2 | 0 | 0 | 0 | 0 | 名单类统计（种子计数，规则不读名单） 2 |
@@ -80,10 +82,10 @@
 | sysu-082 | admission_list | no_extractor |  | 2 | 0 | 0 | 0 | 0 | 名单类统计（种子计数，规则不读名单） 2 |
 | sysu-085 | retest_rules | ok | sysu_retest_html | 9 | 9 | 0 | 0 | 0 |  |
 | sysu-088 | retest_rules | ok | sysu_retest_html | 0 | 0 | 4 | 0 | 8 |  |
-| sysu-089 | retest_rules | no_extractor |  | 3 | 0 | 0 | 0 | 0 | 图片/扫描件，OCR 留到 K7 3 |
+| sysu-089 | retest_rules | ok | sysu_retest_html | 3 | 2 | 0 | 0 | 1 | 图中无此值（种子取自备注 / 同页另一张图） 1 |
 | sysu-091 | retest_rules | ok | sysu_retest_html | 3 | 3 | 1 | 0 | 3 |  |
-| sysu-092 | retest_rules | no_extractor |  | 4 | 0 | 0 | 0 | 0 | 图片/扫描件，OCR 留到 K7 4 |
+| sysu-092 | retest_rules | ok | sysu_retest_html | 4 | 3 | 0 | 0 | 0 | 图中无此值（种子取自备注 / 同页另一张图） 1 |
 | sysu-093 | retest_list | no_extractor |  | 1 | 0 | 0 | 0 | 0 | 名单类统计（种子计数，规则不读名单） 1 |
-| sysu-095 | retest_rules | no_extractor |  | 6 | 0 | 0 | 0 | 0 | 图片/扫描件，OCR 留到 K7 6 |
+| sysu-095 | retest_rules | ok | sysu_retest_html | 6 | 6 | 1 | 0 | 0 |  |
 | sysu-096 | retest_list | no_extractor |  | 2 | 0 | 0 | 0 | 0 | 名单类统计（种子计数，规则不读名单） 2 |
 | sysu-097 | retest_rules | ok | sysu_retest_html | 10 | 10 | 0 | 0 | 12 |  |

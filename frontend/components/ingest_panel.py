@@ -11,9 +11,16 @@ UPLOAD_DIR = Path("data/uploads")
 
 def render_ingest(client: DocAgentClient) -> None:
     st.subheader("导入")
-    path = st.text_input("文档或目录路径", value="data/raw", help="相对仓库根目录，支持 PDF、DOCX、TXT、Markdown")
+    path = st.text_input(
+        "文档或目录路径",
+        value="data/kaoyan/raw",
+        help="相对仓库根目录；考研资料在 data/kaoyan/raw，通用文档模式的企业语料在 data/raw。"
+        "支持 PDF、DOCX、TXT、Markdown、HTML、XLSX/XLS、图片（OCR_BACKEND 开启时识别）",
+    )
     reindex = st.checkbox("重建索引（清空后重导）", value=False)
-    upload = st.file_uploader("或上传文件", type=["pdf", "docx", "txt", "md"])
+    upload = st.file_uploader(
+        "或上传文件", type=["pdf", "docx", "txt", "md", "html", "htm", "xlsx", "xls", "png", "jpg", "jpeg"]
+    )
     if st.button("开始导入", type="primary"):
         paths = [path.strip()] if path.strip() else []
         if upload is not None:
@@ -39,6 +46,9 @@ def render_ingest(client: DocAgentClient) -> None:
         if failed:
             st.warning("部分文件失败")
             st.json(failed)
+        needs_ocr = result.get("docs_needs_ocr") or []
+        if needs_ocr:
+            st.info(f"{len(needs_ocr)} 个图片 / 扫描件未识别（OCR_BACKEND=none 或名单类文件只统计不入库）。")
 
     last = st.session_state.get("last_ingest")
     if last:

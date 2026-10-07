@@ -13,15 +13,36 @@ if str(ROOT) not in sys.path:
 from frontend.api_client import ApiError, DocAgentClient
 from frontend.components.chat_panel import render_chat
 from frontend.components.ingest_panel import render_ingest
+from frontend.components.programs_panel import render_programs
 from frontend.components.tasks_panel import render_tasks
 
+# Acceptance cases of data/gold/kaoyan_qa.json (CURSOR_PROMPT section 6).
 DEMO_QUESTIONS = [
+    "中大计算机学院 085404 的 2026 复试线是多少？",
+    "暨大网络空间安全学院 085412 的 2026 复试线？",
+    "华师计算机学院 085404 复试线多少？",
+    "中大网络空间安全学院 083900 考什么、复试线多少？",
+    "华工计算机学院 085404 初试考什么？考不考 408？",
+    "华工 140500 智能科学与技术考 408 吗？复试线？",
+    "暨大 081203 计算机应用技术 2027 招多少人？",
+    "中大人工智能学院 081200 招多少人？",
+    "华师人工智能学院 085410 计划多少？",
+    "中大软件工程学院 085405 推免多少、公开招考多少？",
+    "哪些专业考 408、全日制、统招 > 20？",
+    "对比四校 085404 的 2026 复试线",
+    "中大 2027 年 085404 招多少人？",
+    "华师有没有网络空间安全学硕（0839）？",
+    "暨大智能科学与工程学院 0812Z3 统考招几个？",
+    "中大电子与通信工程学院 085400 的人工智能方向考 408 吗？",
+    "帮我查华工计算机学院拟录取名单里有没有某某某",
+    "把四校 085404 的复试线和计划导出 Excel",
+]
+
+# 通用文档模式 (the original enterprise demo corpus under data/raw).
+GENERIC_QUESTIONS = [
     "演示产品手册里 TopK 和切片大小分别是多少？",
-    "普通文档的保存期限是多久？",
     "保密等级分为哪几级？",
-    "贵州茅台 2024 年报的主营业务和主要风险是什么？",
     "对比演示产品参数手册和演示企业文档管理制度的要点",
-    "保密等级分为哪几级？导出 Excel，文件名 demo_secrecy",
 ]
 
 
@@ -106,22 +127,28 @@ def _sidebar_health(client: DocAgentClient) -> None:
 
 def _demo_tab() -> None:
     st.subheader("演示剧本")
-    st.caption("点一条问句，会填入对话并发送。")
-    for question in DEMO_QUESTIONS:
-        if st.button(question, use_container_width=True):
+    st.caption("点一条问句，会填入对话并发送。期望答案见 data/gold/kaoyan_qa.json。")
+    for i, question in enumerate(DEMO_QUESTIONS, start=1):
+        if st.button(f"{i}. {question}", key=f"demo-{i}", use_container_width=True):
             st.session_state.draft_question = question
             st.rerun()
+    with st.expander("通用文档模式（企业演示语料 data/raw）"):
+        for i, question in enumerate(GENERIC_QUESTIONS, start=1):
+            if st.button(question, key=f"generic-{i}", use_container_width=True):
+                st.session_state.draft_question = question
+                st.rerun()
 
 
 def main() -> None:
-    st.set_page_config(page_title="文档智能 Agent", layout="wide")
+    st.set_page_config(page_title="考研信息 Agent", layout="wide")
     _init_state()
     _prefer_local_agent()
     _sidebar_controls()
     client = _connect()
     _sidebar_health(client)
-    st.title("企业文档智能处理")
-    st.caption(f"API {st.session_state.base_url} · 本地演示，不要暴露到公网。")
+    st.title("广东四校计算机考研信息 Agent")
+    st.caption(f"中大 / 华工 / 暨大 / 华师 · 每个数字带年份、口径和官方来源 · API {st.session_state.base_url} · "
+               "本地演示，不要暴露到公网。")
     err = st.session_state.get("health_error")
     if err:
         st.error(f"{err.code}：{err.message}")
@@ -129,13 +156,15 @@ def main() -> None:
     if notice:
         st.info(notice)
 
-    tab_chat, tab_kb, tab_tasks, tab_demo = st.tabs(["对话", "知识库", "任务中心", "演示剧本"])
+    tab_chat, tab_programs, tab_kb, tab_tasks, tab_demo = st.tabs(["对话", "专业筛选", "知识库", "任务中心", "演示剧本"])
     with tab_chat:
         render_chat(
             client,
             async_mode=st.session_state.async_mode,
             max_tool_calls=int(st.session_state.max_tool_calls),
         )
+    with tab_programs:
+        render_programs(client)
     with tab_kb:
         render_ingest(client)
     with tab_tasks:
