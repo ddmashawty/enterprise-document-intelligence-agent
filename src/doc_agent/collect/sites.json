@@ -1,0 +1,193 @@
+{
+  "generated_from": "data/kaoyan/sources.json schools[]",
+  "rules_note": "adapter / lists_override / article_patterns / lists[].page_template / skip_url_patterns / probe 为手工维护，重新生成时保留",
+  "sites": [
+    {
+      "school_id": "sysu",
+      "name": "中山大学",
+      "short": "中大",
+      "adapter": "sysu",
+      "domains": [
+        "graduate.sysu.edu.cn",
+        "cse.sysu.edu.cn",
+        "sai.sysu.edu.cn",
+        "sse.sysu.edu.cn",
+        "scst.sysu.edu.cn",
+        "ssse.sysu.edu.cn",
+        "sece.sysu.edu.cn"
+      ],
+      "lists": [
+        {
+          "url": "https://graduate.sysu.edu.cn/zsw/postgraduate",
+          "desc": "硕士招生列表",
+          "page_template": "https://graduate.sysu.edu.cn/zsw/postgraduate?page={n0}"
+        }
+      ],
+      "article_patterns": [
+        {
+          "regex": "^https?://graduate\\.sysu\\.edu\\.cn/zsw/article/(?P<id>\\d+)$",
+          "key": "graduate:{id}"
+        },
+        {
+          "regex": "^https?://(?P<college>cse|sai|sse|scst|ssse)\\.sysu\\.edu\\.cn/article/(?P<id>\\d+)$",
+          "key": "{college}:{id}"
+        },
+        {
+          "regex": "^https?://sece\\.sysu\\.edu\\.cn/zs/zs01/(?P<id>\\d+)\\.htm$",
+          "key": "sece:{id}"
+        }
+      ],
+      "blocked_hosts": [],
+      "catalog_systems": [
+        {
+          "url": "https://graduate.sysu.edu.cn/zsw/article/493",
+          "year": 2026,
+          "desc": "2026 章程及专业目录入口（目录为 PDF 附件）"
+        }
+      ],
+      "probe": {
+        "article_url": "https://graduate.sysu.edu.cn/zsw/article/{id}",
+        "article_id_regex": "graduate\\.sysu\\.edu\\.cn/zsw/article/(\\d+)"
+      }
+    },
+    {
+      "school_id": "scut",
+      "name": "华南理工大学",
+      "short": "华工",
+      "adapter": "scut",
+      "domains": [
+        "yz.scut.edu.cn",
+        "www2.scut.edu.cn",
+        "yanzhao.scut.edu.cn"
+      ],
+      "lists": [
+        {
+          "url": "https://yz.scut.edu.cn/sszs/list.htm",
+          "desc": "硕士招生栏目第 1 页（后续 list2.htm … list10.htm）",
+          "page_template": "https://yz.scut.edu.cn/sszs/list{n}.htm"
+        },
+        {
+          "url": "https://yz.scut.edu.cn/sszs_30381/list.htm",
+          "desc": "简章栏目",
+          "page_template": "https://yz.scut.edu.cn/sszs_30381/list{n}.htm"
+        }
+      ],
+      "article_patterns": [
+        {
+          "regex": "^https?://(?:yz|www2)\\.scut\\.edu\\.cn/(?:[\\w-]+/)*\\d{4}/\\d{4}/c\\d+a(?P<id>\\d+)/page\\.(?:htm|psp)$",
+          "key": "a{id}"
+        }
+      ],
+      "blocked_hosts": [
+        "yanzhao.scut.edu.cn"
+      ],
+      "catalog_systems": [
+        {
+          "url": "https://yanzhao.scut.edu.cn/open/Master/Zsml_view.aspx",
+          "year": 2026,
+          "desc": "硕士专业目录（同站还有学院复试方案 Fsfa.aspx、推免 Jsfa.aspx）",
+          "status": "blocked: 302 到 /rump_frontend/login 统一认证网关"
+        }
+      ]
+    },
+    {
+      "school_id": "jnu",
+      "name": "暨南大学",
+      "short": "暨大",
+      "adapter": "jnu",
+      "domains": [
+        "yz.jnu.edu.cn"
+      ],
+      "lists": [
+        {
+          "url": "https://yz.jnu.edu.cn/tzgg/list.htm",
+          "desc": "通知公告（分页 list2.htm … list18.htm）；建议只爬此主列表",
+          "page_template": "https://yz.jnu.edu.cn/tzgg/list{n}.htm"
+        }
+      ],
+      "article_patterns": [
+        {
+          "regex": "^https?://yz\\.jnu\\.edu\\.cn/\\d{4}/\\d{4}/c\\d+a(?P<id>\\d+)/page\\.(?:htm|psp)$",
+          "key": "a{id}"
+        }
+      ],
+      "skip_url_patterns": [
+        "/33003/",
+        "/32993/",
+        "/33059/"
+      ],
+      "blocked_hosts": [],
+      "catalog_systems": [
+        {
+          "url": "https://yz.jnu.edu.cn/2027nssyjszszyml/list.htm",
+          "year": 2027,
+          "desc": "2027 硕士招生专业目录（202607）"
+        },
+        {
+          "url": "https://yz.jnu.edu.cn/2026nssyjszszyml/list.htm",
+          "year": 2026,
+          "desc": "2026 硕士招生专业目录"
+        }
+      ],
+      "probe": {
+        "catalog_year_url": "https://yz.jnu.edu.cn/{year}nssyjszszyml/list.htm"
+      }
+    },
+    {
+      "school_id": "scnu",
+      "name": "华南师范大学",
+      "short": "华师",
+      "adapter": "scnu",
+      "domains": [
+        "yz.scnu.edu.cn",
+        "yanzhao.scnu.edu.cn",
+        "statics.scnu.edu.cn",
+        "cs.scnu.edu.cn",
+        "ai.scnu.edu.cn",
+        "ds.scnu.edu.cn"
+      ],
+      "lists": [
+        {
+          "url": "http://yz.scnu.edu.cn/ssgg/",
+          "desc": "硕士公告（栏目路径 /ssgg/，分页规则未逐页验证）"
+        },
+        {
+          "url": "http://yz.scnu.edu.cn/ssjz/",
+          "desc": "硕士简章（栏目路径 /ssjz/）"
+        }
+      ],
+      "lists_override": [
+        {
+          "url": "https://yz.scnu.edu.cn/tongzhigonggao/ssgg/",
+          "desc": "硕士公告（2026-10 首页导航；sources.json 里的 /ssgg/ 已 404）"
+        },
+        {
+          "url": "https://yz.scnu.edu.cn/zhaoshengjianzhang/quanrizhishuoshijianzhang/",
+          "desc": "硕士简章（2026-10 首页导航；/ssjz/ 已 404）"
+        }
+      ],
+      "article_patterns": [
+        {
+          "regex": "^https?://(?P<sub>yz|cs|ai|ds)\\.scnu\\.edu\\.cn/a/(?P<date>\\d{8})/(?P<id>\\d+)\\.html$",
+          "key": "{sub}:{id}"
+        }
+      ],
+      "blocked_hosts": [],
+      "catalog_systems": [
+        {
+          "url": "https://yanzhao.scnu.edu.cn/Master/Zsml_View.aspx",
+          "year": 2026,
+          "desc": "硕士招生专业目录（年份/院系/专业/学习方式下拉，__VIEWSTATE 回发，表格分页）；年份下拉目前 2026/2025/2024，出现 2027 即可监测"
+        }
+      ],
+      "probe": {
+        "catalog_url": "https://yanzhao.scnu.edu.cn/Master/Zsml_View.aspx",
+        "catalog_colleges": [
+          "019",
+          "041",
+          "046"
+        ]
+      }
+    }
+  ]
+}

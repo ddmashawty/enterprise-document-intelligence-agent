@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import Any
+from typing import Any, Literal
 
 from pydantic import BaseModel, Field
 
@@ -76,3 +76,26 @@ class DocumentDetailResponse(DocumentMeta):
 class DocumentListResponse(BaseModel):
     count: int
     documents: list[DocumentMeta] = Field(default_factory=list)
+
+
+class CrawlRequest(BaseModel):
+    """Polite crawl of official sites; ``dry_run`` (default) only lists what would be fetched."""
+
+    schools: list[str] = Field(default_factory=list, description="空 = sites.json 里的全部学校")
+    mode: Literal["probe", "list", "full"] = "probe"
+    dry_run: bool = True
+    max_pages: int | None = Field(None, ge=1, le=200, description="每校本次最多请求数（robots.txt 不计）")
+    list_pages: int | None = Field(None, ge=1, le=20, description="list / full：每个列表最多翻几页")
+
+
+class CrawlRunResponse(BaseModel):
+    run_id: str
+    status: str
+    mode: str | None = None
+    school_ids: list[str] = Field(default_factory=list)
+    dry_run: bool | None = None
+    max_pages: int | None = None
+    started_at: str
+    finished_at: str | None = None
+    error: str | None = None
+    stats: dict[str, Any] = Field(default_factory=dict)

@@ -270,6 +270,13 @@ requirements.txt  .env.example  README.md
 - 暨南 2027 推免方案 PDF 表格跨页不重复表头；0812 四个二级学科同写“≤19”，正文说明属于同一一级学科 → 一级学科合计上限
 - 抽取覆盖面：四校目录 / 细则里 37 个目标专业以外的专业约 6800 条事实（数学、信通、集成电路等），K4 不入库；以后扩专业只需在种子里加 program
 
+## 考研改造发现（K6，2026-10-07 实测）
+- 中大：`graduate.sysu.edu.cn` / `cse.sysu.edu.cn` 的 robots.txt 返回 403 WAF 页面（“资源或业务被限制访问”），列表页 `/zsw/postgraduate` 正常 200；列表为 Drupal，翻页 `?page=N`（从 0 起），文章 `/zsw/article/{ID}`，当前最大 ID 542；列表有“中山大学2027年硕士研究生招生章程及专业目录”（2026-09-30）
+- 华工：`yz.scut.edu.cn` 两个栏目 `sszs/`、`sszs_30381/`，同一文章在不同栏目 / `www2` 下 URL 不同，但都以 `a{ID}` 结尾；列表有“华南理工大学2027年硕士研究生招生章程及招生专业目录”（2026-09-30）及卡迪夫 / 南特联培 2027 简章。`yanzhao.scut.edu.cn/open/Master/Zsml_view.aspx` 本次直接 200（WebForms，年度下拉 2027，院系下拉 41 项），不再 302 到统一认证——`sources.json` 记为 blocked 的状态已过时，但访问条件可能随网络 / 时间变化
+- 暨南：列表 `tzgg/list{n}.htm` 每条是两个 `<a>`（`a.tit[title]` + 包着日期 / 标题 / 摘要的 `a[title]`），网站会把长标题截成“…”；`/2028nssyjszszyml/list.htm` 返回 410（2028 目录未发布）
+- 华师：`sources.json` 的 `/ssgg/`、`/ssjz/` 已 404；新路径 `/tongzhigonggao/ssgg/`（硕士公告）、`/zhaoshengjianzhang/quanrizhishuoshijianzhang/`（硕士简章）。文章 `a/20260928/686.html` 为“2027年硕士研究生招生专业目录”，`a/20260928/687.html` 为“2026年各专业硕士研究生报名人数统计表”；`yanzhao.scnu.edu.cn/Master/Zsml_View.aspx` 年份下拉 2027 / 2026 / 2025 / 2024
+- 以上只是列表 / 下拉层面的发现；2027 目录里的具体数字尚未抽取，不能当作已核对数据使用
+
 ## 视觉/浏览器发现
 - 无（本轮为方案设计，未截图）
 

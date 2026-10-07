@@ -1,19 +1,24 @@
 from __future__ import annotations
 
-from typing import Annotated
+from collections.abc import Callable
+from typing import Annotated, Any
 
-from fastapi import APIRouter, Depends, Query
+from fastapi import APIRouter, BackgroundTasks, Depends, Query
 
 from doc_agent.api.errors import http_error
 from doc_agent.api.schemas_kaoyan import (
+    CrawlRequest,
+    CrawlRunResponse,
     DocumentDetailResponse,
     DocumentListResponse,
     ProgramDetailResponse,
     ProgramSearchResponse,
     ScoreLinesResponse,
 )
+from doc_agent.collect.crawler import Crawler, CrawlOptions, create_run, get_run
+from doc_agent.collect.sites import load_sites
 from doc_agent.config import get_settings
-from doc_agent.kaoyan.db import get_kaoyan_store
+from doc_agent.kaoyan.db import KaoyanStore, get_kaoyan_store
 from doc_agent.kaoyan.query import KaoyanQuery
 
 router = APIRouter(prefix="/v1", tags=["kaoyan"])
@@ -28,6 +33,15 @@ def kaoyan_query() -> KaoyanQuery:
 
 
 KaoyanQueryDep = Annotated[KaoyanQuery, Depends(kaoyan_query)]
+
+CrawlRunner = Callable[[KaoyanStore, CrawlOptions, str], Any]
+
+
+def crawl_runner() -> CrawlRunner:
+    return lambda store, opts, run_id: Crawler(store).run(opts, run_id)
+
+
+CrawlRunnerDep = Annotated[CrawlRunner, Depends(crawl_runner)]
 
 
 def _school_or_404(q: KaoyanQuery, school: str | None) -> None:
@@ -98,3 +112,33 @@ def get_document(doc_id: str, q: KaoyanQueryDep) -> DocumentDetailResponse:
     if doc is None:
         raise http_error(404, "document_not_found", f"文档不存在: {doc_id}")
     return DocumentDetailResponse(**doc)
+
+
+@router.post("/crawl", response_model=CrawlRunResponse, status_code=202)
+def start_crawl(
+    q: KaoyanQueryDep, runner: CrawlRunnerDep, req: CrawlRequest, background_tasks: BackgroundTasks
+) -> CrawlRunResponse:
+    sites = load_sites()
+    school_ids: list[str] = []
+    for text in req.schools or list(sites):
+        sid = q.school_id(text)
+        if sid is None:
+            raise http_error(404, "school_not_found", f"未知学校: {text}", {"supported": sorted(q.schools)})
+        if sid not in sites:
+            raise http_error(404, "crawl_site_not_configured", f"collect/sites.json 里没有 {sid}",
+                             {"configured": sorted(sites)})
+        if sid not in school_ids:
+            school_ids.append(sid)
+    opts = CrawlOptions(schools=school_ids, mode=req.mode, dry_run=req.dry_run,
+                        max_pages=req.max_pages, list_pages=req.list_pages)
+    run_id = create_run(q.store, opts)
+    background_tasks.add_task(runner, q.store, opts, run_id)
+    return CrawlRunResponse(**get_run(q.store, run_id))  # type: ignore[arg-type]
+
+
+@router.get("/crawl/{run_id}", response_model=CrawlRunResponse)
+def crawl_status(run_id: str, q: KaoyanQueryDep) -> CrawlRunResponse:
+    run = get_run(q.store, run_id)
+    if run is None:
+        raise http_error(404, "crawl_run_not_found", f"采集任务不存在: {run_id}")
+    return CrawlRunResponse(**run)

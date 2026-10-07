@@ -37,6 +37,17 @@ class Settings(BaseSettings):
     rag_profile: str = "enterprise"
     ocr_backend: str = "none"
 
+    crawl_user_agent: str = "kaoyan-info-agent/0.4 (+https://github.com/ddmashawty/enterprise-document-intelligence-agent)"
+    crawl_contact: str = ""
+    crawl_min_interval_sec: float = 3.0
+    crawl_respect_robots: bool = True
+    crawl_timeout: float = 20.0
+    crawl_max_retries: int = 2
+    crawl_backoff_sec: float = 2.0
+    crawl_max_pages: int = 20
+    crawl_probe_ids: int = 3
+    crawl_cache_dir: str = "data/kaoyan/cache"
+
     chunk_size: int = 800
     chunk_overlap: int = 120
     top_k: int = 8
@@ -75,7 +86,16 @@ class Settings(BaseSettings):
     def kaoyan_data_path(self) -> Path:
         return self.resolve(self.kaoyan_data_dir)
 
-    def for_profile(self, profile: str) -> "Settings":
+    @property
+    def crawl_cache_path(self) -> Path:
+        return self.resolve(self.crawl_cache_dir)
+
+    @property
+    def crawl_user_agent_full(self) -> str:
+        contact = self.crawl_contact.strip()
+        return f"{self.crawl_user_agent} ({contact})" if contact else self.crawl_user_agent
+
+    def for_profile(self, profile: str) -> Settings:
         """Settings whose chroma_dir / collection_name point at the given index."""
         if profile == "enterprise":
             return self

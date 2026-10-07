@@ -1,9 +1,50 @@
 # 进度日志
 
+## 会话：2026-10-07（考研改造 K6：采集层）
+
+### K6
+- **状态：** complete（待提交到 `feat/kaoyan`）
+- 新增 `collect/base.py`、`dedupe.py`、`http.py`（`PoliteClient`：按 host 串行 ≥3 s、robots、重试 / 退避、条件 GET、每校请求上限、登录跳转 → blocked）、`generic_list.py`、`adapters/{sysu,scut,jnu,scnu}.py`、`sites.py` + `sites.json`、`crawler.py`（运行编排、登记 / 版本 / 下架、附件、手动导入）、`scripts/crawl_kaoyan.py`
+- 修改 `config.py`（`crawl_*`）、`.env.example`、`api/routes_kaoyan.py` + `schemas_kaoyan.py`（`POST /v1/crawl` → 202 + `run_id`，`GET /v1/crawl/{run_id}`）
+- `PYTHONPATH=src pytest -q`：222 passed（196 + 26，全部 MockTransport，不联网）
+- 文档：`docs/kaoyan_phase6_notes.md`
+
+### 真实 probe（2026-10-07，本机网络，UA `kaoyan-info-agent/0.4`）
+命令：`python scripts/crawl_kaoyan.py --mode probe [--no-dry-run]`，四校、每校列表第 1 页、同 host 间隔 ≥3 s、每校上限 20 次请求。
+
+| 运行 | run_id | 请求 | 耗时 | 文章（新 / 已知） | 登记 | 未变化 | 提醒 | 错误 / blocked |
+|------|--------|------|------|------------------|------|--------|------|----------------|
+| dry-run（修复前） | `crawl_c58eb0ae290e` | 8 | 41.9 s | 中大被 robots 跳过、华师 404、暨南标题混摘要 | — | — | — | — |
+| dry-run | `crawl_0a8a4af50229` | 11 | 42.4 s | 93（79 / 14） | 0 | 0 | 7 | 0 / 0 |
+| 非 dry-run | `crawl_41795309a6f4` | 80 | 321.1 s | 93（79 / 14） | 67 | 2 | 7 | 0 / 0 |
+
+非 dry-run 分校：
+
+| 学校 | 请求 | 耗时 | 列表条目 | 新 / 已知 | 登记 | 未变化 | 探测 |
+|------|------|------|----------|-----------|------|--------|------|
+| 中大 | 20 | 61.2 s | 20 | 17 / 3 | 17 | 0 | 文章 ID 543 起无新文章 |
+| 华工 | 20 | 58.7 s | 13 + 6（两个栏目） | 15 / 3 | 15 | 2（`scut-043`、`scut-051`，sha256 相同） | 目录系统可访问，年度下拉 2027 |
+| 暨南 | 20 | 84.6 s | 23 | 20 / 3 | 18 | 0 | 2028 目录栏目 410（未发布） |
+| 华师 | 20 | 116.5 s | 22 + 20（两个栏目） | 27 / 5 | 17 | 0 | 目录年份下拉出现 2027 |
+
+- `documents` 97 → 164（全部 `active`）；新登记 4 篇按标题标为含个人信息（拟录取 / 递补复试名单、咨询人员名单），只存在被忽略的 `data/kaoyan/cache/`（本机 5.9 MB）
+- 每校预算都用完：新文章先登记，暨南 2 篇、华师 10 篇未登记，中大 / 暨南 / 华师的已知文章未复查，下次运行补上
+- 7 条提醒：中大 / 华工 2027 招生章程、华工 2 个联培项目 2027 简章（误报，可接受）、华工目录系统可访问、华师 2027 目录（文章 + 下拉）
+- 运行前已备份本机库到 `/tmp/kaoyan_before_k6.db`；库文件、缓存不入 git
+
+## 五问重启检查（K6）
+| 问题 | 答案 |
+|------|------|
+| 我在哪里？ | K6 完成，等用户看 diff 摘要后提交 |
+| 我要去哪里？ | K7：OCR / 视觉（rapidocr + 多模态）、专业筛选前端页、README / docs 更新 |
+| 目标是什么？ | 考研信息 Agent：每个数字带来源 / 年份 / 口径，不知道就说不知道 |
+| 我学到了什么？ | 真实站点和种子记录会漂移：robots.txt 被 WAF 拦、栏目改版 404、原来被统一认证拦的目录系统现在能访问；所以必须先 dry-run 看结果再落库，并让 `sites.json` 能覆盖种子 |
+| 我做了什么？ | 礼貌 HTTP 客户端、4 个站点适配器、变化检测与版本、crawl API / CLI、26 条新测试、两次真实 probe |
+
 ## 会话：2026-09-29（考研改造 K5：Agent 工具、提示词、API）
 
 ### K5
-- **状态：** complete（待提交到 `feat/kaoyan`）
+- **状态：** complete（已提交 `a1c5ee7`）
 - 新增 `kaoyan/query.py`（查询服务：筛选、统招取值、复试线口径、科目、对比表行、文档元数据）、`tools/kaoyan.py`（6 个结构化工具 + citation / 导出行 / LLM 视图）、`agent/kaoyan_flow.py`（按意图确定性调工具、reflect、finalize 数字校验）、`api/routes_kaoyan.py` + `schemas_kaoyan.py`（`/v1/programs`、`/v1/programs/{id}`、`/v1/score-lines`、`/v1/documents`、`/v1/documents/{id}`）、`scripts/smoke_kaoyan.py`
 - 修改 `guardrails.py`（考研意图识别、数字校验）、`prompts.py`（考研 15 条规则）、`nodes.py`（按意图分流，企业路径不变）、`state.py` / `graph.py`（`intent`、`facts`）、`registry.py`（注册工具，`rag_search` 加 `profile`）、`/health` 加可选字段、`__version__` 0.4.0 并用于 `create_app()`
 - `PYTHONPATH=src pytest -q`：196 passed（139 + 57）；`test_api_errors.py` 未改
