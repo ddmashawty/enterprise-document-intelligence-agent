@@ -1,0 +1,58 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "doc-agent"
+version = "0.4.0"
+description = "广东四校计算机考研信息 Agent，保留通用文档问答。"
+readme = "README.md"
+requires-python = ">=3.12"
+license = "MIT"
+authors = [{ name = "的懒" }]
+dependencies = [
+    "fastapi>=0.115.0",
+    "uvicorn[standard]>=0.32.0",
+    "pydantic>=2.9.0",
+    "pydantic-settings>=2.6.0",
+    "python-dotenv>=1.0.1",
+    "httpx>=0.27.0",
+    "openai>=1.55.0",
+    "langgraph>=0.2.50",
+    "langchain-core>=0.3.20",
+    "langchain-openai>=0.2.10",
+    "pypdf>=5.1.0",
+    "python-docx>=1.1.2",
+    "rank-bm25>=0.2.2",
+    "numpy>=1.26.0",
+    "orjson>=3.10.0",
+    "openpyxl>=3.1.5",
+    "pdfplumber>=0.11.4",
+    "beautifulsoup4>=4.12.3",
+    "lxml>=5.3.0",
+    "xlrd>=2.0.1",
+    "Pillow>=10.0",
+    "pypdfium2>=4.0",
+]
+
+[project.optional-dependencies]
+embedding = ["chromadb>=0.5.20"]
+ocr = ["rapidocr_onnxruntime>=1.4,<2"]
+frontend = ["streamlit>=1.40.0", "pandas>=2.2.0"]
+dev = ["pytest>=8.3.0", "ruff>=0.8.0"]
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.pytest.ini_options]
+pythonpath = ["src", "."]
+testpaths = ["tests"]
+
+[tool.ruff]
+target-version = "py312"
+line-length = 120
+src = ["src", "tests", "scripts", "frontend"]
+
+[tool.ruff.lint]
+# F and E9 only: real import/name errors, not a format sweep.
+select = ["E9", "F"]

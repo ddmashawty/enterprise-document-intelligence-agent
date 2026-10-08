@@ -26,30 +26,31 @@
 ```bash
 python3.12 -m venv .venv
 source .venv/bin/activate
-pip install -r requirements.txt -r requirements-dev.txt
-pip install -r requirements-embedding.txt
+pip install -e ".[dev]"
+# 需要向量检索或本地 OCR 时再加：pip install -e ".[embedding,ocr]"
+# requirements*.txt 仍保留，内容和上面的 extras 一致
 
 cp .env.example .env
 # 填写 LLM_API_KEY
 # ollama pull qwen3-embedding:0.6b
 
 # 考研数据：校验种子包 → 建结构化库 → 规则抽取 → 建考研索引（都可重复执行）
-PYTHONPATH=src python scripts/verify_kaoyan_bundle.py
-PYTHONPATH=src python scripts/seed_kaoyan.py
-PYTHONPATH=src python scripts/extract_kaoyan.py
-PYTHONPATH=src python scripts/ingest_kaoyan.py
+python scripts/verify_kaoyan_bundle.py
+python scripts/seed_kaoyan.py
+python scripts/extract_kaoyan.py
+python scripts/ingest_kaoyan.py
 
 # 通用文档模式的企业演示语料
 bash scripts/demo_repro.sh
 
-PYTHONPATH=src python -m uvicorn doc_agent.api:app --host 127.0.0.1 --port 8000
+python -m uvicorn doc_agent.api:app --host 127.0.0.1 --port 8000
 ```
 
 ### 可选：OCR（图片表格、扫描 PDF）
 
 ```bash
-pip install -r requirements-ocr.txt          # rapidocr_onnxruntime，模型随包，不需联网下载
-PYTHONPATH=src python scripts/extract_kaoyan.py --ocr rapidocr
+pip install -e ".[ocr]"          # rapidocr_onnxruntime，模型随包，不需联网下载
+python scripts/extract_kaoyan.py --ocr rapidocr
 ```
 
 - `.env` 里设 `OCR_BACKEND=rapidocr` 后，导入和抽取都会识别图片 / 扫描页；结果按图片 sha256 缓存在 `data/kaoyan/ocr_cache/`（不入库）。
@@ -60,8 +61,8 @@ PYTHONPATH=src python scripts/extract_kaoyan.py --ocr rapidocr
 ### 可选：采集官方网站
 
 ```bash
-PYTHONPATH=src python scripts/crawl_kaoyan.py --school jnu --mode probe              # 默认 dry run，只列出要抓什么
-PYTHONPATH=src python scripts/crawl_kaoyan.py --school jnu --mode probe --no-dry-run
+python scripts/crawl_kaoyan.py --school jnu --mode probe              # 默认 dry run，只列出要抓什么
+python scripts/crawl_kaoyan.py --school jnu --mode probe --no-dry-run
 ```
 
 华工 `yanzhao.scut.edu.cn` 需要统一认证，会被标为 `blocked`，不会重试；这类文件手动下载后用 `--import` 登记。
@@ -78,6 +79,12 @@ bash scripts/run_frontend.sh
 界面标题下会显示当前 API 地址，默认是 `http://127.0.0.1:8000`。若 8000 上不是本服务，而 8001 上是，界面会改连 8001 并提示。请求体里的 `message` 只写一层字符串。
 
 本机演示没有登录。不要把 API 或 Streamlit 暴露到公网。
+
+## 数据来源与版权
+
+代码按 [MIT](LICENSE) 许可。`data/kaoyan/raw/` 里的简章、目录、复试方案是学校和主管部门公布的文件，版权归原发布方。仓库留着这些文件，是为了抽取和核对数字，不表示可以随便再分发原文。回答里只给摘录、年份、口径和原文链接。名单类文件不进库，也不进索引。
+
+如果以后要公开分发，可以改成仓库只留 `data/kaoyan/raw/manifest.csv`（URL 和 sha256），原文件放在本机。代码许可和这批数据的说明是两件事。
 
 ## 调用示例
 
@@ -142,10 +149,10 @@ data/raw/    通用文档模式的演示文档
 ## 测试
 
 ```bash
-PYTHONPATH=src pytest -q                                   # 不联网、不调真实 LLM；缺本地专用文件的用例自动 skip
-PYTHONPATH=src python scripts/eval_extraction.py --ocr rapidocr   # 抽取 vs 种子 → docs/kaoyan_extraction_report.md
-PYTHONPATH=src python scripts/smoke_kaoyan.py              # 18 条考研验收问答（需要 LLM_API_KEY）
-PYTHONPATH=src python scripts/smoke_chat.py                # 通用文档模式
+pytest -q                                   # 不联网、不调真实 LLM；缺本地专用文件的用例自动 skip
+python scripts/eval_extraction.py --ocr rapidocr   # 抽取 vs 种子 → docs/kaoyan_extraction_report.md
+python scripts/smoke_kaoyan.py --json docs/baseline_2026-10.json   # 18 条旧验收题（需要 LLM_API_KEY；会花钱）
+python scripts/smoke_chat.py                # 通用文档模式
 ```
 
 人工验收清单：`docs/frontend_verification_checklist.md`、`docs/backend_verification_checklist.md`；考研各阶段说明见 `docs/kaoyan_phase*_notes.md`。

@@ -9,7 +9,7 @@ from doc_agent.ingest.loaders import ParsedDocument, iter_source_files, load_fil
 from doc_agent.ingest.ocr import NoOCR, get_ocr_backend
 from doc_agent.ingest.redact import looks_personal, mask_notice_names, redact_document
 from doc_agent.kaoyan.privacy import is_personal_file, is_within
-from doc_agent.rag.store import DocumentStore, get_store, reset_store
+from doc_agent.rag.store import get_store, reset_store
 
 
 def load_document(path: Path, settings: Settings | None = None) -> ParsedDocument:

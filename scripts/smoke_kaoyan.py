@@ -51,6 +51,7 @@ def check(item: dict, result: dict) -> dict:
         xlsx = [e for e in result.get("exports") or [] if str(e.get("path", "")).endswith(".xlsx")]
         missing = [k for k in missing if k != "xlsx"] + ([] if xlsx else ["<xlsx export>"])
     validation = (result.get("facts") or {}).get("validation") or {}
+    usage = result.get("usage") or {}
     return {
         "id": item["id"],
         "category": item["category"],
@@ -63,6 +64,10 @@ def check(item: dict, result: dict) -> dict:
         "regenerated": bool(validation.get("regenerated")),
         "unsupported": validation.get("unsupported") or [],
         "stripped": validation.get("stripped") or [],
+        "prompt_tokens": int(usage.get("prompt_tokens") or 0),
+        "completion_tokens": int(usage.get("completion_tokens") or 0),
+        "total_tokens": int(usage.get("total_tokens") or 0),
+        "llm_calls_with_usage": int(usage.get("llm_calls_with_usage") or 0),
     }
 
 
@@ -80,7 +85,15 @@ def summarize(rows: list[dict]) -> dict:
         and out["privacy"][0] == out["privacy"][1]
         and cited == len(rows)
     )
-    return {**{k: f"{a}/{b}" for k, (a, b) in out.items()}, "cited": f"{cited}/{len(rows)}", "accepted": accepted}
+    return {
+        **{k: f"{a}/{b}" for k, (a, b) in out.items()},
+        "cited": f"{cited}/{len(rows)}",
+        "accepted": accepted,
+        "seconds": round(sum(r.get("seconds") or 0 for r in rows), 1),
+        "prompt_tokens": sum(r.get("prompt_tokens") or 0 for r in rows),
+        "completion_tokens": sum(r.get("completion_tokens") or 0 for r in rows),
+        "total_tokens": sum(r.get("total_tokens") or 0 for r in rows),
+    }
 
 
 def main() -> int:
@@ -114,7 +127,7 @@ def main() -> int:
         print(
             f"pass={row['passed']} group={row['group']} cited={row['cited']} tools={row['tools']} "
             f"missing={row['missing']} forbidden={row['forbidden']} regenerated={row['regenerated']} "
-            f"stripped={row['stripped']} {row['seconds']}s"
+            f"stripped={row['stripped']} {row['seconds']}s tokens={row['total_tokens']}"
         )
 
     summary = summarize(rows)

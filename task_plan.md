@@ -6,7 +6,9 @@
 - 需求原文：`data/kaoyan/CURSOR_PROMPT.md`；数据说明：`data/kaoyan/README.md`。
 
 ## 当前阶段
-K0 已确认（2026-09-27）；K1 已提交（`125b5a0`）；K2 已提交（`f6ea30f`）；K3 已提交（`0aa958f`）；K4 已提交（`d933603`）；K5 已提交（`a1c5ee7`）；K6 已提交（`13dab2a`，补跑与正文指纹修复 `6e11eac`）；K7 完成，待提交。包改名（可选，单独 PR）等用户决定。
+K0–K7 已完成，`feat/kaoyan` 已合并进 `main`（`98a809c`）。后续按 `docs/kaoyan_improvement_plan.md` 做，执行记录写在 `docs/kaoyan_m0_notes.md` 起的阶段说明里，不再另起一套计划。
+
+M0（2026-10-08，分支 `m0/skeleton`，未提交）：工程骨架、评测集 v2 的 18 题迁移、60 道未核对候选题。旧 18 题的 LLM 基线故意没跑。P1 评测脚本还没开始。
 
 ## 各阶段
 

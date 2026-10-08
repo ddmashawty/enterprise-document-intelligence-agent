@@ -1,0 +1,716 @@
+{
+  "reviewer": "cursor-agent（逐行对照本地官方原文；名单数据未外发）",
+  "reviewed_at": "2026-10-08",
+  "candidates_file": "data/gold/candidates_m0.jsonl",
+  "decisions": [
+    {
+      "id": "cand-jnu-010-081201-score_line-2026",
+      "action": "edit",
+      "evidence": "jnu_2026_复试方案_010信息科学技术学院.xlsx 汇总行",
+      "reason": "保留二级学科问法，考 agent 能否把 0812 一级学科线套到 081201 并说明口径",
+      "must_include": [
+        "264",
+        "2026",
+        "一级学科"
+      ],
+      "judge_rubric": "264 是 0812 一级学科复试线，081201 没有单独的线；答案要说明是一级学科线"
+    },
+    {
+      "id": "cand-jnu-010-081202-score_line-2026",
+      "action": "edit",
+      "evidence": "jnu_2026_复试方案_010信息科学技术学院.xlsx 汇总行",
+      "reason": "原文只有一行“0812 计算机科学与技术 总分264（35/35/53/53）”，是一级学科线。借这道候选题改问 0812，四个二级学科都对应 264",
+      "new_id": "rv-jnu-010-0812-score_line-2026",
+      "turns": [
+        "暨大信息科学技术学院 0812 计算机科学与技术的 2026 复试线是多少？"
+      ],
+      "program_ids": [
+        "jnu-010-081201",
+        "jnu-010-081202",
+        "jnu-010-081203",
+        "jnu-010-0812Z3"
+      ],
+      "codes": [
+        "0812"
+      ],
+      "expected_facts": [
+        {
+          "table": "score_lines",
+          "program_id": "jnu-010-081201",
+          "kind": "college",
+          "year": 2026,
+          "value": 264,
+          "source_doc_id": "jnu-003"
+        },
+        {
+          "table": "score_lines",
+          "program_id": "jnu-010-081202",
+          "kind": "college",
+          "year": 2026,
+          "value": 264,
+          "source_doc_id": "jnu-003"
+        },
+        {
+          "table": "score_lines",
+          "program_id": "jnu-010-081203",
+          "kind": "college",
+          "year": 2026,
+          "value": 264,
+          "source_doc_id": "jnu-003"
+        },
+        {
+          "table": "score_lines",
+          "program_id": "jnu-010-0812Z3",
+          "kind": "college",
+          "year": 2026,
+          "value": 264,
+          "source_doc_id": "jnu-003"
+        }
+      ],
+      "must_include": [
+        "264",
+        "2026",
+        "0812"
+      ]
+    },
+    {
+      "id": "cand-jnu-010-081203-score_line-2026",
+      "action": "drop",
+      "evidence": "jnu_2026_复试方案_010信息科学技术学院.xlsx 汇总行",
+      "reason": "并入 rv-jnu-010-0812-score_line-2026（同一条一级学科线）"
+    },
+    {
+      "id": "cand-jnu-010-0812Z3-score_line-2026",
+      "action": "drop",
+      "evidence": "jnu_2026_复试方案_010信息科学技术学院.xlsx 汇总行",
+      "reason": "并入 rv-jnu-010-0812-score_line-2026（同一条一级学科线）"
+    },
+    {
+      "id": "cand-jnu-044-0812Z3-score_line-2026",
+      "action": "accept",
+      "evidence": "jnu_2026_复试方案_044智能科学与工程学院.xlsx 汇总行"
+    },
+    {
+      "id": "cand-jnu-052-083900-score_line-2026",
+      "action": "accept",
+      "evidence": "jnu_2026_复试方案_052网络空间安全学院.xlsx 汇总行"
+    },
+    {
+      "id": "cand-jnu-010-085404-score_line-2026",
+      "action": "accept",
+      "evidence": "jnu_2026_复试方案_010信息科学技术学院.xlsx 汇总行"
+    },
+    {
+      "id": "cand-jnu-010-085410-score_line-2026",
+      "action": "accept",
+      "evidence": "jnu_2026_复试方案_010信息科学技术学院.xlsx 汇总行"
+    },
+    {
+      "id": "cand-jnu-044-085410-score_line-2026",
+      "action": "accept",
+      "evidence": "jnu_2026_复试方案_044智能科学与工程学院.xlsx 汇总行"
+    },
+    {
+      "id": "cand-jnu-063-085410-pt-score_line-2026",
+      "action": "edit",
+      "evidence": "jnu_2026_复试方案_063珠海研究院.xlsx 汇总行",
+      "reason": "珠海研究院 085410 是非全日制，问法写明学习方式",
+      "turns": [
+        "暨大珠海研究院 085410 人工智能（非全日制）的 2026 复试线是多少？"
+      ]
+    },
+    {
+      "id": "cand-jnu-052-085412-score_line-2026",
+      "action": "drop",
+      "evidence": "jnu_2026_复试方案_052网络空间安全学院.xlsx 汇总行",
+      "reason": "与 v1-02 重复（同专业同年 348）"
+    },
+    {
+      "id": "cand-scnu-019-081200-score_line-2026",
+      "action": "accept",
+      "evidence": "scnu_cs_2026_复试方案_20260321.html 复试分数线表"
+    },
+    {
+      "id": "cand-scnu-041-081200-score_line-2026",
+      "action": "accept",
+      "evidence": "scnu_ai_2026_复试方案_20260320.html 复试分数线表"
+    },
+    {
+      "id": "cand-scnu-019-083500-score_line-2026",
+      "action": "accept",
+      "evidence": "scnu_cs_2026_复试方案_20260321.html 复试分数线表"
+    },
+    {
+      "id": "cand-scnu-019-085404-score_line-2026",
+      "action": "drop",
+      "evidence": "scnu_cs_2026_复试方案_20260321.html 复试分数线表",
+      "reason": "与 v1-03 重复（348 + 退役 288）"
+    },
+    {
+      "id": "cand-scnu-046-085404-score_line-2026",
+      "action": "accept",
+      "evidence": "scnu_ds_2026_复试方案_20260318.html 复试分数线表"
+    },
+    {
+      "id": "cand-scnu-019-085405-score_line-2026",
+      "action": "accept",
+      "evidence": "scnu_cs_2026_复试方案_20260321.html 复试分数线表",
+      "must_not_include": [],
+      "reason": "同表另有专项线，禁止把它说成学院复试线",
+      "judge_rubric": "同表另有专项线 296（退役大学生或少数民族骨干），不能把专项线当成普通复试线"
+    },
+    {
+      "id": "cand-scnu-041-085405-score_line-2026",
+      "action": "accept",
+      "evidence": "scnu_ai_2026_复试方案_20260320.html 复试分数线表"
+    },
+    {
+      "id": "cand-scnu-041-085410-score_line-2026",
+      "action": "accept",
+      "evidence": "scnu_ai_2026_复试方案_20260320.html 复试分数线表"
+    },
+    {
+      "id": "cand-scut-cs-081200-score_line-2026",
+      "action": "edit",
+      "evidence": "scut_2026_复试初试成绩基本要求_表.jpg（图片，未重新 OCR；与 manual_seed verified=1 一致）",
+      "reason": "库里是 school_baseline（学校复试初试成绩基本要求，08 工学），华工学院没有另发学院线；答案必须标“学校基本线”",
+      "must_include": [
+        "305",
+        "2026",
+        "学校基本线"
+      ],
+      "must_not_include": [],
+      "judge_rubric": "305 是学校复试初试成绩基本要求（08 工学），华工该学院没有另发学院复试线；不能说成学院线"
+    },
+    {
+      "id": "cand-scut-sse-083500-score_line-2026",
+      "action": "edit",
+      "evidence": "scut_2026_复试初试成绩基本要求_表.jpg（图片，未重新 OCR；与 manual_seed verified=1 一致）",
+      "reason": "库里是 school_baseline（学校复试初试成绩基本要求，08 工学），华工学院没有另发学院线；答案必须标“学校基本线”",
+      "must_include": [
+        "305",
+        "2026",
+        "学校基本线"
+      ],
+      "must_not_include": [],
+      "judge_rubric": "305 是学校复试初试成绩基本要求（08 工学），华工该学院没有另发学院复试线；不能说成学院线"
+    },
+    {
+      "id": "cand-scut-sse-085405-score_line-2026",
+      "action": "edit",
+      "evidence": "scut_2026_复试初试成绩基本要求_表.jpg（图片，未重新 OCR；与 manual_seed verified=1 一致）",
+      "reason": "库里是 school_baseline（学校复试初试成绩基本要求，08 工学），华工学院没有另发学院线；答案必须标“学校基本线”",
+      "must_include": [
+        "305",
+        "2026",
+        "学校基本线"
+      ],
+      "must_not_include": [],
+      "judge_rubric": "305 是学校复试初试成绩基本要求（08 工学），华工该学院没有另发学院复试线；不能说成学院线"
+    },
+    {
+      "id": "cand-scut-cs-085404-score_line-2026",
+      "action": "drop",
+      "evidence": "scut_2026_复试初试成绩基本要求_表.jpg（图片，未重新 OCR；与 manual_seed verified=1 一致）",
+      "reason": "与 v1-05 重复（华工计算机 085404 305）"
+    },
+    {
+      "id": "cand-scut-ft-140500-score_line-2026",
+      "action": "drop",
+      "evidence": "scut_2026_复试初试成绩基本要求_表.jpg（图片，未重新 OCR；与 manual_seed verified=1 一致）",
+      "reason": "与 v1-06 重复（140500 交叉学科基本线 320）"
+    },
+    {
+      "id": "cand-sysu-670-081200-score_line-2026",
+      "action": "accept",
+      "evidence": "sysu_cse_2026_复试录取实施细则.html 复试分数线表",
+      "must_not_include": [],
+      "reason": "同表另有专项线，禁止把它说成学院复试线",
+      "judge_rubric": "同表另有专项线 339（退役大学生或少数民族骨干），不能把专项线当成普通复试线"
+    },
+    {
+      "id": "cand-sysu-724-081200-score_line-2026",
+      "action": "accept",
+      "evidence": "sysu_sai_2026_复试录取实施细则.html 复试分数线表"
+    },
+    {
+      "id": "cand-sysu-771-081200-score_line-2026",
+      "action": "accept",
+      "evidence": "sysu_ssse_2026_复试录取实施细则.html 复试分数线表"
+    },
+    {
+      "id": "cand-sysu-725-083500-score_line-2026",
+      "action": "accept",
+      "evidence": "sysu_sse_2026_复试分数线_图.png（图片；manual_seed 与 ocr 两路独立读数一致）"
+    },
+    {
+      "id": "cand-sysu-765-085400-score_line-2026",
+      "action": "drop",
+      "evidence": "sysu_sece_2026_复试分数线_内嵌base64图1.png（图片，未重新核对）",
+      "reason": "与 v1-16 重复（边界项 085400 382）"
+    },
+    {
+      "id": "cand-sysu-670-085404-score_line-2026",
+      "action": "drop",
+      "evidence": "sysu_cse_2026_复试录取实施细则.html 复试分数线表",
+      "reason": "与 v1-01 重复（379）"
+    },
+    {
+      "id": "cand-sysu-771-085404-score_line-2026",
+      "action": "accept",
+      "evidence": "sysu_ssse_2026_复试录取实施细则.html 复试分数线表"
+    },
+    {
+      "id": "cand-sysu-725-085405-score_line-2026",
+      "action": "accept",
+      "evidence": "sysu_sse_2026_复试分数线_图.png（图片；manual_seed 与 ocr 两路独立读数一致）",
+      "must_not_include": [],
+      "reason": "同表另有专项线，禁止把它说成学院复试线",
+      "judge_rubric": "同表另有专项线 303（退役大学生或少数民族骨干），不能把专项线当成普通复试线"
+    },
+    {
+      "id": "cand-sysu-724-085410-score_line-2026",
+      "action": "accept",
+      "evidence": "sysu_sai_2026_复试录取实施细则.html 复试分数线表",
+      "must_not_include": [],
+      "reason": "同表另有专项线，禁止把它说成学院复试线",
+      "judge_rubric": "同表另有专项线 280（退役大学生或少数民族骨干），不能把专项线当成普通复试线"
+    },
+    {
+      "id": "cand-sysu-670-085411-pt-score_line-2026",
+      "action": "edit",
+      "evidence": "sysu_cse_2026_复试录取实施细则.html 复试分数线表",
+      "reason": "细则写明 085411 为非全日制，问法写明学习方式",
+      "turns": [
+        "中大计算机学院 085411 大数据技术与工程（非全日制）的 2026 复试线是多少？"
+      ]
+    },
+    {
+      "id": "cand-sysu-757-085412-score_line-2026",
+      "action": "accept",
+      "evidence": "sysu_scst_2026_复试录取实施细则.html 复试分数线表",
+      "must_not_include": [],
+      "reason": "同表另有专项线，禁止把它说成学院复试线",
+      "judge_rubric": "同表另有专项线 270（退役大学生或少数民族骨干），不能把专项线当成普通复试线"
+    },
+    {
+      "id": "cand-jnu-010-081201-plan-2026",
+      "action": "edit",
+      "evidence": "jnu_2026_硕士招生专业目录.html 招生人数列",
+      "reason": "数字与目录一致；问法改成学生口吻，答案须写明是目录人数（含推免）",
+      "turns": [
+        "暨大信息科学技术学院 081201 计算机系统结构 2026 招多少人？"
+      ],
+      "must_include": [
+        "5",
+        "2026",
+        "目录"
+      ]
+    },
+    {
+      "id": "cand-jnu-010-081202-plan-2026",
+      "action": "edit",
+      "evidence": "jnu_2026_硕士招生专业目录.html 招生人数列",
+      "reason": "数字与目录一致；问法改成学生口吻，答案须写明是目录人数（含推免）",
+      "turns": [
+        "暨大信息科学技术学院 081202 计算机软件与理论 2026 招多少人？"
+      ],
+      "must_include": [
+        "3",
+        "2026",
+        "目录"
+      ]
+    },
+    {
+      "id": "cand-jnu-010-081203-plan-2026",
+      "action": "edit",
+      "evidence": "jnu_2026_硕士招生专业目录.html 招生人数列",
+      "reason": "数字与目录一致；问法改成学生口吻，答案须写明是目录人数（含推免）",
+      "turns": [
+        "暨大信息科学技术学院 081203 计算机应用技术 2026 招多少人？"
+      ],
+      "must_include": [
+        "6",
+        "2026",
+        "目录"
+      ]
+    },
+    {
+      "id": "cand-jnu-010-0812Z3-plan-2026",
+      "action": "edit",
+      "evidence": "jnu_2026_硕士招生专业目录.html 招生人数列",
+      "reason": "数字与目录一致；问法改成学生口吻，答案须写明是目录人数（含推免）",
+      "turns": [
+        "暨大信息科学技术学院 0812Z3 人工智能（自设二级学科） 2026 招多少人？"
+      ],
+      "must_include": [
+        "10",
+        "2026",
+        "目录"
+      ]
+    },
+    {
+      "id": "cand-jnu-052-083900-plan-2027",
+      "action": "edit",
+      "evidence": "jnu_2027_硕士招生专业目录_202607.html 招生人数列（按学院标题归属）",
+      "reason": "数字与目录一致；问法改成学生口吻，答案须写明是目录人数（含推免）",
+      "turns": [
+        "暨大网络空间安全学院 083900 网络空间安全 2027 招多少人？"
+      ],
+      "must_include": [
+        "54",
+        "2027",
+        "目录"
+      ]
+    },
+    {
+      "id": "cand-jnu-010-085404-plan-2027",
+      "action": "edit",
+      "evidence": "jnu_2027_硕士招生专业目录_202607.html 招生人数列（按学院标题归属）",
+      "reason": "数字与目录一致；问法改成学生口吻，答案须写明是目录人数（含推免）",
+      "turns": [
+        "暨大信息科学技术学院 085404 计算机技术 2027 招多少人？"
+      ],
+      "must_include": [
+        "54",
+        "2027",
+        "目录"
+      ]
+    },
+    {
+      "id": "cand-jnu-010-085410-plan-2027",
+      "action": "edit",
+      "evidence": "jnu_2027_硕士招生专业目录_202607.html 招生人数列（按学院标题归属）",
+      "reason": "数字与目录一致；问法改成学生口吻，答案须写明是目录人数（含推免）",
+      "turns": [
+        "暨大信息科学技术学院 085410 人工智能 2027 招多少人？"
+      ],
+      "must_include": [
+        "30",
+        "2027",
+        "目录"
+      ]
+    },
+    {
+      "id": "cand-jnu-044-085410-plan-2027",
+      "action": "edit",
+      "evidence": "jnu_2027_硕士招生专业目录_202607.html 招生人数列（按学院标题归属）",
+      "reason": "数字与目录一致；问法改成学生口吻，答案须写明是目录人数（含推免）",
+      "turns": [
+        "暨大智能科学与工程学院 085410 人工智能 2027 招多少人？"
+      ],
+      "must_include": [
+        "58",
+        "2027",
+        "目录"
+      ]
+    },
+    {
+      "id": "cand-jnu-052-085412-plan-2027",
+      "action": "edit",
+      "evidence": "jnu_2027_硕士招生专业目录_202607.html 招生人数列（按学院标题归属）",
+      "reason": "数字与目录一致；问法改成学生口吻，答案须写明是目录人数（含推免）",
+      "turns": [
+        "暨大网络空间安全学院 085412 网络与信息安全 2027 招多少人？"
+      ],
+      "must_include": [
+        "62",
+        "2027",
+        "目录"
+      ]
+    },
+    {
+      "id": "cand-scnu-019-081200-plan-2026",
+      "action": "edit",
+      "evidence": "scnu_2026_招生专业目录_Zsml_View_019_p1.html lblNzsrs，写法 总(推免)",
+      "reason": "数字与目录一致；问法改成学生口吻，答案须写明是目录人数（含推免）",
+      "turns": [
+        "华师计算机学院 081200 计算机科学与技术 2026 招多少人？"
+      ],
+      "must_include": [
+        "48",
+        "2026",
+        "目录"
+      ]
+    },
+    {
+      "id": "cand-scnu-041-081200-plan-2026",
+      "action": "edit",
+      "evidence": "scnu_2026_招生专业目录_Zsml_View_041_p1.html lblNzsrs，写法 总(推免)",
+      "reason": "数字与目录一致；问法改成学生口吻，答案须写明是目录人数（含推免）",
+      "turns": [
+        "华师人工智能学院 081200 计算机科学与技术 2026 招多少人？"
+      ],
+      "must_include": [
+        "23",
+        "2026",
+        "目录"
+      ]
+    },
+    {
+      "id": "cand-scnu-019-083500-plan-2026",
+      "action": "edit",
+      "evidence": "scnu_2026_招生专业目录_Zsml_View_019_p1.html lblNzsrs，写法 总(推免)",
+      "reason": "数字与目录一致；问法改成学生口吻，答案须写明是目录人数（含推免）",
+      "turns": [
+        "华师计算机学院 083500 软件工程 2026 招多少人？"
+      ],
+      "must_include": [
+        "20",
+        "2026",
+        "目录"
+      ]
+    },
+    {
+      "id": "cand-scnu-019-085404-plan-2026",
+      "action": "edit",
+      "evidence": "scnu_2026_招生专业目录_Zsml_View_019_p1.html lblNzsrs，写法 总(推免)",
+      "reason": "数字与目录一致；问法改成学生口吻，答案须写明是目录人数（含推免）",
+      "turns": [
+        "华师计算机学院 085404 计算机技术 2026 招多少人？"
+      ],
+      "must_include": [
+        "50",
+        "2026",
+        "目录"
+      ]
+    },
+    {
+      "id": "cand-scnu-046-085404-plan-2026",
+      "action": "edit",
+      "evidence": "scnu_2026_招生专业目录_Zsml_View_046_p1.html lblNzsrs",
+      "reason": "数字与目录一致；问法改成学生口吻，答案须写明是目录人数（含推免）",
+      "turns": [
+        "华师数据科学与工程学院 085404 计算机技术 2026 招多少人？"
+      ],
+      "must_include": [
+        "20",
+        "2026",
+        "目录"
+      ]
+    },
+    {
+      "id": "cand-scnu-019-085405-plan-2026",
+      "action": "edit",
+      "evidence": "scnu_2026_招生专业目录_Zsml_View_019_p1.html lblNzsrs，写法 总(推免)",
+      "reason": "数字与目录一致；问法改成学生口吻，答案须写明是目录人数（含推免）",
+      "turns": [
+        "华师计算机学院 085405 软件工程 2026 招多少人？"
+      ],
+      "must_include": [
+        "23",
+        "2026",
+        "目录"
+      ]
+    },
+    {
+      "id": "cand-scnu-041-085405-plan-2026",
+      "action": "edit",
+      "evidence": "scnu_2026_招生专业目录_Zsml_View_041_p1.html lblNzsrs，写法 总(推免)",
+      "reason": "数字与目录一致；问法改成学生口吻，答案须写明是目录人数（含推免）",
+      "turns": [
+        "华师人工智能学院 085405 软件工程 2026 招多少人？"
+      ],
+      "must_include": [
+        "50",
+        "2026",
+        "目录"
+      ]
+    },
+    {
+      "id": "cand-sysu-670-081200-plan-2026",
+      "action": "edit",
+      "evidence": "sysu_2026_硕士招生学科专业目录.pdf 第19页 670 计算机学院",
+      "reason": "数字与目录一致；问法改成学生口吻，答案须写明是目录人数（含推免）",
+      "turns": [
+        "中大计算机学院 081200 计算机科学与技术 2026 招多少人？"
+      ],
+      "must_include": [
+        "65",
+        "2026",
+        "目录"
+      ]
+    },
+    {
+      "id": "cand-jnu-063-085410-pt-plan-2027",
+      "action": "edit",
+      "evidence": "jnu_2027_硕士招生专业目录_202607.html 招生人数列（按学院标题归属）",
+      "reason": "数字与目录一致；问法改成学生口吻，答案须写明是目录人数（含推免）；该行在 063 珠海研究院标题下，是非全日制",
+      "turns": [
+        "暨大珠海研究院 085410 人工智能（非全日制） 2027 招多少人？"
+      ],
+      "must_include": [
+        "20",
+        "2027",
+        "目录"
+      ]
+    },
+    {
+      "id": "cand-jnu-044-0812Z3-plan-2027",
+      "action": "drop",
+      "evidence": "jnu_2027_硕士招生专业目录_202607.html 招生人数列（按学院标题归属）",
+      "reason": "与 v1-15 重复（044 学院 0812Z3 2027 目录 10）"
+    },
+    {
+      "id": "cand-scnu-041-085410-plan-2026",
+      "action": "drop",
+      "evidence": "scnu_2026_招生专业目录_Zsml_View_041_p1.html lblNzsrs，写法 总(推免)",
+      "reason": "与 v1-09 重复（66 / 72）"
+    },
+    {
+      "id": "cand-scut-cs-081200-plan-2026",
+      "action": "edit",
+      "evidence": "scut_cs_2026_复试成绩及统考计划_20260325.html 附件表“统考招生计划数”",
+      "reason": "原文附件表：081200 统考招生计划数 18，备注“5 中法南特联培项目”。答案要同时给出 18 和联培 5",
+      "turns": [
+        "华工计算机科学与工程学院 081200 计算机科学与技术 2026 统考招多少人？"
+      ],
+      "must_include": [
+        "18",
+        "5",
+        "联培",
+        "2026"
+      ],
+      "judge_rubric": "备注没写联培 5 是含在 18 内还是另计；答案不能自行断言是含还是另计"
+    },
+    {
+      "id": "cand-scut-cs-085404-plan-2026",
+      "action": "drop",
+      "evidence": "scut_cs_2026_复试成绩及统考计划_20260325.html 附件表“统考招生计划数”",
+      "reason": "与 v1-05 重复（学院统考计划 35 / 学校统考可用计划 21）"
+    },
+    {
+      "id": "cand-scut-sse-083500-plan-2026",
+      "action": "edit",
+      "evidence": "scut_2026_统考可用计划.pdf",
+      "reason": "原文是学校“统考可用计划”，不是目录总数；问统考人数",
+      "turns": [
+        "华工软件学院 083500 软件工程 2026 统考招多少人？"
+      ],
+      "must_include": [
+        "10",
+        "2026",
+        "统考"
+      ],
+      "judge_rubric": "10 是学校统考可用计划，不能说成目录人数或学院招生总数"
+    },
+    {
+      "id": "cand-scut-sse-085405-plan-2026",
+      "action": "edit",
+      "evidence": "scut_2026_统考可用计划.pdf",
+      "reason": "原文是学校“统考可用计划”，不是目录总数；问统考人数",
+      "turns": [
+        "华工软件学院 085405 软件工程 2026 统考招多少人？"
+      ],
+      "must_include": [
+        "21",
+        "2026",
+        "统考"
+      ],
+      "judge_rubric": "21 是学校统考可用计划，不能说成目录人数或学院招生总数"
+    },
+    {
+      "id": "cand-scut-ft-140500-plan-2026",
+      "action": "edit",
+      "evidence": "scut_ft_2026_复试成绩及招生计划_20260330.html “统考招生计划数”",
+      "reason": "两个口径并存：学院通知统考招生计划 28，学校统考可用计划 22（scut-048）；答案两个都要写",
+      "turns": [
+        "华工未来技术学院 140500 智能科学与技术 2026 统考招多少人？"
+      ],
+      "must_include": [
+        "28",
+        "22",
+        "2026"
+      ],
+      "expected_facts": [
+        {
+          "table": "plans",
+          "program_id": "scut-ft-140500",
+          "kind": "college_exam_plan",
+          "year": 2026,
+          "value": 28,
+          "source_doc_id": "scut-060"
+        },
+        {
+          "table": "plans",
+          "program_id": "scut-ft-140500",
+          "kind": "available_exam",
+          "year": 2026,
+          "value": 22,
+          "source_doc_id": "scut-048"
+        }
+      ],
+      "extra_sources": [
+        "https://yz.scut.edu.cn/2025/1022/c30111a606372/page.htm"
+      ]
+    }
+  ],
+  "additions": [
+    {
+      "id": "rv-jnu-010-0812-plan-2027",
+      "category": "plan",
+      "turns": [
+        "暨大信息科学技术学院 0812 计算机科学与技术 2027 招多少人？"
+      ],
+      "school": [
+        "jnu"
+      ],
+      "program_ids": [
+        "jnu-010-081201",
+        "jnu-010-081202",
+        "jnu-010-081203",
+        "jnu-010-0812Z3"
+      ],
+      "year": 2027,
+      "codes": [
+        "0812"
+      ],
+      "expected_facts": [
+        {
+          "table": "plans",
+          "program_id": "jnu-010-081201",
+          "kind": "catalog_total",
+          "year": 2027,
+          "value": 24,
+          "source_doc_id": "jnu-016"
+        },
+        {
+          "table": "plans",
+          "program_id": "jnu-010-081202",
+          "kind": "catalog_total",
+          "year": 2027,
+          "value": 24,
+          "source_doc_id": "jnu-016"
+        },
+        {
+          "table": "plans",
+          "program_id": "jnu-010-081203",
+          "kind": "catalog_total",
+          "year": 2027,
+          "value": 24,
+          "source_doc_id": "jnu-016"
+        },
+        {
+          "table": "plans",
+          "program_id": "jnu-010-0812Z3",
+          "kind": "catalog_total",
+          "year": 2027,
+          "value": 24,
+          "source_doc_id": "jnu-016"
+        }
+      ],
+      "expected_sources": [
+        "https://yz.jnu.edu.cn/2027nssyjszszyml/list.htm"
+      ],
+      "must_include": [
+        "24",
+        "2027",
+        "目录",
+        "一级学科"
+      ],
+      "judge_rubric": "24 是 2027 目录里 0812 一级学科统筹指标（含推免），二级学科不单列；答案不能编出各二级学科人数",
+      "evidence": "jnu_2027_硕士招生专业目录_202607.html 010 信息科学技术学院标题行“计算机科学与技术指标为24个，以上均按一级学科统筹”",
+      "reason": "生成器跳过 pool_scope 行，2027 年 0812 统筹 24 人没有题；用户第二轮审查要求补一道"
+    }
+  ]
+}

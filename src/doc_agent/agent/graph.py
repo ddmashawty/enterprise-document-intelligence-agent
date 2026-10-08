@@ -59,6 +59,27 @@ def _format_session_context(session_id: str) -> str:
     return "\n".join(lines)
 
 
+def token_usage(messages: list) -> dict[str, int]:
+    """Sum LangChain usage_metadata. Messages without usage count as zero."""
+    prompt = completion = calls = 0
+    for msg in messages or []:
+        meta = getattr(msg, "usage_metadata", None)
+        if not isinstance(meta, dict):
+            continue
+        inp = int(meta.get("input_tokens") or 0)
+        out = int(meta.get("output_tokens") or 0)
+        if inp or out:
+            calls += 1
+            prompt += inp
+            completion += out
+    return {
+        "llm_calls_with_usage": calls,
+        "prompt_tokens": prompt,
+        "completion_tokens": completion,
+        "total_tokens": prompt + completion,
+    }
+
+
 def run_agent(
     message: str,
     session_id: str | None = None,
@@ -145,4 +166,5 @@ def run_agent(
         "iterations": iterations,
         "intent": final.get("intent") or {},
         "facts": final.get("facts") or {},
+        "usage": token_usage(final.get("messages") or []),
     }
