@@ -29,7 +29,11 @@ def main() -> int:
     parser.add_argument("--llm", action="store_true", help="LLM fallback for uncovered text documents")
     parser.add_argument("--dry-run", action="store_true", help="Compare with the seed without writing")
     parser.add_argument("--verbose", action="store_true", help="Include per-document status")
+    parser.add_argument("--ocr", choices=["none", "rapidocr", "vision"],
+                        help="OCR backend for image / scanned documents (default: OCR_BACKEND)")
     args = parser.parse_args()
+    if args.ocr:
+        settings = settings.model_copy(update={"ocr_backend": args.ocr})
 
     store = KaoyanStore(settings.resolve(args.db))
     if store.count("programs") == 0:

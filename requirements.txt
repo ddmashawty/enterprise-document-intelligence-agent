@@ -18,5 +18,8 @@ pdfplumber>=0.11.4
 beautifulsoup4>=4.12.3
 lxml>=5.3.0
 xlrd>=2.0.1
+Pillow>=10.0
+pypdfium2>=4.0
+# Optional OCR: requirements-ocr.txt
 # Optional dense retrieval (install when EMBEDDING_* configured):
 # chromadb>=0.5.20

@@ -1,9 +1,87 @@
 # 进度日志
 
+## 会话：2026-10-07（考研改造 K7：OCR / 视觉 + 前端 + 文档）
+
+### K7
+- **状态：** complete（待用户看 diff 摘要后提交）
+- 新增 `ingest/ocr_table.py`（按线框还原表格、合并格展开）、`kaoyan/roster.py` + `scripts/roster_stats.py`（扫描名单只出每个专业代码的行数）、`kaoyan/extract/scut_baseline_img.py`、`scut_subjects_img.py`、`requirements-ocr.txt`、`frontend/kaoyan_view.py`、`frontend/components/programs_panel.py`、`tests/test_kaoyan_ocr.py`、`tests/test_frontend_kaoyan_view.py`、`docs/kaoyan_phase7_notes.md`
+- 修改 `ingest/ocr.py`（rapidocr / vision / 缓存）、`loaders.py`（图片 OCR、扫描 PDF 页渲染 + OCR）、`pipeline.py`（名单文件强制不 OCR）、`config.py` + `.env.example`（`OCR_CACHE_DIR`、`VISION_*`）、`extract/run.py`（`extraction_method=ocr`）、`extract/evaluate.py`（未复现原因）、`sysu_retest_html.py`（也匹配图片）、两个脚本加 `--ocr`、`requirements*.txt` 显式写出 Pillow / pypdfium2、前端 `api_client.py` / `app.py` / `ingest_panel.py`、README、`data/README.md`
+- `PYTHONPATH=src pytest -q`：250 passed（223 + 27；vision 用 MockTransport，rapidocr 真实识别在缺依赖 / 缺图片时 skip）
+- 6 张图片 OCR（rapidocr，首次 6.5 s、缓存 0.2 s）：61 条事实，17 条与种子一致（`verified=1`），15 条种子没有（`verified=0`），29 条在 37 个专业以外，0 冲突；评估报告种子复现 363 → 380
+- 本机 `data/kaoyan.db` 已用 `--ocr rapidocr` 重新抽取（写入 32 条 OCR 事实）；运行前备份 `/tmp/kaoyan_before_k7.db`
+- 前端：本机起 API + Streamlit 检查“专业筛选”页（37 个专业、口径 / 来源链接、详情）和 18 条演示问句
+- 未能真实验证：vision（`.env` 无 `VISION_*`）；scut-044 扫描名单本机没有（本地专用文件）
+
+## 五问重启检查（K7）
+| 问题 | 答案 |
+|------|------|
+| 我在哪里？ | K7 完成，等用户看 diff 摘要后提交；K0–K7 全部完成 |
+| 我要去哪里？ | 可选：包改名（单独 PR，等用户决定）；配置多模态模型后对比 vision 与 rapidocr；下载 scut-044 后人工核对名单计数 |
+| 目标是什么？ | 考研信息 Agent：每个数字带来源 / 年份 / 口径，不知道就说不知道 |
+| 我学到了什么？ | 政府 / 高校通知里的表格图片线框规整，用“长墨迹 = 线”就能还原合并格，比让 OCR 猜表结构可靠；彩色表头是实心带，要把它的两条边当分隔线；OCR 与种子键不同（门类线 vs 按专业展开）时宁可不命中，也不替人展开口径 |
+| 我做了什么？ | 两个 OCR 后端 + 缓存、表格还原、扫描页 OCR、名单计数、2 个图片抽取器、专业筛选页、4 个前端客户端方法、27 条新测试、README / data README / 阶段说明 |
+
+## 会话：2026-10-07（考研改造 K6：采集层）
+
+### K6
+- **状态：** complete（已提交 `13dab2a`；补跑与正文指纹修复已提交 `6e11eac`）
+- 新增 `collect/base.py`、`dedupe.py`、`http.py`（`PoliteClient`：按 host 串行 ≥3 s、robots、重试 / 退避、条件 GET、每校请求上限、登录跳转 → blocked）、`generic_list.py`、`adapters/{sysu,scut,jnu,scnu}.py`、`sites.py` + `sites.json`、`crawler.py`（运行编排、登记 / 版本 / 下架、附件、手动导入）、`scripts/crawl_kaoyan.py`
+- 修改 `config.py`（`crawl_*`）、`.env.example`、`api/routes_kaoyan.py` + `schemas_kaoyan.py`（`POST /v1/crawl` → 202 + `run_id`，`GET /v1/crawl/{run_id}`）
+- `PYTHONPATH=src pytest -q`：223 passed（196 + 27，全部 MockTransport，不联网）
+- 文档：`docs/kaoyan_phase6_notes.md`
+
+### 真实 probe（2026-10-07，本机网络，UA `kaoyan-info-agent/0.4`）
+命令：`python scripts/crawl_kaoyan.py --mode probe [--no-dry-run]`，四校、每校列表第 1 页、同 host 间隔 ≥3 s、每校上限 20 次请求。
+
+| 运行 | run_id | 请求 | 耗时 | 文章（新 / 已知） | 登记 | 未变化 | 提醒 | 错误 / blocked |
+|------|--------|------|------|------------------|------|--------|------|----------------|
+| dry-run（修复前） | `crawl_c58eb0ae290e` | 8 | 41.9 s | 中大被 robots 跳过、华师 404、暨南标题混摘要 | — | — | — | — |
+| dry-run | `crawl_0a8a4af50229` | 11 | 42.4 s | 93（79 / 14） | 0 | 0 | 7 | 0 / 0 |
+| 非 dry-run | `crawl_41795309a6f4` | 80 | 321.1 s | 93（79 / 14） | 67 | 2 | 7 | 0 / 0 |
+
+非 dry-run 分校：
+
+| 学校 | 请求 | 耗时 | 列表条目 | 新 / 已知 | 登记 | 未变化 | 探测 |
+|------|------|------|----------|-----------|------|--------|------|
+| 中大 | 20 | 61.2 s | 20 | 17 / 3 | 17 | 0 | 文章 ID 543 起无新文章 |
+| 华工 | 20 | 58.7 s | 13 + 6（两个栏目） | 15 / 3 | 15 | 2（`scut-043`、`scut-051`，sha256 相同） | 目录系统可访问，年度下拉 2027 |
+| 暨南 | 20 | 84.6 s | 23 | 20 / 3 | 18 | 0 | 2028 目录栏目 410（未发布） |
+| 华师 | 20 | 116.5 s | 22 + 20（两个栏目） | 27 / 5 | 17 | 0 | 目录年份下拉出现 2027 |
+
+- `documents` 97 → 164（全部 `active`）；新登记 4 篇按标题标为含个人信息（拟录取 / 递补复试名单、咨询人员名单），只存在被忽略的 `data/kaoyan/cache/`（本机 5.9 MB）
+- 每校预算都用完：新文章先登记，暨南 2 篇、华师 10 篇未登记，中大 / 暨南 / 华师的已知文章未复查，下次运行补上
+- 7 条提醒：中大 / 华工 2027 招生章程、华工 2 个联培项目 2027 简章（误报，可接受）、华工目录系统可访问、华师 2027 目录（文章 + 下拉）
+- 运行前已备份本机库到 `/tmp/kaoyan_before_k6.db`；库文件、缓存不入 git
+
+### 补跑非 dry-run（2026-10-07 10:50，`--max-pages 40`）
+| run_id | 请求 | 耗时 | 新 / 已知 | 登记 | 未变化 | 变化 | 下架 | 错误 / blocked |
+|--------|------|------|-----------|------|--------|------|------|----------------|
+| `crawl_99061ce8e6ac` | 104 | 437.4 s | 12 / 81 | 12 | 76 | 5 → 0（误判，已清理） | 0 | 0 / 0 |
+
+| 学校 | 请求 | 耗时 | 新 / 已知 | 登记 | 未变化 | 变化 |
+|------|------|------|-----------|------|--------|------|
+| 中大 | 23 | 70.4 s | 0 / 20 | 0 | 20 | 0 |
+| 华工 | 21 | 61.7 s | 0 / 18 | 0 | 18 | 0 |
+| 暨南 | 25 | 96.3 s | 2 / 21 | 2 | 21 | 0 |
+| 华师 | 35 | 208.9 s | 10 / 22 | 10 | 17 | 5（误判） |
+
+- 上次没登记的暨南 2 篇、华师 10 篇已登记；第一次登记的 67 篇在复查中全部判为未变化（sha256 / 304 / 正文指纹）
+- 华师 5 篇种子文档（`scnu-021 / 028 / 029 / 030 / 033`）被判为“变化”：差异全在边栏（最新消息 / 本周图文 / 热门消息出现 9-28 新发的 2027 目录）和“上一篇 / 下一篇”，正文一字未改。修复：`sites.json` 加每校 `content_selector`，正文指纹只取正文文字 + 正文内链接 / 附件地址；离线用同样的字节复核 5 篇均判为未变化，删除误建的 5 条 `-v2` 记录和缓存文件，父文档 `last_seen` 更新为本次时间
+- `documents` 164 → 176，全部 `active`、无版本记录；已知文章全部复查完毕。运行前备份 `/tmp/kaoyan_before_k6_run2.db`
+
+## 五问重启检查（K6）
+| 问题 | 答案 |
+|------|------|
+| 我在哪里？ | K6 完成，等用户看 diff 摘要后提交 |
+| 我要去哪里？ | K7：OCR / 视觉（rapidocr + 多模态）、专业筛选前端页、README / docs 更新 |
+| 目标是什么？ | 考研信息 Agent：每个数字带来源 / 年份 / 口径，不知道就说不知道 |
+| 我学到了什么？ | 真实站点和种子记录会漂移：robots.txt 被 WAF 拦、栏目改版 404、原来被统一认证拦的目录系统现在能访问；所以必须先 dry-run 看结果再落库，并让 `sites.json` 能覆盖种子 |
+| 我做了什么？ | 礼貌 HTTP 客户端、4 个站点适配器、变化检测与版本、crawl API / CLI、27 条新测试、三次真实 probe（含补跑） |
+
 ## 会话：2026-09-29（考研改造 K5：Agent 工具、提示词、API）
 
 ### K5
-- **状态：** complete（待提交到 `feat/kaoyan`）
+- **状态：** complete（已提交 `a1c5ee7`）
 - 新增 `kaoyan/query.py`（查询服务：筛选、统招取值、复试线口径、科目、对比表行、文档元数据）、`tools/kaoyan.py`（6 个结构化工具 + citation / 导出行 / LLM 视图）、`agent/kaoyan_flow.py`（按意图确定性调工具、reflect、finalize 数字校验）、`api/routes_kaoyan.py` + `schemas_kaoyan.py`（`/v1/programs`、`/v1/programs/{id}`、`/v1/score-lines`、`/v1/documents`、`/v1/documents/{id}`）、`scripts/smoke_kaoyan.py`
 - 修改 `guardrails.py`（考研意图识别、数字校验）、`prompts.py`（考研 15 条规则）、`nodes.py`（按意图分流，企业路径不变）、`state.py` / `graph.py`（`intent`、`facts`）、`registry.py`（注册工具，`rag_search` 加 `profile`）、`/health` 加可选字段、`__version__` 0.4.0 并用于 `create_app()`
 - `PYTHONPATH=src pytest -q`：196 passed（139 + 57）；`test_api_errors.py` 未改

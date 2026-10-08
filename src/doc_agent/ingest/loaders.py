@@ -489,6 +489,30 @@ def load_xls(path: Path) -> ParsedDocument:
 _IMAGE_MIME = {".jpg": "image/jpeg", ".jpeg": "image/jpeg", ".png": "image/png"}
 
 
+def ocr_page(
+    image: bytes, backend: OCRBackend, source: str, page_no: int, first_index: int
+) -> tuple[str, list[tbl.Table]] | None:
+    """OCR one image → (prose with ``[[TABLE:n]]`` markers, tables). Vision backends return
+    Markdown tables; box backends get the table rebuilt from the ruling lines."""
+    from doc_agent.ingest.ocr import group_lines
+    from doc_agent.ingest.ocr_table import inside_bbox, rebuild_table
+
+    result = backend.recognize(image)
+    if result is None:
+        return None
+    tables: list[tbl.Table] = []
+    lines = list(result.lines)
+    if result.tables:
+        for rows in result.tables:
+            cells = [[tbl.clean_cell(c) for c in row] for row in rows]
+            tables.append(tbl.Table(cells, source=source, page=page_no, index=first_index + len(tables)))
+    elif result.boxes and (grid := rebuild_table(image, result.boxes)) is not None:
+        tables.append(tbl.Table(grid.cells, source=source, page=page_no, index=first_index, origins=grid.origins))
+        lines = group_lines([b for b in result.boxes if not inside_bbox(b, grid.bbox)])
+    prose = "\n".join([*lines, *(tbl.TABLE_MARKER.format(index=t.index) for t in tables)])
+    return prose, tables
+
+
 def load_image(path: Path, *, ocr: OCRBackend | None = None) -> ParsedDocument:
     backend = ocr or NoOCR()
     data = path.read_bytes()
@@ -497,14 +521,67 @@ def load_image(path: Path, *, ocr: OCRBackend | None = None) -> ParsedDocument:
         sha256=hashlib.sha256(data).hexdigest(), needs_ocr=True,
     )
     pages: list[DocumentPage] = []
-    meta: dict[str, Any] = {"format": "image", "ocr_pages": [], "ocr_backend": backend.name}
+    tables: list[tbl.Table] = []
+    meta: dict[str, Any] = {"format": "image", "ocr_pages": [], "ocr_backend": backend.name, "prose": {}}
     if backend.available():
-        result = backend.recognize(data)
-        text = _clean(result.text) if result else ""
-        if text:
-            pages.append(DocumentPage(source=str(path), page=1, text=text))
-            image.needs_ocr = False
-    return ParsedDocument(source=str(path), pages=pages, images=[image], meta=meta)
+        try:
+            out = ocr_page(data, backend, str(path), 1, 0)
+        except Exception as exc:  # noqa: BLE001
+            meta["ocr_error"] = f"{type(exc).__name__}: {exc}"
+            out = None
+        if out is not None:
+            prose, tables = out
+            text = tbl.render_page(prose, tables)
+            if text:
+                pages.append(DocumentPage(source=str(path), page=1, text=text))
+                meta["prose"] = {1: prose}
+                meta["ocr_applied"] = [1]
+                image.needs_ocr = False
+    return ParsedDocument(source=str(path), pages=pages, tables=tables, images=[image], meta=meta)
+
+
+def render_pdf_pages(path: Path, page_numbers: list[int], scale: float = 2.0) -> dict[int, bytes]:
+    """PNG bytes of the given 1-based pages (for OCR of scanned pages)."""
+    import io
+
+    import pypdfium2 as pdfium
+
+    out: dict[int, bytes] = {}
+    pdf = pdfium.PdfDocument(str(path))
+    try:
+        for n in page_numbers:
+            buf = io.BytesIO()
+            pdf[n - 1].render(scale=scale).to_pil().save(buf, format="PNG")
+            out[n] = buf.getvalue()
+    finally:
+        pdf.close()
+    return out
+
+
+def _ocr_pdf_pages(path: Path, doc: ParsedDocument, backend: OCRBackend) -> None:
+    """Replace scanned pages (``meta["ocr_pages"]``) with OCR text and tables, in page order."""
+    done: list[int] = []
+    prose_map = doc.meta.setdefault("prose", {})
+    for page_no, image in render_pdf_pages(path, doc.ocr_pages).items():
+        try:
+            out = ocr_page(image, backend, str(path), page_no, len(doc.tables))
+        except Exception as exc:  # noqa: BLE001
+            doc.meta.setdefault("ocr_errors", {})[page_no] = f"{type(exc).__name__}: {exc}"
+            continue
+        if out is None:
+            continue
+        prose, page_tables = out
+        text = tbl.render_page(prose, page_tables)
+        if not text:
+            continue
+        doc.tables.extend(page_tables)
+        doc.pages.append(DocumentPage(source=str(path), page=page_no, text=text))
+        prose_map[page_no] = prose
+        done.append(page_no)
+    doc.pages.sort(key=lambda p: p.page)
+    doc.meta["ocr_pages"] = [p for p in doc.ocr_pages if p not in done]
+    doc.meta["ocr_applied"] = done
+    doc.meta["ocr_backend"] = backend.name
 
 
 def load_file(path: Path, *, tables: bool = False, ocr: OCRBackend | None = None) -> ParsedDocument:
@@ -512,7 +589,10 @@ def load_file(path: Path, *, tables: bool = False, ocr: OCRBackend | None = None
     always carry tables); ``ocr`` defaults to the no-op backend."""
     suffix = path.suffix.lower()
     if suffix == ".pdf":
-        return load_pdf(path, tables=tables)
+        doc = load_pdf(path, tables=tables)
+        if ocr is not None and doc.ocr_pages and ocr.available():
+            _ocr_pdf_pages(path, doc, ocr)
+        return doc
     if suffix == ".docx":
         return as_parsed(load_docx(path), format="docx")
     if suffix == ".doc":

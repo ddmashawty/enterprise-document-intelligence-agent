@@ -27,7 +27,11 @@ def main() -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument("--db", default="data/kaoyan_eval.db", help="Scratch SQLite path (recreated)")
     parser.add_argument("--out", default="docs/kaoyan_extraction_report.md", help="Markdown report path")
+    parser.add_argument("--ocr", choices=["none", "rapidocr", "vision"],
+                        help="OCR backend for image documents (default: OCR_BACKEND)")
     args = parser.parse_args()
+    if args.ocr:
+        settings = settings.model_copy(update={"ocr_backend": args.ocr})
 
     db = settings.resolve(args.db)
     if db == settings.kaoyan_db_path.resolve():

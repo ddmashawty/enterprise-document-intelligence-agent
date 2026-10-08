@@ -189,7 +189,7 @@ def test_jnu_tm_pool_upper_bound() -> None:
 
 def test_every_rule_extractor_has_a_name() -> None:
     names = [cls().name for cls in RULE_EXTRACTORS]
-    assert len(names) == len(set(names)) == 10
+    assert len(names) == len(set(names)) == 12
 
 
 # --- apply: resolve / compare / write ----------------------------------------

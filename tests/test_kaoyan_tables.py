@@ -184,7 +184,8 @@ def test_empty_pdf_still_raises(tmp_path: Path) -> None:
 def test_ocr_backend_registry() -> None:
     backend = get_ocr_backend("none")
     assert backend.name == "none" and not backend.available() and backend.recognize(b"") is None
+    assert get_ocr_backend("rapidocr").name == "rapidocr"
     with pytest.raises(ValueError, match="not implemented"):
-        get_ocr_backend("rapidocr")
+        get_ocr_backend("paddleocr")
     with pytest.raises(ValueError, match="Unknown"):
         get_ocr_backend("tesseract")

@@ -99,6 +99,9 @@ def run_extraction(
         facts: list[Fact] = []
         for extractor in matching:
             facts.extend(extractor.extract(doc, ctx))
+        if doc.meta.get("ocr_applied"):
+            for fact in facts:
+                fact.extraction_method = "ocr"
         status = "needs_ocr" if not facts and doc.needs_ocr else "ok"
         if not facts and llm is not None and llm.eligible(ctx) and not doc.needs_ocr:
             facts = llm.extract(doc, ctx)

@@ -6,7 +6,7 @@
 - 需求原文：`data/kaoyan/CURSOR_PROMPT.md`；数据说明：`data/kaoyan/README.md`。
 
 ## 当前阶段
-K0 已确认（2026-09-27）；K1 已提交（`125b5a0`）；K2 已提交（`f6ea30f`）；K3 已提交（`0aa958f`）；K4 已提交（`d933603`）；K5 完成（2026-09-29，待提交）；下一步 **K6 采集层**。
+K0 已确认（2026-09-27）；K1 已提交（`125b5a0`）；K2 已提交（`f6ea30f`）；K3 已提交（`0aa958f`）；K4 已提交（`d933603`）；K5 已提交（`a1c5ee7`）；K6 已提交（`13dab2a`，补跑与正文指纹修复 `6e11eac`）；K7 完成，待提交。包改名（可选，单独 PR）等用户决定。
 
 ## 各阶段
 
@@ -131,12 +131,16 @@ K0 已确认（2026-09-27）；K1 已提交（`125b5a0`）；K2 已提交（`f6e
 - **修改：** `api/routes_kaoyan.py`（`POST /v1/crawl` 默认 `dry_run=true` → `run_id`；`GET /v1/crawl/{run_id}`，记录在 `kaoyan.db.crawl_runs`）、`config.py`（`crawl_*`）
 - **测试（全部 `httpx.MockTransport`）：** 限速、robots、重试、URL 规范化 / 文章 ID / sha256 去重、SCUT 多栏目 a{ID} 去重、SYSU 分页 URL 修正、SCNU WebForms 回发参数、JNU 年份探测、`yanzhao.scut.edu.cn` 302 → `blocked` 且不重试
 - **验收：** 用户手动跑一次真实 `probe`（每校列表第 1 页、间隔 ≥3 秒），结果与耗时写进 `progress.md`；新文档进 `documents`，已有的按 sha256 识别为未变化
-- **状态：** pending
+- **实际做法补充：** 列表页按 `sites.json` 里的文章 URL 正则识别（不依赖 CSS 选择器），发布日期取 URL 中的日期，否则取链接附近文字；标题优先取 `title` 属性，其次取内层 `.title`，网站截断的标题（以“…”结尾）登记时用文章页标题补全。`collect/crawler.py` 负责编排：`crawl_runs` 记录、新文章下载到 `cache/<school>/` 并登记（id `{school}-w{hash8}`，按标题猜 doc_type / 年份 / 个人信息，标题过 `redact_text`），已知文章按 304 → sha256 → 正文指纹（忽略浏览计数）判断是否变化，变化时登记新版本 `{id}-v{n}`（`parent_doc_id`），404 / 410 标 `removed`；full 模式下载附件（同 sha 只记重复）并回发抓华师目录。标题提醒：出现比库里更新年份的“招生简章 / 章程 / 专业目录”。`import_manual` 走手动导入（id `{school}-m{sha8}`）。站点探测：中大文章 ID 递增、华工目录系统是否可访问及年度下拉、暨南下一年目录栏目、华师目录年份下拉。`sites.json` 的规则键（adapter / lists_override / article_patterns / skip_url_patterns / probe）在重新生成时保留
+- **结果：** 223 passed（196 + 27）。真实 dry-run probe：4 校 11 次请求、42.4 s，93 篇文章（79 新 / 14 已知），7 条提醒；真实非 dry-run probe：80 次请求、321.1 s，登记 67 篇（`documents` 97 → 164），华工 2 篇已知文章按 sha256 判为未变化，0 错误 0 blocked；补跑（每校上限 40）104 次请求、437.4 s，再登记 12 篇（→ 176），76 篇已知文章未变化，修复正文指纹后 0 误判。详见 `progress.md`、`docs/kaoyan_phase6_notes.md`
+- **状态：** complete
 
 ### 阶段 K7：OCR / 视觉 + 前端 + 文档
 - **修改 / 新增：** `ingest/ocr.py` 接 `rapidocr`（`requirements-ocr.txt`）和 `vision`（OpenAI 兼容多模态，`vision_*` 配置）；OCR 结果按 sha256 缓存到 `data/kaoyan/ocr_cache/`；6 张图片表格 OCR 产出 `verified=0`，与种子一致才标已核对；扫描名单只统计人数。前端：新增“专业筛选”页（调 `/v1/programs`，显示口径和来源链接），演示剧本换成第 6 节问题，`frontend/api_client.py` 新方法配测试。README / `data/README.md` / `docs/` 更新
-- **可选：** 包改名（单独 PR，等用户决定）
-- **状态：** pending
+- **可选：** 包改名（单独 PR，等用户决定）——未做
+- **实际做法补充：** 表格不靠 OCR 猜结构：`ingest/ocr_table.py` 用长墨迹找线框，文字框按中心落格，缺线 = 合并格；vision 直接要 Markdown 表。OCR 结果按图片 sha256 缓存。名单文件在 `load_document` 里强制 `NoOCR`，人数统计走 `kaoyan/roster.py` + `scripts/roster_stats.py`（只打印，不写库）。新增华工两种图片表抽取器，中大细则抽取器同时匹配图片。前端展平逻辑放在不依赖 streamlit 的 `frontend/kaoyan_view.py`，便于单测
+- **结果：** 250 passed（223 + 27）。6 张图片 61 条事实：17 条与种子一致、15 条新（`verified=0`）、29 条超出 37 个专业、0 冲突；评估报告种子复现 363 → 380。vision 只做了假传输测试（无 `VISION_*`）；scut-044 本机缺失，名单计数只有离线测试。详见 `docs/kaoyan_phase7_notes.md`
+- **状态：** complete
 
 ## 开放问题
 1. （无）Embedding 已定为本地 Ollama `qwen3-embedding:0.6b`；仍保留未配置时 BM25 兜底。
@@ -189,6 +193,20 @@ K0 已确认（2026-09-27）；K1 已提交（`125b5a0`）；K2 已提交（`f6e
 | 【K5】数字校验证据 = 结构化工具原始输出 + 检索片段 + 提示 + 用户问题，不含会话历史；另豁免 0 开头的 4 位学科代码 | 历史回答可能含未经核对的数字；“0812”等代码不是数值 |
 | 【K5】派生值以 `formula`（“210 − 165 = 45”）+ 两份来源输出，而不是单独的 `derived` 字段 | 模型可照抄公式，校验能在证据中找到每个数 |
 | 【K5】名单题只调 `search_programs` 取统计、不做 RAG；答案缺“个人信息”说明时自动补在开头 | 约束 4；检索片段虽已脱敏也不必带入 |
+| 【K6】robots.txt 按 RFC 9309：4xx（含 401 / 403）视为全部允许，5xx / 网络错误视为全部禁止 | 中大 robots.txt 被 WAF 返回 403 页面，列表页本身 200；按标准处理而不是放弃该校 |
+| 【K6】列表解析靠文章 URL 正则 + 文章 key（华工 / 暨南 `a{ID}`，中大按学院，华师 `{子站}:{ID}`） | 四校模板不同、改版频繁；同一文章挂多个栏目 / 子域时能去重 |
+| 【K6】`dry_run`（默认）只抓列表页和探测 URL，不写 `documents`；`crawl_runs` 照常记录 | 约束 3 礼貌抓取；先看会发现什么再决定是否落库 |
+| 【K6】每校请求上限（默认 20，robots.txt 不计）；新文章先登记，已知文章后复查 | 首次运行新文章多时优先补库；复查留到预算剩余或下次运行 |
+| 【K6】抓取文档 id `{school}-w{sha1(key)[:8]}`，版本 `{id}-v{n}`，手动导入 `{school}-m{sha256[:8]}`；doc_type / 年份 / 个人信息按标题猜，标题先脱敏 | 与种子 id（`jnu-001`）不冲突、可重复计算；猜错只影响排序，K7 可人工修正 |
+| 【K6】栏目路径失效时在 `sites.json` 写 `lists_override`，不改 `sources.json` | `sources.json` 是种子包原文；覆盖项在重新生成时保留 |
+| 【K6】`crawl_min_interval_sec` 低于 3 秒时强制改为 3 秒 | 约束 3：同一 host ≥3 秒，配置写错也不能更快 |
+| 【K7】OCR 表格按线框还原（长墨迹 = 线，实心色带两边各算一条线，缺线 = 合并格），不让 OCR / 模型推断表结构 | 通知图片线框规整；合并格展开方式与 HTML `rowspan` 一致，抽取器可共用 |
+| 【K7】OCR 事实 `extraction_method=ocr`，入库规则同 K4（同键同值才 `verified=1`） | 约束：OCR 产出 `verified=0`，和种子对上才能标已核对 |
+| 【K7】华工校线图按学科门类出事实，不展开到专业；种子按专业展开的 5 条记为未复现 | 哪些专业适用哪条门类线是编辑口径，抽取器不替人决定 |
+| 【K7】名单文件永不 OCR 入库；扫描名单计数只打印、不写库 | 约束 4；全校按专业代码计数混合学院 / 联培，口径要人工确认 |
+| 【K7】OCR 依赖可选（`requirements-ocr.txt`），真实 OCR 测试 `importorskip` | 核心安装不变；CI / 别的机器没装也全绿 |
+| 【K7】不改包名 | CURSOR_PROMPT 3.8：单独 PR，由用户决定 |
+| 【K6】正文指纹只取 `content_selector`（中大 `article`、华工 / 暨南 `.wp_articlecontent`、华师 `.detail .article`）内的文字 + 链接 / 附件地址；选择器取不到时退回整页文字 | 边栏和上一篇 / 下一篇随新文章变化，整页比较会误建版本；正文只有 PDF 播放器时靠 `pdfsrc` 发现附件替换 |
 
 ## 遇到的错误
 | 错误 | 尝试次数 | 解决方案 |
@@ -219,6 +237,17 @@ K0 已确认（2026-09-27）；K1 已提交（`125b5a0`）；K2 已提交（`f6e
 | 【K5】冒烟首轮 16/18：模型主动写用户没问的“2027 年复试线未取得”，写“考 408 / 不考 408”，边界项漏补复试线 | 3 | 提示词加规则 4 / 14 / 15，规则 5 要求原样写“官方资料中未取得”；规则 14 限定“用户问到 408 时”，no_exam 专业不提 408 |
 | 【K5】数字校验把学科代码“0812”判为无依据数字 | 1 | 豁免 0 开头的 4 位学科代码；普通 4 位数（如 1200）仍校验 |
 | 【K5】FastAPI 依赖写成参数默认值触发 ruff B008，改 `Annotated` 后无默认参数排在有默认参数之后 | 1 | 依赖参数放到签名第一位 |
+| 【K6】真实 dry-run 首轮中大整校被跳过：robots.txt 返回 WAF 403 页面，被当成“禁止” | 1 | 按 RFC 9309，4xx 视为全部允许；加测试 |
+| 【K6】华师两个列表栏目 404（`sources.json` 的 `/ssgg/`、`/ssjz/` 已改版） | 1 | 从首页导航找到新路径，写进 `sites.json` 的 `lists_override` |
+| 【K6】暨南列表标题混进摘要和日期（每条有两个 `<a>`，第二个包着日期 + 标题 + 摘要） | 1 | 标题按质量取：`title` 属性 > 内层 `.title` > 链接文字；同 key 保留最好的 |
+| 【K6】测试偶发失败（预算用尽） | 1 | 并行发起编辑和 pytest，测试跑在编辑落盘之前；改为编辑完成后再跑，10/10 通过 |
+| 【K6】补跑时华师 5 篇种子文档被误判为“内容变化”（边栏、上一篇 / 下一篇变了，正文没变） | 1 | 每校 `content_selector` 只比正文；离线复核后删除误建的 5 条版本记录 |
+| 【K6】测试失败输出里 `Settings` repr 带出 `.env` 的 LLM key（只在本机终端） | 1 | 测试用 `Settings(_env_file=None, llm_api_key="")`；建议轮换 key |
+| 【K7】蓝色表头带和第一行数据被并成一格（实心带不算细线，两行之间没有分隔） | 1 | 宽度 >6px 的实心带在上下边各产生一条零宽分隔线 |
+| 【K7】合并格文字中心正好压在线上，落不进任何格而丢失 | 1 | `_locate` 找不到包含的区间时归到最近的格 |
+| 【K7】OCR 把“英语（一）”识别成“英语 (一)”，科目解析不认 | 1 | `fix_cjk_punct` 统一全角并去掉括号两侧空格；全角括号旁的逗号也转全角（单测发现） |
+| 【K7】`test_every_rule_extractor_has_a_name` 写死 10 个抽取器 | 1 | 新增两个图片抽取器后改为 12 |
+| 【K7】Streamlit 侧栏地址用浏览器自动化填值不生效（React 状态未更新） | 1 | 把 API 起在默认 8000 端口再检查页面 |
 
 ## 备注
 - 规划文件位于项目根目录，不在 skill 安装目录

@@ -1,4 +1,8 @@
-"""中山大学学院《复试录取实施细则》: 复试分数线表 + 拟招生人数表（总计划 / 已招推免生 / 公开招考计划）."""
+"""中山大学学院《复试录取实施细则》: 复试分数线表 + 拟招生人数表（总计划 / 已招推免生 / 公开招考计划）.
+
+Also reads the same tables published as images (软件工程学院 / 电子与通信工程学院) once OCR
+has rebuilt them.
+"""
 
 from __future__ import annotations
 
@@ -34,7 +38,7 @@ class SysuRetestHtml:
     name = "sysu_retest_html"
 
     def matches(self, ctx: ExtractContext) -> bool:
-        return ctx.school_id == "sysu" and ctx.doc_type == "retest_rules" and str(ctx.format).startswith("html")
+        return ctx.school_id == "sysu" and ctx.doc_type == "retest_rules" and str(ctx.format).startswith(("html", "img"))
 
     def extract(self, doc: ParsedDocument, ctx: ExtractContext) -> list[Fact]:
         facts = FactSet(ctx, self.name)
