@@ -80,8 +80,8 @@ def _schools(question: str) -> list[str]:
 
 
 def _codes(question: str) -> list[str]:
-    six = re.findall(r"(?<!\d)(\d{6})(?!\d)", question)
-    four = [c for c in re.findall(r"(?<!\d)(\d{4})(?!\d)", question) if not c.startswith("20")]
+    six = re.findall(r"(?<![0-9A-Za-z])(\d{4}[0-9A-Z]{2})(?![0-9A-Za-z])", question)
+    four = [c for c in re.findall(r"(?<![0-9A-Za-z])(\d{4})(?![0-9A-Za-z])", question) if not c.startswith("20")]
     out = []
     for code in six + four:
         if code not in out:

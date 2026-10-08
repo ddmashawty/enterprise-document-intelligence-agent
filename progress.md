@@ -1,5 +1,14 @@
 # 进度日志
 
+## 会话：2026-10-09（P1 评测 L0 + L1，不调 LLM）
+
+- **状态：** 分支 `p1/eval-l0-l1`；M0 已开 [PR #3](https://github.com/ddmashawty/enterprise-document-intelligence-agent/pull/3)
+- **记录：** `docs/kaoyan_p1_notes.md`；第一份报告 `docs/eval/2026-10-09.md`
+- **做了：** `src/doc_agent/eval/`（metrics、runner）、`scripts/eval_kaoyan.py`、CI 建库后跑 L0/L1 并和 `docs/eval/baseline.json` 比（掉超过 2 个百分点失败）；修正 v1-15 金标准代码（0812Z3）
+- **结果：** L0 全字段 97.1%（“四校”识别不出学校，2 道）；L1 50 道全命中（同库生成，只防回归）
+- **验证：** `ruff check` 通过；`pytest -q` 261 passed（255 + 6）；CI 方式新建库上 L0/L1 结果和本机库相同
+- **下一步：** 回填 v1 的 `expected_facts`；扩充评测集
+
 ## 会话：2026-10-08（M0 工程骨架，不调 LLM）
 
 - **状态：** 骨架已提交到 `m0/skeleton`（`4e39661`）；候选题核对未提交
