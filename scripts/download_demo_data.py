@@ -217,43 +217,6 @@ def download_annual_reports(sources: list[dict]) -> list[dict]:
 
 def download_public_extras(sources: list[dict]) -> list[dict]:
     """Download a few stable public PDFs for policy / manual demos."""
-    extras = [
-        # SEC 10-K sample (English technical/financial manual-like structure)
-        {
-            "category": "manuals",
-            "filename": "SEC_Apple_10K_2024.pdf",
-            "title": "Apple Inc. Form 10-K (SEC EDGAR)",
-            "source": "https://www.sec.gov/Archives/edgar/data/320193/000032019324000123/aapl-20240928.htm",
-            "urls": [
-                # Direct PDF filings when available; HTML is common — try known PDF wrappers
-                "https://www.sec.gov/Archives/edgar/data/320193/000032019324000123/aapl-20240928.pdf",
-            ],
-        },
-        # Chinese open government / exchange policy PDFs (try several candidates)
-        {
-            "category": "policies",
-            "filename": "上交所_股票上市规则_摘录说明.pdf",
-            "title": "上海证券交易所股票上市规则（公开披露文本）",
-            "source": "https://www.sse.com.cn/",
-            "urls": [
-                # These may rotate; script will skip failures
-                "http://www.sse.com.cn/lawandrules/sselawsrules/stocks/mainipo/c/c_20230519_5684463.pdf",
-                "https://www.sse.com.cn/lawandrules/sselawsrules/stocks/mainipo/c/c_20230519_5684463.pdf",
-            ],
-        },
-        {
-            "category": "policies",
-            "filename": "深交所_股票上市规则.pdf",
-            "title": "深圳证券交易所股票上市规则",
-            "source": "https://www.szse.cn/",
-            "urls": [
-                "https://www.szse.cn/lawrules/rule/stock/list/t20230702_600000.html",
-            ],
-        },
-    ]
-
-    # Prefer reliable open PDFs from Wikimedia / government mirrors for demo
-    # Replace fragile exchange links with known-good public files:
     stable = [
         {
             "category": "policies",

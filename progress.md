@@ -1,5 +1,13 @@
 # 进度日志
 
+## 会话：2026-10-08（M0 工程骨架，不调 LLM）
+
+- **状态：** 代码在分支 `m0/skeleton`，未提交
+- **计划：** `docs/kaoyan_improvement_plan.md`。本阶段记录：`docs/kaoyan_m0_notes.md`
+- **做了：** `pyproject.toml`、MIT `LICENSE`、README 版权说明、CI（ruff + pytest）、评测集说明、18 题迁入 `data/gold/kaoyan_eval_v2.jsonl`（split=dev）、60 道模板候选 `data/gold/candidates_m0.jsonl`、`run_agent` 汇总 token
+- **没做：** 不跑 `smoke_kaoyan.py`（18 题要花 DeepSeek）。`docs/baseline_2026-10.json` 不存在。2024–2025 复试线没有去官网逐份核对
+- **验证：** `ruff check` 通过；`pytest -q` 253 passed（原 250 + 本阶段 3）
+
 ## 会话：2026-10-07（考研改造 K7：OCR / 视觉 + 前端 + 文档）
 
 ### K7
