@@ -1,10 +1,12 @@
 #!/usr/bin/env python3
 """Build the v2 eval skeleton without calling an LLM.
 
---migrate-v1 writes data/gold/kaoyan_eval_v2.jsonl from the old 18-question file.
-The default run also writes data/gold/candidates_m0.jsonl: at most one score line
-and one plan question per program, capped at 60, from the local kaoyan.db.
-Candidates stay out of the eval file until a person reviews them.
+--migrate-v1 rewrites the v1-* rows of data/gold/kaoyan_eval_v2.jsonl from the old
+18-question file and keeps every other row.
+--candidates writes data/gold/candidates_m0.jsonl: at most one score line and one
+plan question per program, capped at 60, from the local kaoyan.db.
+--apply-review replaces the reviewed template rows of the eval file with the
+accepted and edited candidates listed in data/gold/review_m0.json.
 """
 
 from __future__ import annotations
@@ -20,6 +22,7 @@ ROOT = Path(__file__).resolve().parents[1]
 GOLD_V1 = ROOT / "data" / "gold" / "kaoyan_qa.json"
 EVAL_V2 = ROOT / "data" / "gold" / "kaoyan_eval_v2.jsonl"
 CANDIDATES = ROOT / "data" / "gold" / "candidates_m0.jsonl"
+REVIEW = ROOT / "data" / "gold" / "review_m0.json"
 DB_PATH = ROOT / "data" / "kaoyan.db"
 CANDIDATE_CAP = 60
 
@@ -125,6 +128,7 @@ def migrate_v1_item(item: dict) -> dict:
         "expected_sources": [s["url"] for s in item.get("sources") or [] if s.get("url")],
         "must_include": item.get("must_include") or [],
         "must_not_include": item.get("must_not_include") or [],
+        "judge_rubric": "",
         "origin": "handwritten",
         "reviewed_by": "",
         "reviewed_at": "",
@@ -138,11 +142,97 @@ def write_jsonl(path: Path, rows: list[dict]) -> None:
     path.write_text(text, encoding="utf-8")
 
 
+def read_jsonl(path: Path) -> list[dict]:
+    if not path.exists():
+        return []
+    return [json.loads(line) for line in path.read_text(encoding="utf-8").splitlines() if line.strip()]
+
+
 def migrate_v1() -> list[dict]:
     payload = json.loads(GOLD_V1.read_text(encoding="utf-8"))
     rows = [migrate_v1_item(item) for item in payload["items"]]
-    write_jsonl(EVAL_V2, rows)
+    kept = [r for r in read_jsonl(EVAL_V2) if not r["id"].startswith("v1-")]
+    write_jsonl(EVAL_V2, rows + kept)
     return rows
+
+
+def reviewed_row(candidate: dict, decision: dict, reviewer: str, reviewed_at: str) -> dict:
+    row = json.loads(json.dumps(candidate))
+    row["id"] = decision.get("new_id") or candidate["id"].replace("cand-", "rv-", 1)
+    row["split"] = "unsplit"
+    for key in ("turns", "program_ids", "expected_facts", "must_include", "must_not_include"):
+        if key in decision:
+            row[key] = decision[key]
+    if "codes" in decision:
+        row["expected_intent"]["codes"] = decision["codes"]
+    row["expected_sources"] = row["expected_sources"] + [
+        u for u in decision.get("extra_sources") or [] if u not in row["expected_sources"]
+    ]
+    row["reviewed_by"] = reviewer
+    row["reviewed_at"] = reviewed_at
+    note = f"from {candidate['id']}; {decision['action']}; evidence: {decision['evidence']}"
+    if decision.get("reason"):
+        note += f"; {decision['reason']}"
+    row["notes"] = note
+    ordered = {}
+    for key, value in row.items():
+        ordered[key] = value
+        if key == "must_not_include":
+            ordered["judge_rubric"] = decision.get("judge_rubric", "")
+    return ordered
+
+
+def apply_review() -> list[dict]:
+    review = json.loads(REVIEW.read_text(encoding="utf-8"))
+    candidates = {r["id"]: r for r in read_jsonl(CANDIDATES)}
+    decisions = review["decisions"]
+    decided = {d["id"] for d in decisions}
+    if decided != set(candidates):
+        raise SystemExit(
+            "review_m0.json and candidates_m0.jsonl disagree; "
+            f"undecided: {sorted(set(candidates) - decided)}, unknown: {sorted(decided - set(candidates))}"
+        )
+    rows = [
+        reviewed_row(candidates[d["id"]], d, review["reviewer"], review["reviewed_at"])
+        for d in decisions
+        if d["action"] in {"accept", "edit"}
+    ]
+    rows += [addition_row(a, review["reviewer"], review["reviewed_at"]) for a in review.get("additions") or []]
+    kept = [r for r in read_jsonl(EVAL_V2) if not r["id"].startswith("rv-")]
+    write_jsonl(EVAL_V2, kept + rows)
+    return rows
+
+
+def addition_row(addition: dict, reviewer: str, reviewed_at: str) -> dict:
+    """A question written during review for a fact the template generator skips."""
+    metric = "score_line" if addition["category"] == "score_line" else "plan"
+    return {
+        "id": addition["id"],
+        "split": "unsplit",
+        "category": addition["category"],
+        "turns": addition["turns"],
+        "school": addition["school"],
+        "program_ids": addition["program_ids"],
+        "year": addition["year"],
+        "expected_intent": {
+            "operation": "lookup",
+            "metrics": [metric],
+            "schools": addition["school"],
+            "codes": addition["codes"],
+            "year": addition["year"],
+            "follow_up": False,
+        },
+        "expected_facts": addition["expected_facts"],
+        "expected_refusal": None,
+        "expected_sources": addition["expected_sources"],
+        "must_include": addition["must_include"],
+        "must_not_include": addition.get("must_not_include") or [],
+        "judge_rubric": addition.get("judge_rubric", ""),
+        "origin": "handwritten",
+        "reviewed_by": reviewer,
+        "reviewed_at": reviewed_at,
+        "notes": f"review addition; evidence: {addition['evidence']}; {addition['reason']}",
+    }
 
 
 def _connect(db_path: Path) -> sqlite3.Connection:
@@ -288,8 +378,14 @@ def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__.splitlines()[0])
     parser.add_argument("--migrate-v1", action="store_true", help="only rewrite kaoyan_eval_v2.jsonl")
     parser.add_argument("--candidates", action="store_true", help="only rewrite candidates_m0.jsonl")
+    parser.add_argument("--apply-review", action="store_true", help="only merge review_m0.json into the eval file")
     parser.add_argument("--db", default=str(DB_PATH))
     args = parser.parse_args()
+
+    if args.apply_review:
+        rows = apply_review()
+        print(f"wrote {len(rows)} reviewed rows to {EVAL_V2.relative_to(ROOT)}")
+        return 0
     do_v1 = args.migrate_v1 or not args.candidates
     do_candidates = args.candidates or not args.migrate_v1
     if args.migrate_v1 and args.candidates:
