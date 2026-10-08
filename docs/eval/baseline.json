@@ -1,0 +1,32 @@
+{
+  "meta": {
+    "date": "2026-10-09",
+    "commit": "1cbd1ed-dirty",
+    "gold": "data/gold/kaoyan_eval_v2.jsonl",
+    "splits": [],
+    "rows": 68
+  },
+  "layers": {
+    "L0": {
+      "summary": {
+        "rows": 68,
+        "exact": 0.9706,
+        "schools": 0.9706,
+        "codes": 1.0,
+        "year": 1.0,
+        "operation": 1.0,
+        "metrics": 1.0,
+        "privacy": 1.0
+      }
+    },
+    "L1": {
+      "summary": {
+        "rows": 50,
+        "unscorable": 0,
+        "row_pass": 1.0,
+        "fact_recall": 1.0,
+        "source_match": 1.0
+      }
+    }
+  }
+}

@@ -151,6 +151,7 @@ data/raw/    通用文档模式的演示文档
 ```bash
 pytest -q                                   # 不联网、不调真实 LLM；缺本地专用文件的用例自动 skip
 python scripts/eval_extraction.py --ocr rapidocr   # 抽取 vs 种子 → docs/kaoyan_extraction_report.md
+python scripts/eval_kaoyan.py --out docs/eval      # 评测集 v2 的 L0 意图 + L1 工具，不调 LLM → docs/eval/<日期>.md
 python scripts/smoke_kaoyan.py --json docs/baseline_2026-10.json   # 18 条旧验收题（需要 LLM_API_KEY；会花钱）
 python scripts/smoke_chat.py                # 通用文档模式
 ```

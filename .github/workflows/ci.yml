@@ -18,3 +18,9 @@ jobs:
         run: ruff check
       - name: Pytest
         run: pytest -q
+      - name: Build kaoyan DB from tracked sources
+        run: |
+          python scripts/seed_kaoyan.py --db "$RUNNER_TEMP/kaoyan.db" > /dev/null
+          python scripts/extract_kaoyan.py --db "$RUNNER_TEMP/kaoyan.db" > /dev/null
+      - name: Eval L0-L1 against baseline
+        run: python scripts/eval_kaoyan.py --layers L0,L1 --db "$RUNNER_TEMP/kaoyan.db" --baseline docs/eval/baseline.json --max-drop 0.02
