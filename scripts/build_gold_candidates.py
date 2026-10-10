@@ -2,7 +2,8 @@
 """Build the v2 eval skeleton without calling an LLM.
 
 --migrate-v1 rewrites the v1-* rows of data/gold/kaoyan_eval_v2.jsonl from the old
-18-question file and keeps every other row.
+18-question file plus the facts and reviewer in data/gold/v1_review.json, and keeps
+every other row.
 --candidates writes data/gold/candidates_m0.jsonl: at most one score line and one
 plan question per program, capped at 60, from the local kaoyan.db.
 --apply-review replaces the reviewed template rows of the eval file with the
@@ -23,6 +24,7 @@ GOLD_V1 = ROOT / "data" / "gold" / "kaoyan_qa.json"
 EVAL_V2 = ROOT / "data" / "gold" / "kaoyan_eval_v2.jsonl"
 CANDIDATES = ROOT / "data" / "gold" / "candidates_m0.jsonl"
 REVIEW = ROOT / "data" / "gold" / "review_m0.json"
+V1_REVIEW = ROOT / "data" / "gold" / "v1_review.json"
 DB_PATH = ROOT / "data" / "kaoyan.db"
 CANDIDATE_CAP = 60
 
@@ -148,9 +150,28 @@ def read_jsonl(path: Path) -> list[dict]:
     return [json.loads(line) for line in path.read_text(encoding="utf-8").splitlines() if line.strip()]
 
 
+def apply_v1_review(row: dict, decision: dict, reviewer: str, reviewed_at: str) -> dict:
+    facts = decision.get("expected_facts") or []
+    row["expected_facts"] = facts
+    row["program_ids"] = list(dict.fromkeys(f["program_id"] for f in facts))
+    row["judge_rubric"] = decision.get("judge_rubric", "")
+    row["reviewed_by"] = reviewer
+    row["reviewed_at"] = reviewed_at
+    if decision.get("note"):
+        row["notes"] += " " + decision["note"]
+    return row
+
+
 def migrate_v1() -> list[dict]:
     payload = json.loads(GOLD_V1.read_text(encoding="utf-8"))
     rows = [migrate_v1_item(item) for item in payload["items"]]
+    if V1_REVIEW.exists():
+        review = json.loads(V1_REVIEW.read_text(encoding="utf-8"))
+        rows = [
+            apply_v1_review(r, review["rows"][r["id"]], review["reviewer"], review["reviewed_at"])
+            if r["id"] in review["rows"] else r
+            for r in rows
+        ]
     kept = [r for r in read_jsonl(EVAL_V2) if not r["id"].startswith("v1-")]
     write_jsonl(EVAL_V2, rows + kept)
     return rows

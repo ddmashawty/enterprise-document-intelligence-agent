@@ -1,0 +1,4230 @@
+{
+  "meta": {
+    "date": "2026-10-10",
+    "commit": "8bf7470-dirty",
+    "gold": "data/gold/kaoyan_eval_v2.jsonl",
+    "splits": [],
+    "rows": 68
+  },
+  "layers": {
+    "L0": {
+      "summary": {
+        "rows": 68,
+        "exact": 0.9706,
+        "schools": 0.9706,
+        "codes": 1.0,
+        "year": 1.0,
+        "operation": 1.0,
+        "metrics": 1.0,
+        "privacy": 1.0
+      },
+      "rows": [
+        {
+          "id": "v1-01",
+          "fields": {
+            "schools": true,
+            "codes": true,
+            "year": true,
+            "operation": true,
+            "privacy": true
+          },
+          "exact": true,
+          "predicted": {
+            "schools": [
+              "sysu"
+            ],
+            "codes": [
+              "085404"
+            ],
+            "prefixes": [],
+            "year": 2026,
+            "kinds": [
+              "score_line"
+            ],
+            "privacy": false
+          }
+        },
+        {
+          "id": "v1-02",
+          "fields": {
+            "schools": true,
+            "codes": true,
+            "year": true,
+            "operation": true,
+            "privacy": true
+          },
+          "exact": true,
+          "predicted": {
+            "schools": [
+              "jnu"
+            ],
+            "codes": [
+              "085412"
+            ],
+            "prefixes": [],
+            "year": 2026,
+            "kinds": [
+              "score_line"
+            ],
+            "privacy": false
+          }
+        },
+        {
+          "id": "v1-03",
+          "fields": {
+            "schools": true,
+            "codes": true,
+            "year": true,
+            "operation": true,
+            "privacy": true
+          },
+          "exact": true,
+          "predicted": {
+            "schools": [
+              "scnu"
+            ],
+            "codes": [
+              "085404"
+            ],
+            "prefixes": [],
+            "year": null,
+            "kinds": [
+              "score_line"
+            ],
+            "privacy": false
+          }
+        },
+        {
+          "id": "v1-04",
+          "fields": {
+            "schools": true,
+            "codes": true,
+            "year": true,
+            "operation": true,
+            "privacy": true
+          },
+          "exact": true,
+          "predicted": {
+            "schools": [
+              "sysu"
+            ],
+            "codes": [
+              "083900"
+            ],
+            "prefixes": [],
+            "year": null,
+            "kinds": [
+              "score_line",
+              "subjects"
+            ],
+            "privacy": false
+          }
+        },
+        {
+          "id": "v1-05",
+          "fields": {
+            "schools": true,
+            "codes": true,
+            "year": true,
+            "operation": true,
+            "privacy": true
+          },
+          "exact": true,
+          "predicted": {
+            "schools": [
+              "scut"
+            ],
+            "codes": [
+              "085404"
+            ],
+            "prefixes": [],
+            "year": null,
+            "kinds": [
+              "subjects"
+            ],
+            "privacy": false
+          }
+        },
+        {
+          "id": "v1-06",
+          "fields": {
+            "schools": true,
+            "codes": true,
+            "year": true,
+            "operation": true,
+            "privacy": true
+          },
+          "exact": true,
+          "predicted": {
+            "schools": [
+              "scut"
+            ],
+            "codes": [
+              "140500"
+            ],
+            "prefixes": [],
+            "year": null,
+            "kinds": [
+              "score_line",
+              "subjects"
+            ],
+            "privacy": false
+          }
+        },
+        {
+          "id": "v1-07",
+          "fields": {
+            "schools": true,
+            "codes": true,
+            "year": true,
+            "operation": true,
+            "privacy": true
+          },
+          "exact": true,
+          "predicted": {
+            "schools": [
+              "jnu"
+            ],
+            "codes": [
+              "081203"
+            ],
+            "prefixes": [],
+            "year": 2027,
+            "kinds": [
+              "plan"
+            ],
+            "privacy": false
+          }
+        },
+        {
+          "id": "v1-08",
+          "fields": {
+            "schools": true,
+            "codes": true,
+            "year": true,
+            "operation": true,
+            "privacy": true
+          },
+          "exact": true,
+          "predicted": {
+            "schools": [
+              "sysu"
+            ],
+            "codes": [
+              "081200"
+            ],
+            "prefixes": [],
+            "year": null,
+            "kinds": [
+              "plan"
+            ],
+            "privacy": false
+          }
+        },
+        {
+          "id": "v1-09",
+          "fields": {
+            "schools": true,
+            "codes": true,
+            "year": true,
+            "operation": true,
+            "privacy": true
+          },
+          "exact": true,
+          "predicted": {
+            "schools": [
+              "scnu"
+            ],
+            "codes": [
+              "085410"
+            ],
+            "prefixes": [],
+            "year": null,
+            "kinds": [
+              "plan"
+            ],
+            "privacy": false
+          }
+        },
+        {
+          "id": "v1-10",
+          "fields": {
+            "schools": true,
+            "codes": true,
+            "year": true,
+            "operation": true,
+            "privacy": true
+          },
+          "exact": true,
+          "predicted": {
+            "schools": [
+              "sysu"
+            ],
+            "codes": [
+              "085405"
+            ],
+            "prefixes": [],
+            "year": null,
+            "kinds": [
+              "plan"
+            ],
+            "privacy": false
+          }
+        },
+        {
+          "id": "v1-11",
+          "fields": {
+            "schools": true,
+            "codes": true,
+            "year": true,
+            "operation": true,
+            "privacy": true
+          },
+          "exact": true,
+          "predicted": {
+            "schools": [],
+            "codes": [],
+            "prefixes": [],
+            "year": null,
+            "kinds": [
+              "plan",
+              "subjects",
+              "filter"
+            ],
+            "privacy": false
+          }
+        },
+        {
+          "id": "v1-12",
+          "fields": {
+            "schools": false,
+            "codes": true,
+            "year": true,
+            "operation": true,
+            "privacy": true
+          },
+          "exact": false,
+          "predicted": {
+            "schools": [],
+            "codes": [
+              "085404"
+            ],
+            "prefixes": [],
+            "year": 2026,
+            "kinds": [
+              "score_line",
+              "compare"
+            ],
+            "privacy": false
+          }
+        },
+        {
+          "id": "v1-13",
+          "fields": {
+            "schools": true,
+            "codes": true,
+            "year": true,
+            "operation": true,
+            "privacy": true
+          },
+          "exact": true,
+          "predicted": {
+            "schools": [
+              "sysu"
+            ],
+            "codes": [
+              "085404"
+            ],
+            "prefixes": [],
+            "year": 2027,
+            "kinds": [
+              "plan"
+            ],
+            "privacy": false
+          }
+        },
+        {
+          "id": "v1-14",
+          "fields": {
+            "schools": true,
+            "codes": true,
+            "year": true,
+            "operation": true,
+            "privacy": true
+          },
+          "exact": true,
+          "predicted": {
+            "schools": [
+              "scnu"
+            ],
+            "codes": [],
+            "prefixes": [
+              "0839"
+            ],
+            "year": null,
+            "kinds": [
+              "directions"
+            ],
+            "privacy": false
+          }
+        },
+        {
+          "id": "v1-15",
+          "fields": {
+            "schools": true,
+            "codes": true,
+            "year": true,
+            "operation": true,
+            "privacy": true
+          },
+          "exact": true,
+          "predicted": {
+            "schools": [
+              "jnu"
+            ],
+            "codes": [
+              "0812Z3"
+            ],
+            "prefixes": [],
+            "year": null,
+            "kinds": [
+              "plan"
+            ],
+            "privacy": false
+          }
+        },
+        {
+          "id": "v1-16",
+          "fields": {
+            "schools": true,
+            "codes": true,
+            "year": true,
+            "operation": true,
+            "privacy": true
+          },
+          "exact": true,
+          "predicted": {
+            "schools": [
+              "sysu"
+            ],
+            "codes": [
+              "085400"
+            ],
+            "prefixes": [],
+            "year": null,
+            "kinds": [
+              "subjects",
+              "directions"
+            ],
+            "privacy": false
+          }
+        },
+        {
+          "id": "v1-17",
+          "fields": {
+            "schools": true,
+            "codes": true,
+            "year": true,
+            "operation": true,
+            "privacy": true
+          },
+          "exact": true,
+          "predicted": {
+            "schools": [
+              "scut"
+            ],
+            "codes": [],
+            "prefixes": [],
+            "year": null,
+            "kinds": [
+              "directions",
+              "privacy"
+            ],
+            "privacy": true
+          }
+        },
+        {
+          "id": "v1-18",
+          "fields": {
+            "schools": false,
+            "codes": true,
+            "year": true,
+            "operation": true,
+            "privacy": true
+          },
+          "exact": false,
+          "predicted": {
+            "schools": [],
+            "codes": [
+              "085404"
+            ],
+            "prefixes": [],
+            "year": null,
+            "kinds": [
+              "score_line",
+              "plan",
+              "compare",
+              "export"
+            ],
+            "privacy": false
+          }
+        },
+        {
+          "id": "rv-jnu-010-081201-score_line-2026",
+          "fields": {
+            "schools": true,
+            "codes": true,
+            "year": true,
+            "operation": true,
+            "privacy": true,
+            "metrics": true
+          },
+          "exact": true,
+          "predicted": {
+            "schools": [
+              "jnu"
+            ],
+            "codes": [
+              "081201"
+            ],
+            "prefixes": [],
+            "year": 2026,
+            "kinds": [
+              "score_line"
+            ],
+            "privacy": false
+          }
+        },
+        {
+          "id": "rv-jnu-010-0812-score_line-2026",
+          "fields": {
+            "schools": true,
+            "codes": true,
+            "year": true,
+            "operation": true,
+            "privacy": true,
+            "metrics": true
+          },
+          "exact": true,
+          "predicted": {
+            "schools": [
+              "jnu"
+            ],
+            "codes": [],
+            "prefixes": [
+              "0812"
+            ],
+            "year": 2026,
+            "kinds": [
+              "score_line"
+            ],
+            "privacy": false
+          }
+        },
+        {
+          "id": "rv-jnu-044-0812Z3-score_line-2026",
+          "fields": {
+            "schools": true,
+            "codes": true,
+            "year": true,
+            "operation": true,
+            "privacy": true,
+            "metrics": true
+          },
+          "exact": true,
+          "predicted": {
+            "schools": [
+              "jnu"
+            ],
+            "codes": [
+              "0812Z3"
+            ],
+            "prefixes": [],
+            "year": 2026,
+            "kinds": [
+              "score_line"
+            ],
+            "privacy": false
+          }
+        },
+        {
+          "id": "rv-jnu-052-083900-score_line-2026",
+          "fields": {
+            "schools": true,
+            "codes": true,
+            "year": true,
+            "operation": true,
+            "privacy": true,
+            "metrics": true
+          },
+          "exact": true,
+          "predicted": {
+            "schools": [
+              "jnu"
+            ],
+            "codes": [
+              "083900"
+            ],
+            "prefixes": [],
+            "year": 2026,
+            "kinds": [
+              "score_line"
+            ],
+            "privacy": false
+          }
+        },
+        {
+          "id": "rv-jnu-010-085404-score_line-2026",
+          "fields": {
+            "schools": true,
+            "codes": true,
+            "year": true,
+            "operation": true,
+            "privacy": true,
+            "metrics": true
+          },
+          "exact": true,
+          "predicted": {
+            "schools": [
+              "jnu"
+            ],
+            "codes": [
+              "085404"
+            ],
+            "prefixes": [],
+            "year": 2026,
+            "kinds": [
+              "score_line"
+            ],
+            "privacy": false
+          }
+        },
+        {
+          "id": "rv-jnu-010-085410-score_line-2026",
+          "fields": {
+            "schools": true,
+            "codes": true,
+            "year": true,
+            "operation": true,
+            "privacy": true,
+            "metrics": true
+          },
+          "exact": true,
+          "predicted": {
+            "schools": [
+              "jnu"
+            ],
+            "codes": [
+              "085410"
+            ],
+            "prefixes": [],
+            "year": 2026,
+            "kinds": [
+              "score_line"
+            ],
+            "privacy": false
+          }
+        },
+        {
+          "id": "rv-jnu-044-085410-score_line-2026",
+          "fields": {
+            "schools": true,
+            "codes": true,
+            "year": true,
+            "operation": true,
+            "privacy": true,
+            "metrics": true
+          },
+          "exact": true,
+          "predicted": {
+            "schools": [
+              "jnu"
+            ],
+            "codes": [
+              "085410"
+            ],
+            "prefixes": [],
+            "year": 2026,
+            "kinds": [
+              "score_line"
+            ],
+            "privacy": false
+          }
+        },
+        {
+          "id": "rv-jnu-063-085410-pt-score_line-2026",
+          "fields": {
+            "schools": true,
+            "codes": true,
+            "year": true,
+            "operation": true,
+            "privacy": true,
+            "metrics": true
+          },
+          "exact": true,
+          "predicted": {
+            "schools": [
+              "jnu"
+            ],
+            "codes": [
+              "085410"
+            ],
+            "prefixes": [],
+            "year": 2026,
+            "kinds": [
+              "score_line"
+            ],
+            "privacy": false
+          }
+        },
+        {
+          "id": "rv-scnu-019-081200-score_line-2026",
+          "fields": {
+            "schools": true,
+            "codes": true,
+            "year": true,
+            "operation": true,
+            "privacy": true,
+            "metrics": true
+          },
+          "exact": true,
+          "predicted": {
+            "schools": [
+              "scnu"
+            ],
+            "codes": [
+              "081200"
+            ],
+            "prefixes": [],
+            "year": 2026,
+            "kinds": [
+              "score_line"
+            ],
+            "privacy": false
+          }
+        },
+        {
+          "id": "rv-scnu-041-081200-score_line-2026",
+          "fields": {
+            "schools": true,
+            "codes": true,
+            "year": true,
+            "operation": true,
+            "privacy": true,
+            "metrics": true
+          },
+          "exact": true,
+          "predicted": {
+            "schools": [
+              "scnu"
+            ],
+            "codes": [
+              "081200"
+            ],
+            "prefixes": [],
+            "year": 2026,
+            "kinds": [
+              "score_line"
+            ],
+            "privacy": false
+          }
+        },
+        {
+          "id": "rv-scnu-019-083500-score_line-2026",
+          "fields": {
+            "schools": true,
+            "codes": true,
+            "year": true,
+            "operation": true,
+            "privacy": true,
+            "metrics": true
+          },
+          "exact": true,
+          "predicted": {
+            "schools": [
+              "scnu"
+            ],
+            "codes": [
+              "083500"
+            ],
+            "prefixes": [],
+            "year": 2026,
+            "kinds": [
+              "score_line"
+            ],
+            "privacy": false
+          }
+        },
+        {
+          "id": "rv-scnu-046-085404-score_line-2026",
+          "fields": {
+            "schools": true,
+            "codes": true,
+            "year": true,
+            "operation": true,
+            "privacy": true,
+            "metrics": true
+          },
+          "exact": true,
+          "predicted": {
+            "schools": [
+              "scnu"
+            ],
+            "codes": [
+              "085404"
+            ],
+            "prefixes": [],
+            "year": 2026,
+            "kinds": [
+              "score_line"
+            ],
+            "privacy": false
+          }
+        },
+        {
+          "id": "rv-scnu-019-085405-score_line-2026",
+          "fields": {
+            "schools": true,
+            "codes": true,
+            "year": true,
+            "operation": true,
+            "privacy": true,
+            "metrics": true
+          },
+          "exact": true,
+          "predicted": {
+            "schools": [
+              "scnu"
+            ],
+            "codes": [
+              "085405"
+            ],
+            "prefixes": [],
+            "year": 2026,
+            "kinds": [
+              "score_line"
+            ],
+            "privacy": false
+          }
+        },
+        {
+          "id": "rv-scnu-041-085405-score_line-2026",
+          "fields": {
+            "schools": true,
+            "codes": true,
+            "year": true,
+            "operation": true,
+            "privacy": true,
+            "metrics": true
+          },
+          "exact": true,
+          "predicted": {
+            "schools": [
+              "scnu"
+            ],
+            "codes": [
+              "085405"
+            ],
+            "prefixes": [],
+            "year": 2026,
+            "kinds": [
+              "score_line"
+            ],
+            "privacy": false
+          }
+        },
+        {
+          "id": "rv-scnu-041-085410-score_line-2026",
+          "fields": {
+            "schools": true,
+            "codes": true,
+            "year": true,
+            "operation": true,
+            "privacy": true,
+            "metrics": true
+          },
+          "exact": true,
+          "predicted": {
+            "schools": [
+              "scnu"
+            ],
+            "codes": [
+              "085410"
+            ],
+            "prefixes": [],
+            "year": 2026,
+            "kinds": [
+              "score_line"
+            ],
+            "privacy": false
+          }
+        },
+        {
+          "id": "rv-scut-cs-081200-score_line-2026",
+          "fields": {
+            "schools": true,
+            "codes": true,
+            "year": true,
+            "operation": true,
+            "privacy": true,
+            "metrics": true
+          },
+          "exact": true,
+          "predicted": {
+            "schools": [
+              "scut"
+            ],
+            "codes": [
+              "081200"
+            ],
+            "prefixes": [],
+            "year": 2026,
+            "kinds": [
+              "score_line"
+            ],
+            "privacy": false
+          }
+        },
+        {
+          "id": "rv-scut-sse-083500-score_line-2026",
+          "fields": {
+            "schools": true,
+            "codes": true,
+            "year": true,
+            "operation": true,
+            "privacy": true,
+            "metrics": true
+          },
+          "exact": true,
+          "predicted": {
+            "schools": [
+              "scut"
+            ],
+            "codes": [
+              "083500"
+            ],
+            "prefixes": [],
+            "year": 2026,
+            "kinds": [
+              "score_line"
+            ],
+            "privacy": false
+          }
+        },
+        {
+          "id": "rv-scut-sse-085405-score_line-2026",
+          "fields": {
+            "schools": true,
+            "codes": true,
+            "year": true,
+            "operation": true,
+            "privacy": true,
+            "metrics": true
+          },
+          "exact": true,
+          "predicted": {
+            "schools": [
+              "scut"
+            ],
+            "codes": [
+              "085405"
+            ],
+            "prefixes": [],
+            "year": 2026,
+            "kinds": [
+              "score_line"
+            ],
+            "privacy": false
+          }
+        },
+        {
+          "id": "rv-sysu-670-081200-score_line-2026",
+          "fields": {
+            "schools": true,
+            "codes": true,
+            "year": true,
+            "operation": true,
+            "privacy": true,
+            "metrics": true
+          },
+          "exact": true,
+          "predicted": {
+            "schools": [
+              "sysu"
+            ],
+            "codes": [
+              "081200"
+            ],
+            "prefixes": [],
+            "year": 2026,
+            "kinds": [
+              "score_line"
+            ],
+            "privacy": false
+          }
+        },
+        {
+          "id": "rv-sysu-724-081200-score_line-2026",
+          "fields": {
+            "schools": true,
+            "codes": true,
+            "year": true,
+            "operation": true,
+            "privacy": true,
+            "metrics": true
+          },
+          "exact": true,
+          "predicted": {
+            "schools": [
+              "sysu"
+            ],
+            "codes": [
+              "081200"
+            ],
+            "prefixes": [],
+            "year": 2026,
+            "kinds": [
+              "score_line"
+            ],
+            "privacy": false
+          }
+        },
+        {
+          "id": "rv-sysu-771-081200-score_line-2026",
+          "fields": {
+            "schools": true,
+            "codes": true,
+            "year": true,
+            "operation": true,
+            "privacy": true,
+            "metrics": true
+          },
+          "exact": true,
+          "predicted": {
+            "schools": [
+              "sysu"
+            ],
+            "codes": [
+              "081200"
+            ],
+            "prefixes": [],
+            "year": 2026,
+            "kinds": [
+              "score_line"
+            ],
+            "privacy": false
+          }
+        },
+        {
+          "id": "rv-sysu-725-083500-score_line-2026",
+          "fields": {
+            "schools": true,
+            "codes": true,
+            "year": true,
+            "operation": true,
+            "privacy": true,
+            "metrics": true
+          },
+          "exact": true,
+          "predicted": {
+            "schools": [
+              "sysu"
+            ],
+            "codes": [
+              "083500"
+            ],
+            "prefixes": [],
+            "year": 2026,
+            "kinds": [
+              "score_line"
+            ],
+            "privacy": false
+          }
+        },
+        {
+          "id": "rv-sysu-771-085404-score_line-2026",
+          "fields": {
+            "schools": true,
+            "codes": true,
+            "year": true,
+            "operation": true,
+            "privacy": true,
+            "metrics": true
+          },
+          "exact": true,
+          "predicted": {
+            "schools": [
+              "sysu"
+            ],
+            "codes": [
+              "085404"
+            ],
+            "prefixes": [],
+            "year": 2026,
+            "kinds": [
+              "score_line"
+            ],
+            "privacy": false
+          }
+        },
+        {
+          "id": "rv-sysu-725-085405-score_line-2026",
+          "fields": {
+            "schools": true,
+            "codes": true,
+            "year": true,
+            "operation": true,
+            "privacy": true,
+            "metrics": true
+          },
+          "exact": true,
+          "predicted": {
+            "schools": [
+              "sysu"
+            ],
+            "codes": [
+              "085405"
+            ],
+            "prefixes": [],
+            "year": 2026,
+            "kinds": [
+              "score_line"
+            ],
+            "privacy": false
+          }
+        },
+        {
+          "id": "rv-sysu-724-085410-score_line-2026",
+          "fields": {
+            "schools": true,
+            "codes": true,
+            "year": true,
+            "operation": true,
+            "privacy": true,
+            "metrics": true
+          },
+          "exact": true,
+          "predicted": {
+            "schools": [
+              "sysu"
+            ],
+            "codes": [
+              "085410"
+            ],
+            "prefixes": [],
+            "year": 2026,
+            "kinds": [
+              "score_line"
+            ],
+            "privacy": false
+          }
+        },
+        {
+          "id": "rv-sysu-670-085411-pt-score_line-2026",
+          "fields": {
+            "schools": true,
+            "codes": true,
+            "year": true,
+            "operation": true,
+            "privacy": true,
+            "metrics": true
+          },
+          "exact": true,
+          "predicted": {
+            "schools": [
+              "sysu"
+            ],
+            "codes": [
+              "085411"
+            ],
+            "prefixes": [],
+            "year": 2026,
+            "kinds": [
+              "score_line"
+            ],
+            "privacy": false
+          }
+        },
+        {
+          "id": "rv-sysu-757-085412-score_line-2026",
+          "fields": {
+            "schools": true,
+            "codes": true,
+            "year": true,
+            "operation": true,
+            "privacy": true,
+            "metrics": true
+          },
+          "exact": true,
+          "predicted": {
+            "schools": [
+              "sysu"
+            ],
+            "codes": [
+              "085412"
+            ],
+            "prefixes": [],
+            "year": 2026,
+            "kinds": [
+              "score_line"
+            ],
+            "privacy": false
+          }
+        },
+        {
+          "id": "rv-jnu-010-081201-plan-2026",
+          "fields": {
+            "schools": true,
+            "codes": true,
+            "year": true,
+            "operation": true,
+            "privacy": true,
+            "metrics": true
+          },
+          "exact": true,
+          "predicted": {
+            "schools": [
+              "jnu"
+            ],
+            "codes": [
+              "081201"
+            ],
+            "prefixes": [],
+            "year": 2026,
+            "kinds": [
+              "plan"
+            ],
+            "privacy": false
+          }
+        },
+        {
+          "id": "rv-jnu-010-081202-plan-2026",
+          "fields": {
+            "schools": true,
+            "codes": true,
+            "year": true,
+            "operation": true,
+            "privacy": true,
+            "metrics": true
+          },
+          "exact": true,
+          "predicted": {
+            "schools": [
+              "jnu"
+            ],
+            "codes": [
+              "081202"
+            ],
+            "prefixes": [],
+            "year": 2026,
+            "kinds": [
+              "plan"
+            ],
+            "privacy": false
+          }
+        },
+        {
+          "id": "rv-jnu-010-081203-plan-2026",
+          "fields": {
+            "schools": true,
+            "codes": true,
+            "year": true,
+            "operation": true,
+            "privacy": true,
+            "metrics": true
+          },
+          "exact": true,
+          "predicted": {
+            "schools": [
+              "jnu"
+            ],
+            "codes": [
+              "081203"
+            ],
+            "prefixes": [],
+            "year": 2026,
+            "kinds": [
+              "plan"
+            ],
+            "privacy": false
+          }
+        },
+        {
+          "id": "rv-jnu-010-0812Z3-plan-2026",
+          "fields": {
+            "schools": true,
+            "codes": true,
+            "year": true,
+            "operation": true,
+            "privacy": true,
+            "metrics": true
+          },
+          "exact": true,
+          "predicted": {
+            "schools": [
+              "jnu"
+            ],
+            "codes": [
+              "0812Z3"
+            ],
+            "prefixes": [],
+            "year": 2026,
+            "kinds": [
+              "plan"
+            ],
+            "privacy": false
+          }
+        },
+        {
+          "id": "rv-jnu-052-083900-plan-2027",
+          "fields": {
+            "schools": true,
+            "codes": true,
+            "year": true,
+            "operation": true,
+            "privacy": true,
+            "metrics": true
+          },
+          "exact": true,
+          "predicted": {
+            "schools": [
+              "jnu"
+            ],
+            "codes": [
+              "083900"
+            ],
+            "prefixes": [],
+            "year": 2027,
+            "kinds": [
+              "plan"
+            ],
+            "privacy": false
+          }
+        },
+        {
+          "id": "rv-jnu-010-085404-plan-2027",
+          "fields": {
+            "schools": true,
+            "codes": true,
+            "year": true,
+            "operation": true,
+            "privacy": true,
+            "metrics": true
+          },
+          "exact": true,
+          "predicted": {
+            "schools": [
+              "jnu"
+            ],
+            "codes": [
+              "085404"
+            ],
+            "prefixes": [],
+            "year": 2027,
+            "kinds": [
+              "plan"
+            ],
+            "privacy": false
+          }
+        },
+        {
+          "id": "rv-jnu-010-085410-plan-2027",
+          "fields": {
+            "schools": true,
+            "codes": true,
+            "year": true,
+            "operation": true,
+            "privacy": true,
+            "metrics": true
+          },
+          "exact": true,
+          "predicted": {
+            "schools": [
+              "jnu"
+            ],
+            "codes": [
+              "085410"
+            ],
+            "prefixes": [],
+            "year": 2027,
+            "kinds": [
+              "plan"
+            ],
+            "privacy": false
+          }
+        },
+        {
+          "id": "rv-jnu-044-085410-plan-2027",
+          "fields": {
+            "schools": true,
+            "codes": true,
+            "year": true,
+            "operation": true,
+            "privacy": true,
+            "metrics": true
+          },
+          "exact": true,
+          "predicted": {
+            "schools": [
+              "jnu"
+            ],
+            "codes": [
+              "085410"
+            ],
+            "prefixes": [],
+            "year": 2027,
+            "kinds": [
+              "plan"
+            ],
+            "privacy": false
+          }
+        },
+        {
+          "id": "rv-jnu-052-085412-plan-2027",
+          "fields": {
+            "schools": true,
+            "codes": true,
+            "year": true,
+            "operation": true,
+            "privacy": true,
+            "metrics": true
+          },
+          "exact": true,
+          "predicted": {
+            "schools": [
+              "jnu"
+            ],
+            "codes": [
+              "085412"
+            ],
+            "prefixes": [],
+            "year": 2027,
+            "kinds": [
+              "plan"
+            ],
+            "privacy": false
+          }
+        },
+        {
+          "id": "rv-scnu-019-081200-plan-2026",
+          "fields": {
+            "schools": true,
+            "codes": true,
+            "year": true,
+            "operation": true,
+            "privacy": true,
+            "metrics": true
+          },
+          "exact": true,
+          "predicted": {
+            "schools": [
+              "scnu"
+            ],
+            "codes": [
+              "081200"
+            ],
+            "prefixes": [],
+            "year": 2026,
+            "kinds": [
+              "plan"
+            ],
+            "privacy": false
+          }
+        },
+        {
+          "id": "rv-scnu-041-081200-plan-2026",
+          "fields": {
+            "schools": true,
+            "codes": true,
+            "year": true,
+            "operation": true,
+            "privacy": true,
+            "metrics": true
+          },
+          "exact": true,
+          "predicted": {
+            "schools": [
+              "scnu"
+            ],
+            "codes": [
+              "081200"
+            ],
+            "prefixes": [],
+            "year": 2026,
+            "kinds": [
+              "plan"
+            ],
+            "privacy": false
+          }
+        },
+        {
+          "id": "rv-scnu-019-083500-plan-2026",
+          "fields": {
+            "schools": true,
+            "codes": true,
+            "year": true,
+            "operation": true,
+            "privacy": true,
+            "metrics": true
+          },
+          "exact": true,
+          "predicted": {
+            "schools": [
+              "scnu"
+            ],
+            "codes": [
+              "083500"
+            ],
+            "prefixes": [],
+            "year": 2026,
+            "kinds": [
+              "plan"
+            ],
+            "privacy": false
+          }
+        },
+        {
+          "id": "rv-scnu-019-085404-plan-2026",
+          "fields": {
+            "schools": true,
+            "codes": true,
+            "year": true,
+            "operation": true,
+            "privacy": true,
+            "metrics": true
+          },
+          "exact": true,
+          "predicted": {
+            "schools": [
+              "scnu"
+            ],
+            "codes": [
+              "085404"
+            ],
+            "prefixes": [],
+            "year": 2026,
+            "kinds": [
+              "plan"
+            ],
+            "privacy": false
+          }
+        },
+        {
+          "id": "rv-scnu-046-085404-plan-2026",
+          "fields": {
+            "schools": true,
+            "codes": true,
+            "year": true,
+            "operation": true,
+            "privacy": true,
+            "metrics": true
+          },
+          "exact": true,
+          "predicted": {
+            "schools": [
+              "scnu"
+            ],
+            "codes": [
+              "085404"
+            ],
+            "prefixes": [],
+            "year": 2026,
+            "kinds": [
+              "plan"
+            ],
+            "privacy": false
+          }
+        },
+        {
+          "id": "rv-scnu-019-085405-plan-2026",
+          "fields": {
+            "schools": true,
+            "codes": true,
+            "year": true,
+            "operation": true,
+            "privacy": true,
+            "metrics": true
+          },
+          "exact": true,
+          "predicted": {
+            "schools": [
+              "scnu"
+            ],
+            "codes": [
+              "085405"
+            ],
+            "prefixes": [],
+            "year": 2026,
+            "kinds": [
+              "plan"
+            ],
+            "privacy": false
+          }
+        },
+        {
+          "id": "rv-scnu-041-085405-plan-2026",
+          "fields": {
+            "schools": true,
+            "codes": true,
+            "year": true,
+            "operation": true,
+            "privacy": true,
+            "metrics": true
+          },
+          "exact": true,
+          "predicted": {
+            "schools": [
+              "scnu"
+            ],
+            "codes": [
+              "085405"
+            ],
+            "prefixes": [],
+            "year": 2026,
+            "kinds": [
+              "plan"
+            ],
+            "privacy": false
+          }
+        },
+        {
+          "id": "rv-sysu-670-081200-plan-2026",
+          "fields": {
+            "schools": true,
+            "codes": true,
+            "year": true,
+            "operation": true,
+            "privacy": true,
+            "metrics": true
+          },
+          "exact": true,
+          "predicted": {
+            "schools": [
+              "sysu"
+            ],
+            "codes": [
+              "081200"
+            ],
+            "prefixes": [],
+            "year": 2026,
+            "kinds": [
+              "plan"
+            ],
+            "privacy": false
+          }
+        },
+        {
+          "id": "rv-jnu-063-085410-pt-plan-2027",
+          "fields": {
+            "schools": true,
+            "codes": true,
+            "year": true,
+            "operation": true,
+            "privacy": true,
+            "metrics": true
+          },
+          "exact": true,
+          "predicted": {
+            "schools": [
+              "jnu"
+            ],
+            "codes": [
+              "085410"
+            ],
+            "prefixes": [],
+            "year": 2027,
+            "kinds": [
+              "plan"
+            ],
+            "privacy": false
+          }
+        },
+        {
+          "id": "rv-scut-cs-081200-plan-2026",
+          "fields": {
+            "schools": true,
+            "codes": true,
+            "year": true,
+            "operation": true,
+            "privacy": true,
+            "metrics": true
+          },
+          "exact": true,
+          "predicted": {
+            "schools": [
+              "scut"
+            ],
+            "codes": [
+              "081200"
+            ],
+            "prefixes": [],
+            "year": 2026,
+            "kinds": [
+              "plan"
+            ],
+            "privacy": false
+          }
+        },
+        {
+          "id": "rv-scut-sse-083500-plan-2026",
+          "fields": {
+            "schools": true,
+            "codes": true,
+            "year": true,
+            "operation": true,
+            "privacy": true,
+            "metrics": true
+          },
+          "exact": true,
+          "predicted": {
+            "schools": [
+              "scut"
+            ],
+            "codes": [
+              "083500"
+            ],
+            "prefixes": [],
+            "year": 2026,
+            "kinds": [
+              "plan"
+            ],
+            "privacy": false
+          }
+        },
+        {
+          "id": "rv-scut-sse-085405-plan-2026",
+          "fields": {
+            "schools": true,
+            "codes": true,
+            "year": true,
+            "operation": true,
+            "privacy": true,
+            "metrics": true
+          },
+          "exact": true,
+          "predicted": {
+            "schools": [
+              "scut"
+            ],
+            "codes": [
+              "085405"
+            ],
+            "prefixes": [],
+            "year": 2026,
+            "kinds": [
+              "plan"
+            ],
+            "privacy": false
+          }
+        },
+        {
+          "id": "rv-scut-ft-140500-plan-2026",
+          "fields": {
+            "schools": true,
+            "codes": true,
+            "year": true,
+            "operation": true,
+            "privacy": true,
+            "metrics": true
+          },
+          "exact": true,
+          "predicted": {
+            "schools": [
+              "scut"
+            ],
+            "codes": [
+              "140500"
+            ],
+            "prefixes": [],
+            "year": 2026,
+            "kinds": [
+              "plan"
+            ],
+            "privacy": false
+          }
+        },
+        {
+          "id": "rv-jnu-010-0812-plan-2027",
+          "fields": {
+            "schools": true,
+            "codes": true,
+            "year": true,
+            "operation": true,
+            "privacy": true,
+            "metrics": true
+          },
+          "exact": true,
+          "predicted": {
+            "schools": [
+              "jnu"
+            ],
+            "codes": [],
+            "prefixes": [
+              "0812"
+            ],
+            "year": 2027,
+            "kinds": [
+              "plan"
+            ],
+            "privacy": false
+          }
+        }
+      ]
+    },
+    "L1": {
+      "summary": {
+        "rows": 66,
+        "unscorable": 0,
+        "row_pass": 1.0,
+        "fact_recall": 1.0,
+        "source_match": 1.0
+      },
+      "rows": [
+        {
+          "id": "v1-01",
+          "status": "pass",
+          "calls": [
+            [
+              "get_score_lines",
+              {
+                "school": "sysu",
+                "college": "计算机学院",
+                "code": "085404",
+                "year": 2026
+              }
+            ],
+            [
+              "search_programs",
+              {
+                "school": "sysu",
+                "college": "计算机学院",
+                "code": "085404"
+              }
+            ]
+          ],
+          "facts": [
+            {
+              "table": "score_lines",
+              "program_id": "sysu-670-085404",
+              "kind": "college",
+              "year": 2026,
+              "value": 379,
+              "source_doc_id": "sysu-078",
+              "found": true,
+              "source_ok": true
+            }
+          ]
+        },
+        {
+          "id": "v1-02",
+          "status": "pass",
+          "calls": [
+            [
+              "get_score_lines",
+              {
+                "school": "jnu",
+                "college": "网络空间安全学院",
+                "code": "085412",
+                "year": 2026
+              }
+            ],
+            [
+              "search_programs",
+              {
+                "school": "jnu",
+                "college": "网络空间安全学院",
+                "code": "085412"
+              }
+            ]
+          ],
+          "facts": [
+            {
+              "table": "score_lines",
+              "program_id": "jnu-052-085412",
+              "kind": "college",
+              "year": 2026,
+              "value": 348,
+              "source_doc_id": "jnu-005",
+              "found": true,
+              "source_ok": true
+            }
+          ]
+        },
+        {
+          "id": "v1-03",
+          "status": "pass",
+          "calls": [
+            [
+              "get_score_lines",
+              {
+                "school": "scnu",
+                "college": "计算机学院",
+                "code": "085404",
+                "year": 2026
+              }
+            ],
+            [
+              "search_programs",
+              {
+                "school": "scnu",
+                "college": "计算机学院",
+                "code": "085404"
+              }
+            ]
+          ],
+          "facts": [
+            {
+              "table": "score_lines",
+              "program_id": "scnu-019-085404",
+              "kind": "college",
+              "year": 2026,
+              "value": 348,
+              "source_doc_id": "scnu-037",
+              "found": true,
+              "source_ok": true
+            },
+            {
+              "table": "score_lines",
+              "program_id": "scnu-019-085404",
+              "kind": "special_veteran",
+              "year": 2026,
+              "value": 288,
+              "source_doc_id": "scnu-037",
+              "found": true,
+              "source_ok": true
+            }
+          ]
+        },
+        {
+          "id": "v1-04",
+          "status": "pass",
+          "calls": [
+            [
+              "get_score_lines",
+              {
+                "school": "sysu",
+                "college": "网络空间安全学院",
+                "code": "083900",
+                "year": 2026
+              }
+            ],
+            [
+              "get_exam_subjects",
+              {
+                "school": "sysu",
+                "college": "网络空间安全学院",
+                "code": "083900"
+              }
+            ],
+            [
+              "search_programs",
+              {
+                "school": "sysu",
+                "college": "网络空间安全学院",
+                "code": "083900"
+              }
+            ]
+          ],
+          "facts": [
+            {
+              "table": "plans",
+              "program_id": "sysu-757-083900",
+              "kind": "rules_total",
+              "year": 2026,
+              "value": 15,
+              "source_doc_id": "sysu-085",
+              "found": true,
+              "source_ok": true
+            },
+            {
+              "table": "plans",
+              "program_id": "sysu-757-083900",
+              "kind": "tm",
+              "year": 2026,
+              "value": 15,
+              "source_doc_id": "sysu-085",
+              "found": true,
+              "source_ok": true
+            },
+            {
+              "table": "plans",
+              "program_id": "sysu-757-083900",
+              "kind": "public_exam",
+              "year": 2026,
+              "value": 0,
+              "source_doc_id": "sysu-085",
+              "found": true,
+              "source_ok": true
+            }
+          ]
+        },
+        {
+          "id": "v1-05",
+          "status": "pass",
+          "calls": [
+            [
+              "get_exam_subjects",
+              {
+                "school": "scut",
+                "college": "计算机学院",
+                "code": "085404"
+              }
+            ],
+            [
+              "search_programs",
+              {
+                "school": "scut",
+                "college": "计算机学院",
+                "code": "085404"
+              }
+            ]
+          ],
+          "facts": [
+            {
+              "table": "score_lines",
+              "program_id": "scut-cs-085404",
+              "kind": "school_baseline",
+              "year": 2026,
+              "value": 305,
+              "source_doc_id": "scut-040",
+              "found": true,
+              "source_ok": true
+            },
+            {
+              "table": "plans",
+              "program_id": "scut-cs-085404",
+              "kind": "college_exam_plan",
+              "year": 2026,
+              "value": 35,
+              "source_doc_id": "scut-055",
+              "found": true,
+              "source_ok": true
+            },
+            {
+              "table": "plans",
+              "program_id": "scut-cs-085404",
+              "kind": "available_exam",
+              "year": 2026,
+              "value": 21,
+              "source_doc_id": "scut-048",
+              "found": true,
+              "source_ok": true
+            }
+          ]
+        },
+        {
+          "id": "v1-06",
+          "status": "pass",
+          "calls": [
+            [
+              "get_score_lines",
+              {
+                "school": "scut",
+                "code": "140500",
+                "year": 2026
+              }
+            ],
+            [
+              "get_exam_subjects",
+              {
+                "school": "scut",
+                "code": "140500"
+              }
+            ],
+            [
+              "search_programs",
+              {
+                "school": "scut",
+                "code": "140500"
+              }
+            ]
+          ],
+          "facts": [
+            {
+              "table": "exam_subjects",
+              "program_id": "scut-ft-140500",
+              "kind": "slot1",
+              "year": 2026,
+              "value": "101",
+              "source_doc_id": "scut-061",
+              "found": true,
+              "source_ok": true
+            },
+            {
+              "table": "exam_subjects",
+              "program_id": "scut-ft-140500",
+              "kind": "slot2",
+              "year": 2026,
+              "value": "201",
+              "source_doc_id": "scut-061",
+              "found": true,
+              "source_ok": true
+            },
+            {
+              "table": "exam_subjects",
+              "program_id": "scut-ft-140500",
+              "kind": "slot3",
+              "year": 2026,
+              "value": "301",
+              "source_doc_id": "scut-061",
+              "found": true,
+              "source_ok": true
+            },
+            {
+              "table": "exam_subjects",
+              "program_id": "scut-ft-140500",
+              "kind": "slot4",
+              "year": 2026,
+              "value": "408",
+              "source_doc_id": "scut-061",
+              "found": true,
+              "source_ok": true
+            },
+            {
+              "table": "score_lines",
+              "program_id": "scut-ft-140500",
+              "kind": "school_baseline",
+              "year": 2026,
+              "value": 320,
+              "source_doc_id": "scut-040",
+              "found": true,
+              "source_ok": true
+            }
+          ]
+        },
+        {
+          "id": "v1-07",
+          "status": "pass",
+          "calls": [
+            [
+              "search_programs",
+              {
+                "school": "jnu",
+                "code": "081203"
+              }
+            ]
+          ],
+          "facts": [
+            {
+              "table": "plans",
+              "program_id": "jnu-010-081203",
+              "kind": "catalog_total",
+              "year": 2027,
+              "value": 24,
+              "source_doc_id": "jnu-016",
+              "found": true,
+              "source_ok": true
+            },
+            {
+              "table": "plans",
+              "program_id": "jnu-010-081203",
+              "kind": "tm",
+              "year": 2027,
+              "value": 19,
+              "source_doc_id": "jnu-012",
+              "found": true,
+              "source_ok": true
+            }
+          ]
+        },
+        {
+          "id": "v1-08",
+          "status": "pass",
+          "calls": [
+            [
+              "search_programs",
+              {
+                "school": "sysu",
+                "college": "人工智能学院",
+                "code": "081200"
+              }
+            ]
+          ],
+          "facts": [
+            {
+              "table": "plans",
+              "program_id": "sysu-724-081200",
+              "kind": "catalog_total",
+              "year": 2026,
+              "value": 9,
+              "source_doc_id": "sysu-072",
+              "found": true,
+              "source_ok": true
+            },
+            {
+              "table": "plans",
+              "program_id": "sysu-724-081200",
+              "kind": "rules_total",
+              "year": 2026,
+              "value": 15,
+              "source_doc_id": "sysu-081",
+              "found": true,
+              "source_ok": true
+            },
+            {
+              "table": "plans",
+              "program_id": "sysu-724-081200",
+              "kind": "tm",
+              "year": 2026,
+              "value": 7,
+              "source_doc_id": "sysu-081",
+              "found": true,
+              "source_ok": true
+            },
+            {
+              "table": "plans",
+              "program_id": "sysu-724-081200",
+              "kind": "public_exam",
+              "year": 2026,
+              "value": 8,
+              "source_doc_id": "sysu-081",
+              "found": true,
+              "source_ok": true
+            }
+          ]
+        },
+        {
+          "id": "v1-09",
+          "status": "pass",
+          "calls": [
+            [
+              "search_programs",
+              {
+                "school": "scnu",
+                "college": "人工智能学院",
+                "code": "085410"
+              }
+            ]
+          ],
+          "facts": [
+            {
+              "table": "plans",
+              "program_id": "scnu-041-085410",
+              "kind": "catalog_total",
+              "year": 2026,
+              "value": 66,
+              "source_doc_id": "scnu-024",
+              "found": true,
+              "source_ok": true
+            },
+            {
+              "table": "plans",
+              "program_id": "scnu-041-085410",
+              "kind": "rules_total",
+              "year": 2026,
+              "value": 72,
+              "source_doc_id": "scnu-036",
+              "found": true,
+              "source_ok": true
+            },
+            {
+              "table": "plans",
+              "program_id": "scnu-041-085410",
+              "kind": "tm",
+              "year": 2026,
+              "value": 5,
+              "source_doc_id": "scnu-024",
+              "found": true,
+              "source_ok": true
+            }
+          ]
+        },
+        {
+          "id": "v1-10",
+          "status": "pass",
+          "calls": [
+            [
+              "search_programs",
+              {
+                "school": "sysu",
+                "college": "软件工程学院",
+                "code": "085405"
+              }
+            ]
+          ],
+          "facts": [
+            {
+              "table": "plans",
+              "program_id": "sysu-725-085405",
+              "kind": "rules_total",
+              "year": 2026,
+              "value": 53,
+              "source_doc_id": "sysu-095",
+              "found": true,
+              "source_ok": true
+            },
+            {
+              "table": "plans",
+              "program_id": "sysu-725-085405",
+              "kind": "tm",
+              "year": 2026,
+              "value": 30,
+              "source_doc_id": "sysu-095",
+              "found": true,
+              "source_ok": true
+            },
+            {
+              "table": "plans",
+              "program_id": "sysu-725-085405",
+              "kind": "public_exam",
+              "year": 2026,
+              "value": 23,
+              "source_doc_id": "sysu-095",
+              "found": true,
+              "source_ok": true
+            },
+            {
+              "table": "plans",
+              "program_id": "sysu-725-085405",
+              "kind": "catalog_total",
+              "year": 2026,
+              "value": 37,
+              "source_doc_id": "sysu-072",
+              "found": true,
+              "source_ok": true
+            }
+          ]
+        },
+        {
+          "id": "v1-12",
+          "status": "pass",
+          "calls": [
+            [
+              "compare_programs",
+              {
+                "year": 2026,
+                "program_ids": "jnu-010-085404,scnu-019-085404,scnu-046-085404,scut-cs-085404,sysu-670-085404,sysu-771-085404"
+              }
+            ]
+          ],
+          "facts": [
+            {
+              "table": "score_lines",
+              "program_id": "sysu-670-085404",
+              "kind": "college",
+              "year": 2026,
+              "value": 379,
+              "source_doc_id": "sysu-078",
+              "found": true,
+              "source_ok": true
+            },
+            {
+              "table": "score_lines",
+              "program_id": "sysu-771-085404",
+              "kind": "college",
+              "year": 2026,
+              "value": 335,
+              "source_doc_id": "sysu-097",
+              "found": true,
+              "source_ok": true
+            },
+            {
+              "table": "score_lines",
+              "program_id": "scut-cs-085404",
+              "kind": "school_baseline",
+              "year": 2026,
+              "value": 305,
+              "source_doc_id": "scut-040",
+              "found": true,
+              "source_ok": true
+            },
+            {
+              "table": "score_lines",
+              "program_id": "jnu-010-085404",
+              "kind": "college",
+              "year": 2026,
+              "value": 318,
+              "source_doc_id": "jnu-003",
+              "found": true,
+              "source_ok": true
+            },
+            {
+              "table": "score_lines",
+              "program_id": "scnu-019-085404",
+              "kind": "college",
+              "year": 2026,
+              "value": 348,
+              "source_doc_id": "scnu-037",
+              "found": true,
+              "source_ok": true
+            },
+            {
+              "table": "score_lines",
+              "program_id": "scnu-046-085404",
+              "kind": "college",
+              "year": 2026,
+              "value": 340,
+              "source_doc_id": "scnu-038",
+              "found": true,
+              "source_ok": true
+            }
+          ]
+        },
+        {
+          "id": "v1-13",
+          "status": "pass",
+          "calls": [
+            [
+              "search_programs",
+              {
+                "school": "sysu",
+                "code": "085404"
+              }
+            ]
+          ],
+          "facts": [
+            {
+              "table": "plans",
+              "program_id": "sysu-670-085404",
+              "kind": "catalog_total",
+              "year": 2026,
+              "value": 210,
+              "source_doc_id": "sysu-072",
+              "found": true,
+              "source_ok": true
+            },
+            {
+              "table": "plans",
+              "program_id": "sysu-670-085404",
+              "kind": "rules_total",
+              "year": 2026,
+              "value": 214,
+              "source_doc_id": "sysu-078",
+              "found": true,
+              "source_ok": true
+            },
+            {
+              "table": "plans",
+              "program_id": "sysu-670-085404",
+              "kind": "tm",
+              "year": 2026,
+              "value": 165,
+              "source_doc_id": "sysu-078",
+              "found": true,
+              "source_ok": true
+            },
+            {
+              "table": "plans",
+              "program_id": "sysu-670-085404",
+              "kind": "public_exam",
+              "year": 2026,
+              "value": 49,
+              "source_doc_id": "sysu-078",
+              "found": true,
+              "source_ok": true
+            }
+          ]
+        },
+        {
+          "id": "v1-15",
+          "status": "pass",
+          "calls": [
+            [
+              "search_programs",
+              {
+                "school": "jnu",
+                "college": "智能科学与工程学院",
+                "code": "0812Z3"
+              }
+            ]
+          ],
+          "facts": [
+            {
+              "table": "plans",
+              "program_id": "jnu-044-0812Z3",
+              "kind": "catalog_total",
+              "year": 2027,
+              "value": 10,
+              "source_doc_id": "jnu-016",
+              "found": true,
+              "source_ok": true
+            },
+            {
+              "table": "plans",
+              "program_id": "jnu-044-0812Z3",
+              "kind": "tm",
+              "year": 2027,
+              "value": 10,
+              "source_doc_id": "jnu-013",
+              "found": true,
+              "source_ok": true
+            },
+            {
+              "table": "plans",
+              "program_id": "jnu-044-0812Z3",
+              "kind": "public_exam",
+              "year": 2026,
+              "value": 5,
+              "source_doc_id": "jnu-004",
+              "found": true,
+              "source_ok": true
+            }
+          ]
+        },
+        {
+          "id": "v1-16",
+          "status": "pass",
+          "calls": [
+            [
+              "get_exam_subjects",
+              {
+                "school": "sysu",
+                "college": "电子与通信工程学院",
+                "code": "085400"
+              }
+            ],
+            [
+              "search_programs",
+              {
+                "school": "sysu",
+                "college": "电子与通信工程学院",
+                "code": "085400"
+              }
+            ]
+          ],
+          "facts": [
+            {
+              "table": "exam_subjects",
+              "program_id": "sysu-765-085400",
+              "kind": "slot4",
+              "year": 2026,
+              "value": "884",
+              "source_doc_id": "sysu-072",
+              "found": true,
+              "source_ok": true
+            },
+            {
+              "table": "score_lines",
+              "program_id": "sysu-765-085400",
+              "kind": "college",
+              "year": 2026,
+              "value": 382,
+              "source_doc_id": "sysu-089",
+              "found": true,
+              "source_ok": true
+            }
+          ]
+        },
+        {
+          "id": "v1-17",
+          "status": "pass",
+          "calls": [
+            [
+              "search_programs",
+              {
+                "school": "scut",
+                "college": "计算机学院"
+              }
+            ]
+          ],
+          "facts": [
+            {
+              "table": "admission_stats",
+              "program_id": "scut-cs-085404",
+              "kind": "admit_count",
+              "year": 2026,
+              "value": 36,
+              "source_doc_id": "scut-058",
+              "found": true,
+              "source_ok": true
+            },
+            {
+              "table": "admission_stats",
+              "program_id": "scut-cs-081200",
+              "kind": "admit_count",
+              "year": 2026,
+              "value": 23,
+              "source_doc_id": "scut-058",
+              "found": true,
+              "source_ok": true
+            }
+          ]
+        },
+        {
+          "id": "v1-18",
+          "status": "pass",
+          "calls": [
+            [
+              "compare_programs",
+              {
+                "program_ids": "jnu-010-085404,scnu-019-085404,scnu-046-085404,scut-cs-085404,sysu-670-085404,sysu-771-085404"
+              }
+            ]
+          ],
+          "facts": [
+            {
+              "table": "score_lines",
+              "program_id": "sysu-670-085404",
+              "kind": "college",
+              "year": 2026,
+              "value": 379,
+              "source_doc_id": "sysu-078",
+              "found": true,
+              "source_ok": true
+            },
+            {
+              "table": "score_lines",
+              "program_id": "sysu-771-085404",
+              "kind": "college",
+              "year": 2026,
+              "value": 335,
+              "source_doc_id": "sysu-097",
+              "found": true,
+              "source_ok": true
+            },
+            {
+              "table": "score_lines",
+              "program_id": "scut-cs-085404",
+              "kind": "school_baseline",
+              "year": 2026,
+              "value": 305,
+              "source_doc_id": "scut-040",
+              "found": true,
+              "source_ok": true
+            },
+            {
+              "table": "score_lines",
+              "program_id": "jnu-010-085404",
+              "kind": "college",
+              "year": 2026,
+              "value": 318,
+              "source_doc_id": "jnu-003",
+              "found": true,
+              "source_ok": true
+            },
+            {
+              "table": "score_lines",
+              "program_id": "scnu-019-085404",
+              "kind": "college",
+              "year": 2026,
+              "value": 348,
+              "source_doc_id": "scnu-037",
+              "found": true,
+              "source_ok": true
+            },
+            {
+              "table": "score_lines",
+              "program_id": "scnu-046-085404",
+              "kind": "college",
+              "year": 2026,
+              "value": 340,
+              "source_doc_id": "scnu-038",
+              "found": true,
+              "source_ok": true
+            }
+          ]
+        },
+        {
+          "id": "rv-jnu-010-081201-score_line-2026",
+          "status": "pass",
+          "calls": [
+            [
+              "get_score_lines",
+              {
+                "school": "jnu",
+                "college": "信息科学技术学院",
+                "code": "081201",
+                "year": 2026
+              }
+            ],
+            [
+              "search_programs",
+              {
+                "school": "jnu",
+                "college": "信息科学技术学院",
+                "code": "081201"
+              }
+            ]
+          ],
+          "facts": [
+            {
+              "table": "score_lines",
+              "program_id": "jnu-010-081201",
+              "kind": "college",
+              "year": 2026,
+              "value": 264,
+              "source_doc_id": "jnu-003",
+              "found": true,
+              "source_ok": true
+            }
+          ]
+        },
+        {
+          "id": "rv-jnu-010-0812-score_line-2026",
+          "status": "pass",
+          "calls": [
+            [
+              "get_score_lines",
+              {
+                "school": "jnu",
+                "college": "信息科学技术学院",
+                "code": "0812",
+                "year": 2026
+              }
+            ],
+            [
+              "search_programs",
+              {
+                "school": "jnu",
+                "college": "信息科学技术学院",
+                "code": "0812"
+              }
+            ]
+          ],
+          "facts": [
+            {
+              "table": "score_lines",
+              "program_id": "jnu-010-081201",
+              "kind": "college",
+              "year": 2026,
+              "value": 264,
+              "source_doc_id": "jnu-003",
+              "found": true,
+              "source_ok": true
+            },
+            {
+              "table": "score_lines",
+              "program_id": "jnu-010-081202",
+              "kind": "college",
+              "year": 2026,
+              "value": 264,
+              "source_doc_id": "jnu-003",
+              "found": true,
+              "source_ok": true
+            },
+            {
+              "table": "score_lines",
+              "program_id": "jnu-010-081203",
+              "kind": "college",
+              "year": 2026,
+              "value": 264,
+              "source_doc_id": "jnu-003",
+              "found": true,
+              "source_ok": true
+            },
+            {
+              "table": "score_lines",
+              "program_id": "jnu-010-0812Z3",
+              "kind": "college",
+              "year": 2026,
+              "value": 264,
+              "source_doc_id": "jnu-003",
+              "found": true,
+              "source_ok": true
+            }
+          ]
+        },
+        {
+          "id": "rv-jnu-044-0812Z3-score_line-2026",
+          "status": "pass",
+          "calls": [
+            [
+              "get_score_lines",
+              {
+                "school": "jnu",
+                "college": "智能科学与工程学院",
+                "code": "0812Z3",
+                "year": 2026
+              }
+            ],
+            [
+              "search_programs",
+              {
+                "school": "jnu",
+                "college": "智能科学与工程学院",
+                "code": "0812Z3"
+              }
+            ]
+          ],
+          "facts": [
+            {
+              "table": "score_lines",
+              "program_id": "jnu-044-0812Z3",
+              "kind": "college",
+              "year": 2026,
+              "value": 276,
+              "source_doc_id": "jnu-004",
+              "found": true,
+              "source_ok": true
+            }
+          ]
+        },
+        {
+          "id": "rv-jnu-052-083900-score_line-2026",
+          "status": "pass",
+          "calls": [
+            [
+              "get_score_lines",
+              {
+                "school": "jnu",
+                "college": "网络空间安全学院",
+                "code": "083900",
+                "year": 2026
+              }
+            ],
+            [
+              "search_programs",
+              {
+                "school": "jnu",
+                "college": "网络空间安全学院",
+                "code": "083900"
+              }
+            ]
+          ],
+          "facts": [
+            {
+              "table": "score_lines",
+              "program_id": "jnu-052-083900",
+              "kind": "college",
+              "year": 2026,
+              "value": 310,
+              "source_doc_id": "jnu-005",
+              "found": true,
+              "source_ok": true
+            }
+          ]
+        },
+        {
+          "id": "rv-jnu-010-085404-score_line-2026",
+          "status": "pass",
+          "calls": [
+            [
+              "get_score_lines",
+              {
+                "school": "jnu",
+                "college": "信息科学技术学院",
+                "code": "085404",
+                "year": 2026
+              }
+            ],
+            [
+              "search_programs",
+              {
+                "school": "jnu",
+                "college": "信息科学技术学院",
+                "code": "085404"
+              }
+            ]
+          ],
+          "facts": [
+            {
+              "table": "score_lines",
+              "program_id": "jnu-010-085404",
+              "kind": "college",
+              "year": 2026,
+              "value": 318,
+              "source_doc_id": "jnu-003",
+              "found": true,
+              "source_ok": true
+            }
+          ]
+        },
+        {
+          "id": "rv-jnu-010-085410-score_line-2026",
+          "status": "pass",
+          "calls": [
+            [
+              "get_score_lines",
+              {
+                "school": "jnu",
+                "college": "信息科学技术学院",
+                "code": "085410",
+                "year": 2026
+              }
+            ],
+            [
+              "search_programs",
+              {
+                "school": "jnu",
+                "college": "信息科学技术学院",
+                "code": "085410"
+              }
+            ]
+          ],
+          "facts": [
+            {
+              "table": "score_lines",
+              "program_id": "jnu-010-085410",
+              "kind": "college",
+              "year": 2026,
+              "value": 331,
+              "source_doc_id": "jnu-003",
+              "found": true,
+              "source_ok": true
+            }
+          ]
+        },
+        {
+          "id": "rv-jnu-044-085410-score_line-2026",
+          "status": "pass",
+          "calls": [
+            [
+              "get_score_lines",
+              {
+                "school": "jnu",
+                "college": "智能科学与工程学院",
+                "code": "085410",
+                "year": 2026
+              }
+            ],
+            [
+              "search_programs",
+              {
+                "school": "jnu",
+                "college": "智能科学与工程学院",
+                "code": "085410"
+              }
+            ]
+          ],
+          "facts": [
+            {
+              "table": "score_lines",
+              "program_id": "jnu-044-085410",
+              "kind": "college",
+              "year": 2026,
+              "value": 331,
+              "source_doc_id": "jnu-004",
+              "found": true,
+              "source_ok": true
+            }
+          ]
+        },
+        {
+          "id": "rv-jnu-063-085410-pt-score_line-2026",
+          "status": "pass",
+          "calls": [
+            [
+              "get_score_lines",
+              {
+                "school": "jnu",
+                "code": "085410",
+                "year": 2026
+              }
+            ],
+            [
+              "search_programs",
+              {
+                "school": "jnu",
+                "code": "085410"
+              }
+            ]
+          ],
+          "facts": [
+            {
+              "table": "score_lines",
+              "program_id": "jnu-063-085410-pt",
+              "kind": "college",
+              "year": 2026,
+              "value": 267,
+              "source_doc_id": "jnu-006",
+              "found": true,
+              "source_ok": true
+            }
+          ]
+        },
+        {
+          "id": "rv-scnu-019-081200-score_line-2026",
+          "status": "pass",
+          "calls": [
+            [
+              "get_score_lines",
+              {
+                "school": "scnu",
+                "college": "计算机学院",
+                "code": "081200",
+                "year": 2026
+              }
+            ],
+            [
+              "search_programs",
+              {
+                "school": "scnu",
+                "college": "计算机学院",
+                "code": "081200"
+              }
+            ]
+          ],
+          "facts": [
+            {
+              "table": "score_lines",
+              "program_id": "scnu-019-081200",
+              "kind": "college",
+              "year": 2026,
+              "value": 304,
+              "source_doc_id": "scnu-037",
+              "found": true,
+              "source_ok": true
+            }
+          ]
+        },
+        {
+          "id": "rv-scnu-041-081200-score_line-2026",
+          "status": "pass",
+          "calls": [
+            [
+              "get_score_lines",
+              {
+                "school": "scnu",
+                "college": "人工智能学院",
+                "code": "081200",
+                "year": 2026
+              }
+            ],
+            [
+              "search_programs",
+              {
+                "school": "scnu",
+                "college": "人工智能学院",
+                "code": "081200"
+              }
+            ]
+          ],
+          "facts": [
+            {
+              "table": "score_lines",
+              "program_id": "scnu-041-081200",
+              "kind": "college",
+              "year": 2026,
+              "value": 264,
+              "source_doc_id": "scnu-036",
+              "found": true,
+              "source_ok": true
+            }
+          ]
+        },
+        {
+          "id": "rv-scnu-019-083500-score_line-2026",
+          "status": "pass",
+          "calls": [
+            [
+              "get_score_lines",
+              {
+                "school": "scnu",
+                "college": "计算机学院",
+                "code": "083500",
+                "year": 2026
+              }
+            ],
+            [
+              "search_programs",
+              {
+                "school": "scnu",
+                "college": "计算机学院",
+                "code": "083500"
+              }
+            ]
+          ],
+          "facts": [
+            {
+              "table": "score_lines",
+              "program_id": "scnu-019-083500",
+              "kind": "college",
+              "year": 2026,
+              "value": 264,
+              "source_doc_id": "scnu-037",
+              "found": true,
+              "source_ok": true
+            }
+          ]
+        },
+        {
+          "id": "rv-scnu-046-085404-score_line-2026",
+          "status": "pass",
+          "calls": [
+            [
+              "get_score_lines",
+              {
+                "school": "scnu",
+                "college": "数据科学与工程学院",
+                "code": "085404",
+                "year": 2026
+              }
+            ],
+            [
+              "search_programs",
+              {
+                "school": "scnu",
+                "college": "数据科学与工程学院",
+                "code": "085404"
+              }
+            ]
+          ],
+          "facts": [
+            {
+              "table": "score_lines",
+              "program_id": "scnu-046-085404",
+              "kind": "college",
+              "year": 2026,
+              "value": 340,
+              "source_doc_id": "scnu-038",
+              "found": true,
+              "source_ok": true
+            }
+          ]
+        },
+        {
+          "id": "rv-scnu-019-085405-score_line-2026",
+          "status": "pass",
+          "calls": [
+            [
+              "get_score_lines",
+              {
+                "school": "scnu",
+                "college": "计算机学院",
+                "code": "085405",
+                "year": 2026
+              }
+            ],
+            [
+              "search_programs",
+              {
+                "school": "scnu",
+                "college": "计算机学院",
+                "code": "085405"
+              }
+            ]
+          ],
+          "facts": [
+            {
+              "table": "score_lines",
+              "program_id": "scnu-019-085405",
+              "kind": "college",
+              "year": 2026,
+              "value": 335,
+              "source_doc_id": "scnu-037",
+              "found": true,
+              "source_ok": true
+            }
+          ]
+        },
+        {
+          "id": "rv-scnu-041-085405-score_line-2026",
+          "status": "pass",
+          "calls": [
+            [
+              "get_score_lines",
+              {
+                "school": "scnu",
+                "college": "人工智能学院",
+                "code": "085405",
+                "year": 2026
+              }
+            ],
+            [
+              "search_programs",
+              {
+                "school": "scnu",
+                "college": "人工智能学院",
+                "code": "085405"
+              }
+            ]
+          ],
+          "facts": [
+            {
+              "table": "score_lines",
+              "program_id": "scnu-041-085405",
+              "kind": "college",
+              "year": 2026,
+              "value": 326,
+              "source_doc_id": "scnu-036",
+              "found": true,
+              "source_ok": true
+            }
+          ]
+        },
+        {
+          "id": "rv-scnu-041-085410-score_line-2026",
+          "status": "pass",
+          "calls": [
+            [
+              "get_score_lines",
+              {
+                "school": "scnu",
+                "college": "人工智能学院",
+                "code": "085410",
+                "year": 2026
+              }
+            ],
+            [
+              "search_programs",
+              {
+                "school": "scnu",
+                "college": "人工智能学院",
+                "code": "085410"
+              }
+            ]
+          ],
+          "facts": [
+            {
+              "table": "score_lines",
+              "program_id": "scnu-041-085410",
+              "kind": "college",
+              "year": 2026,
+              "value": 324,
+              "source_doc_id": "scnu-036",
+              "found": true,
+              "source_ok": true
+            }
+          ]
+        },
+        {
+          "id": "rv-scut-cs-081200-score_line-2026",
+          "status": "pass",
+          "calls": [
+            [
+              "get_score_lines",
+              {
+                "school": "scut",
+                "college": "计算机科学与工程学院",
+                "code": "081200",
+                "year": 2026
+              }
+            ],
+            [
+              "search_programs",
+              {
+                "school": "scut",
+                "college": "计算机科学与工程学院",
+                "code": "081200"
+              }
+            ]
+          ],
+          "facts": [
+            {
+              "table": "score_lines",
+              "program_id": "scut-cs-081200",
+              "kind": "school_baseline",
+              "year": 2026,
+              "value": 305,
+              "source_doc_id": "scut-040",
+              "found": true,
+              "source_ok": true
+            }
+          ]
+        },
+        {
+          "id": "rv-scut-sse-083500-score_line-2026",
+          "status": "pass",
+          "calls": [
+            [
+              "get_score_lines",
+              {
+                "school": "scut",
+                "college": "软件学院",
+                "code": "083500",
+                "year": 2026
+              }
+            ],
+            [
+              "search_programs",
+              {
+                "school": "scut",
+                "college": "软件学院",
+                "code": "083500"
+              }
+            ]
+          ],
+          "facts": [
+            {
+              "table": "score_lines",
+              "program_id": "scut-sse-083500",
+              "kind": "school_baseline",
+              "year": 2026,
+              "value": 305,
+              "source_doc_id": "scut-040",
+              "found": true,
+              "source_ok": true
+            }
+          ]
+        },
+        {
+          "id": "rv-scut-sse-085405-score_line-2026",
+          "status": "pass",
+          "calls": [
+            [
+              "get_score_lines",
+              {
+                "school": "scut",
+                "college": "软件学院",
+                "code": "085405",
+                "year": 2026
+              }
+            ],
+            [
+              "search_programs",
+              {
+                "school": "scut",
+                "college": "软件学院",
+                "code": "085405"
+              }
+            ]
+          ],
+          "facts": [
+            {
+              "table": "score_lines",
+              "program_id": "scut-sse-085405",
+              "kind": "school_baseline",
+              "year": 2026,
+              "value": 305,
+              "source_doc_id": "scut-040",
+              "found": true,
+              "source_ok": true
+            }
+          ]
+        },
+        {
+          "id": "rv-sysu-670-081200-score_line-2026",
+          "status": "pass",
+          "calls": [
+            [
+              "get_score_lines",
+              {
+                "school": "sysu",
+                "college": "计算机学院",
+                "code": "081200",
+                "year": 2026
+              }
+            ],
+            [
+              "search_programs",
+              {
+                "school": "sysu",
+                "college": "计算机学院",
+                "code": "081200"
+              }
+            ]
+          ],
+          "facts": [
+            {
+              "table": "score_lines",
+              "program_id": "sysu-670-081200",
+              "kind": "college",
+              "year": 2026,
+              "value": 344,
+              "source_doc_id": "sysu-078",
+              "found": true,
+              "source_ok": true
+            }
+          ]
+        },
+        {
+          "id": "rv-sysu-724-081200-score_line-2026",
+          "status": "pass",
+          "calls": [
+            [
+              "get_score_lines",
+              {
+                "school": "sysu",
+                "college": "人工智能学院",
+                "code": "081200",
+                "year": 2026
+              }
+            ],
+            [
+              "search_programs",
+              {
+                "school": "sysu",
+                "college": "人工智能学院",
+                "code": "081200"
+              }
+            ]
+          ],
+          "facts": [
+            {
+              "table": "score_lines",
+              "program_id": "sysu-724-081200",
+              "kind": "college",
+              "year": 2026,
+              "value": 305,
+              "source_doc_id": "sysu-081",
+              "found": true,
+              "source_ok": true
+            }
+          ]
+        },
+        {
+          "id": "rv-sysu-771-081200-score_line-2026",
+          "status": "pass",
+          "calls": [
+            [
+              "get_score_lines",
+              {
+                "school": "sysu",
+                "college": "系统科学与工程学院",
+                "code": "081200",
+                "year": 2026
+              }
+            ],
+            [
+              "search_programs",
+              {
+                "school": "sysu",
+                "college": "系统科学与工程学院",
+                "code": "081200"
+              }
+            ]
+          ],
+          "facts": [
+            {
+              "table": "score_lines",
+              "program_id": "sysu-771-081200",
+              "kind": "college",
+              "year": 2026,
+              "value": 376,
+              "source_doc_id": "sysu-097",
+              "found": true,
+              "source_ok": true
+            }
+          ]
+        },
+        {
+          "id": "rv-sysu-725-083500-score_line-2026",
+          "status": "pass",
+          "calls": [
+            [
+              "get_score_lines",
+              {
+                "school": "sysu",
+                "college": "软件工程学院",
+                "code": "083500",
+                "year": 2026
+              }
+            ],
+            [
+              "search_programs",
+              {
+                "school": "sysu",
+                "college": "软件工程学院",
+                "code": "083500"
+              }
+            ]
+          ],
+          "facts": [
+            {
+              "table": "score_lines",
+              "program_id": "sysu-725-083500",
+              "kind": "college",
+              "year": 2026,
+              "value": 339,
+              "source_doc_id": "sysu-092",
+              "found": true,
+              "source_ok": true
+            }
+          ]
+        },
+        {
+          "id": "rv-sysu-771-085404-score_line-2026",
+          "status": "pass",
+          "calls": [
+            [
+              "get_score_lines",
+              {
+                "school": "sysu",
+                "college": "系统科学与工程学院",
+                "code": "085404",
+                "year": 2026
+              }
+            ],
+            [
+              "search_programs",
+              {
+                "school": "sysu",
+                "college": "系统科学与工程学院",
+                "code": "085404"
+              }
+            ]
+          ],
+          "facts": [
+            {
+              "table": "score_lines",
+              "program_id": "sysu-771-085404",
+              "kind": "college",
+              "year": 2026,
+              "value": 335,
+              "source_doc_id": "sysu-097",
+              "found": true,
+              "source_ok": true
+            }
+          ]
+        },
+        {
+          "id": "rv-sysu-725-085405-score_line-2026",
+          "status": "pass",
+          "calls": [
+            [
+              "get_score_lines",
+              {
+                "school": "sysu",
+                "college": "软件工程学院",
+                "code": "085405",
+                "year": 2026
+              }
+            ],
+            [
+              "search_programs",
+              {
+                "school": "sysu",
+                "college": "软件工程学院",
+                "code": "085405"
+              }
+            ]
+          ],
+          "facts": [
+            {
+              "table": "score_lines",
+              "program_id": "sysu-725-085405",
+              "kind": "college",
+              "year": 2026,
+              "value": 314,
+              "source_doc_id": "sysu-092",
+              "found": true,
+              "source_ok": true
+            }
+          ]
+        },
+        {
+          "id": "rv-sysu-724-085410-score_line-2026",
+          "status": "pass",
+          "calls": [
+            [
+              "get_score_lines",
+              {
+                "school": "sysu",
+                "college": "人工智能学院",
+                "code": "085410",
+                "year": 2026
+              }
+            ],
+            [
+              "search_programs",
+              {
+                "school": "sysu",
+                "college": "人工智能学院",
+                "code": "085410"
+              }
+            ]
+          ],
+          "facts": [
+            {
+              "table": "score_lines",
+              "program_id": "sysu-724-085410",
+              "kind": "college",
+              "year": 2026,
+              "value": 350,
+              "source_doc_id": "sysu-081",
+              "found": true,
+              "source_ok": true
+            }
+          ]
+        },
+        {
+          "id": "rv-sysu-670-085411-pt-score_line-2026",
+          "status": "pass",
+          "calls": [
+            [
+              "get_score_lines",
+              {
+                "school": "sysu",
+                "college": "计算机学院",
+                "code": "085411",
+                "year": 2026
+              }
+            ],
+            [
+              "search_programs",
+              {
+                "school": "sysu",
+                "college": "计算机学院",
+                "code": "085411"
+              }
+            ]
+          ],
+          "facts": [
+            {
+              "table": "score_lines",
+              "program_id": "sysu-670-085411-pt",
+              "kind": "college",
+              "year": 2026,
+              "value": 309,
+              "source_doc_id": "sysu-078",
+              "found": true,
+              "source_ok": true
+            }
+          ]
+        },
+        {
+          "id": "rv-sysu-757-085412-score_line-2026",
+          "status": "pass",
+          "calls": [
+            [
+              "get_score_lines",
+              {
+                "school": "sysu",
+                "college": "网络空间安全学院",
+                "code": "085412",
+                "year": 2026
+              }
+            ],
+            [
+              "search_programs",
+              {
+                "school": "sysu",
+                "college": "网络空间安全学院",
+                "code": "085412"
+              }
+            ]
+          ],
+          "facts": [
+            {
+              "table": "score_lines",
+              "program_id": "sysu-757-085412",
+              "kind": "college",
+              "year": 2026,
+              "value": 344,
+              "source_doc_id": "sysu-085",
+              "found": true,
+              "source_ok": true
+            }
+          ]
+        },
+        {
+          "id": "rv-jnu-010-081201-plan-2026",
+          "status": "pass",
+          "calls": [
+            [
+              "search_programs",
+              {
+                "school": "jnu",
+                "college": "信息科学技术学院",
+                "code": "081201"
+              }
+            ]
+          ],
+          "facts": [
+            {
+              "table": "plans",
+              "program_id": "jnu-010-081201",
+              "kind": "catalog_total",
+              "year": 2026,
+              "value": 5,
+              "source_doc_id": "jnu-010",
+              "found": true,
+              "source_ok": true
+            }
+          ]
+        },
+        {
+          "id": "rv-jnu-010-081202-plan-2026",
+          "status": "pass",
+          "calls": [
+            [
+              "search_programs",
+              {
+                "school": "jnu",
+                "college": "信息科学技术学院",
+                "code": "081202"
+              }
+            ]
+          ],
+          "facts": [
+            {
+              "table": "plans",
+              "program_id": "jnu-010-081202",
+              "kind": "catalog_total",
+              "year": 2026,
+              "value": 3,
+              "source_doc_id": "jnu-010",
+              "found": true,
+              "source_ok": true
+            }
+          ]
+        },
+        {
+          "id": "rv-jnu-010-081203-plan-2026",
+          "status": "pass",
+          "calls": [
+            [
+              "search_programs",
+              {
+                "school": "jnu",
+                "college": "信息科学技术学院",
+                "code": "081203"
+              }
+            ]
+          ],
+          "facts": [
+            {
+              "table": "plans",
+              "program_id": "jnu-010-081203",
+              "kind": "catalog_total",
+              "year": 2026,
+              "value": 6,
+              "source_doc_id": "jnu-010",
+              "found": true,
+              "source_ok": true
+            }
+          ]
+        },
+        {
+          "id": "rv-jnu-010-0812Z3-plan-2026",
+          "status": "pass",
+          "calls": [
+            [
+              "search_programs",
+              {
+                "school": "jnu",
+                "college": "信息科学技术学院",
+                "code": "0812Z3"
+              }
+            ]
+          ],
+          "facts": [
+            {
+              "table": "plans",
+              "program_id": "jnu-010-0812Z3",
+              "kind": "catalog_total",
+              "year": 2026,
+              "value": 10,
+              "source_doc_id": "jnu-010",
+              "found": true,
+              "source_ok": true
+            }
+          ]
+        },
+        {
+          "id": "rv-jnu-052-083900-plan-2027",
+          "status": "pass",
+          "calls": [
+            [
+              "search_programs",
+              {
+                "school": "jnu",
+                "college": "网络空间安全学院",
+                "code": "083900"
+              }
+            ]
+          ],
+          "facts": [
+            {
+              "table": "plans",
+              "program_id": "jnu-052-083900",
+              "kind": "catalog_total",
+              "year": 2027,
+              "value": 54,
+              "source_doc_id": "jnu-016",
+              "found": true,
+              "source_ok": true
+            }
+          ]
+        },
+        {
+          "id": "rv-jnu-010-085404-plan-2027",
+          "status": "pass",
+          "calls": [
+            [
+              "search_programs",
+              {
+                "school": "jnu",
+                "college": "信息科学技术学院",
+                "code": "085404"
+              }
+            ]
+          ],
+          "facts": [
+            {
+              "table": "plans",
+              "program_id": "jnu-010-085404",
+              "kind": "catalog_total",
+              "year": 2027,
+              "value": 54,
+              "source_doc_id": "jnu-016",
+              "found": true,
+              "source_ok": true
+            }
+          ]
+        },
+        {
+          "id": "rv-jnu-010-085410-plan-2027",
+          "status": "pass",
+          "calls": [
+            [
+              "search_programs",
+              {
+                "school": "jnu",
+                "college": "信息科学技术学院",
+                "code": "085410"
+              }
+            ]
+          ],
+          "facts": [
+            {
+              "table": "plans",
+              "program_id": "jnu-010-085410",
+              "kind": "catalog_total",
+              "year": 2027,
+              "value": 30,
+              "source_doc_id": "jnu-016",
+              "found": true,
+              "source_ok": true
+            }
+          ]
+        },
+        {
+          "id": "rv-jnu-044-085410-plan-2027",
+          "status": "pass",
+          "calls": [
+            [
+              "search_programs",
+              {
+                "school": "jnu",
+                "college": "智能科学与工程学院",
+                "code": "085410"
+              }
+            ]
+          ],
+          "facts": [
+            {
+              "table": "plans",
+              "program_id": "jnu-044-085410",
+              "kind": "catalog_total",
+              "year": 2027,
+              "value": 58,
+              "source_doc_id": "jnu-016",
+              "found": true,
+              "source_ok": true
+            }
+          ]
+        },
+        {
+          "id": "rv-jnu-052-085412-plan-2027",
+          "status": "pass",
+          "calls": [
+            [
+              "search_programs",
+              {
+                "school": "jnu",
+                "college": "网络空间安全学院",
+                "code": "085412"
+              }
+            ]
+          ],
+          "facts": [
+            {
+              "table": "plans",
+              "program_id": "jnu-052-085412",
+              "kind": "catalog_total",
+              "year": 2027,
+              "value": 62,
+              "source_doc_id": "jnu-016",
+              "found": true,
+              "source_ok": true
+            }
+          ]
+        },
+        {
+          "id": "rv-scnu-019-081200-plan-2026",
+          "status": "pass",
+          "calls": [
+            [
+              "search_programs",
+              {
+                "school": "scnu",
+                "college": "计算机学院",
+                "code": "081200"
+              }
+            ]
+          ],
+          "facts": [
+            {
+              "table": "plans",
+              "program_id": "scnu-019-081200",
+              "kind": "catalog_total",
+              "year": 2026,
+              "value": 48,
+              "source_doc_id": "scnu-022",
+              "found": true,
+              "source_ok": true
+            }
+          ]
+        },
+        {
+          "id": "rv-scnu-041-081200-plan-2026",
+          "status": "pass",
+          "calls": [
+            [
+              "search_programs",
+              {
+                "school": "scnu",
+                "college": "人工智能学院",
+                "code": "081200"
+              }
+            ]
+          ],
+          "facts": [
+            {
+              "table": "plans",
+              "program_id": "scnu-041-081200",
+              "kind": "catalog_total",
+              "year": 2026,
+              "value": 23,
+              "source_doc_id": "scnu-024",
+              "found": true,
+              "source_ok": true
+            }
+          ]
+        },
+        {
+          "id": "rv-scnu-019-083500-plan-2026",
+          "status": "pass",
+          "calls": [
+            [
+              "search_programs",
+              {
+                "school": "scnu",
+                "college": "计算机学院",
+                "code": "083500"
+              }
+            ]
+          ],
+          "facts": [
+            {
+              "table": "plans",
+              "program_id": "scnu-019-083500",
+              "kind": "catalog_total",
+              "year": 2026,
+              "value": 20,
+              "source_doc_id": "scnu-022",
+              "found": true,
+              "source_ok": true
+            }
+          ]
+        },
+        {
+          "id": "rv-scnu-019-085404-plan-2026",
+          "status": "pass",
+          "calls": [
+            [
+              "search_programs",
+              {
+                "school": "scnu",
+                "college": "计算机学院",
+                "code": "085404"
+              }
+            ]
+          ],
+          "facts": [
+            {
+              "table": "plans",
+              "program_id": "scnu-019-085404",
+              "kind": "catalog_total",
+              "year": 2026,
+              "value": 50,
+              "source_doc_id": "scnu-022",
+              "found": true,
+              "source_ok": true
+            }
+          ]
+        },
+        {
+          "id": "rv-scnu-046-085404-plan-2026",
+          "status": "pass",
+          "calls": [
+            [
+              "search_programs",
+              {
+                "school": "scnu",
+                "college": "数据科学与工程学院",
+                "code": "085404"
+              }
+            ]
+          ],
+          "facts": [
+            {
+              "table": "plans",
+              "program_id": "scnu-046-085404",
+              "kind": "catalog_total",
+              "year": 2026,
+              "value": 20,
+              "source_doc_id": "scnu-026",
+              "found": true,
+              "source_ok": true
+            }
+          ]
+        },
+        {
+          "id": "rv-scnu-019-085405-plan-2026",
+          "status": "pass",
+          "calls": [
+            [
+              "search_programs",
+              {
+                "school": "scnu",
+                "college": "计算机学院",
+                "code": "085405"
+              }
+            ]
+          ],
+          "facts": [
+            {
+              "table": "plans",
+              "program_id": "scnu-019-085405",
+              "kind": "catalog_total",
+              "year": 2026,
+              "value": 23,
+              "source_doc_id": "scnu-022",
+              "found": true,
+              "source_ok": true
+            }
+          ]
+        },
+        {
+          "id": "rv-scnu-041-085405-plan-2026",
+          "status": "pass",
+          "calls": [
+            [
+              "search_programs",
+              {
+                "school": "scnu",
+                "college": "人工智能学院",
+                "code": "085405"
+              }
+            ]
+          ],
+          "facts": [
+            {
+              "table": "plans",
+              "program_id": "scnu-041-085405",
+              "kind": "catalog_total",
+              "year": 2026,
+              "value": 50,
+              "source_doc_id": "scnu-024",
+              "found": true,
+              "source_ok": true
+            }
+          ]
+        },
+        {
+          "id": "rv-sysu-670-081200-plan-2026",
+          "status": "pass",
+          "calls": [
+            [
+              "search_programs",
+              {
+                "school": "sysu",
+                "college": "计算机学院",
+                "code": "081200"
+              }
+            ]
+          ],
+          "facts": [
+            {
+              "table": "plans",
+              "program_id": "sysu-670-081200",
+              "kind": "catalog_total",
+              "year": 2026,
+              "value": 65,
+              "source_doc_id": "sysu-072",
+              "found": true,
+              "source_ok": true
+            }
+          ]
+        },
+        {
+          "id": "rv-jnu-063-085410-pt-plan-2027",
+          "status": "pass",
+          "calls": [
+            [
+              "search_programs",
+              {
+                "school": "jnu",
+                "code": "085410"
+              }
+            ]
+          ],
+          "facts": [
+            {
+              "table": "plans",
+              "program_id": "jnu-063-085410-pt",
+              "kind": "catalog_total",
+              "year": 2027,
+              "value": 20,
+              "source_doc_id": "jnu-016",
+              "found": true,
+              "source_ok": true
+            }
+          ]
+        },
+        {
+          "id": "rv-scut-cs-081200-plan-2026",
+          "status": "pass",
+          "calls": [
+            [
+              "search_programs",
+              {
+                "school": "scut",
+                "college": "计算机科学与工程学院",
+                "code": "081200"
+              }
+            ]
+          ],
+          "facts": [
+            {
+              "table": "plans",
+              "program_id": "scut-cs-081200",
+              "kind": "college_exam_plan",
+              "year": 2026,
+              "value": 18,
+              "source_doc_id": "scut-055",
+              "found": true,
+              "source_ok": true
+            }
+          ]
+        },
+        {
+          "id": "rv-scut-sse-083500-plan-2026",
+          "status": "pass",
+          "calls": [
+            [
+              "search_programs",
+              {
+                "school": "scut",
+                "college": "软件学院",
+                "code": "083500"
+              }
+            ]
+          ],
+          "facts": [
+            {
+              "table": "plans",
+              "program_id": "scut-sse-083500",
+              "kind": "available_exam",
+              "year": 2026,
+              "value": 10,
+              "source_doc_id": "scut-048",
+              "found": true,
+              "source_ok": true
+            }
+          ]
+        },
+        {
+          "id": "rv-scut-sse-085405-plan-2026",
+          "status": "pass",
+          "calls": [
+            [
+              "search_programs",
+              {
+                "school": "scut",
+                "college": "软件学院",
+                "code": "085405"
+              }
+            ]
+          ],
+          "facts": [
+            {
+              "table": "plans",
+              "program_id": "scut-sse-085405",
+              "kind": "available_exam",
+              "year": 2026,
+              "value": 21,
+              "source_doc_id": "scut-048",
+              "found": true,
+              "source_ok": true
+            }
+          ]
+        },
+        {
+          "id": "rv-scut-ft-140500-plan-2026",
+          "status": "pass",
+          "calls": [
+            [
+              "search_programs",
+              {
+                "school": "scut",
+                "college": "未来技术学院",
+                "code": "140500"
+              }
+            ]
+          ],
+          "facts": [
+            {
+              "table": "plans",
+              "program_id": "scut-ft-140500",
+              "kind": "college_exam_plan",
+              "year": 2026,
+              "value": 28,
+              "source_doc_id": "scut-060",
+              "found": true,
+              "source_ok": true
+            },
+            {
+              "table": "plans",
+              "program_id": "scut-ft-140500",
+              "kind": "available_exam",
+              "year": 2026,
+              "value": 22,
+              "source_doc_id": "scut-048",
+              "found": true,
+              "source_ok": true
+            }
+          ]
+        },
+        {
+          "id": "rv-jnu-010-0812-plan-2027",
+          "status": "pass",
+          "calls": [
+            [
+              "search_programs",
+              {
+                "school": "jnu",
+                "college": "信息科学技术学院",
+                "code": "0812"
+              }
+            ]
+          ],
+          "facts": [
+            {
+              "table": "plans",
+              "program_id": "jnu-010-081201",
+              "kind": "catalog_total",
+              "year": 2027,
+              "value": 24,
+              "source_doc_id": "jnu-016",
+              "found": true,
+              "source_ok": true
+            },
+            {
+              "table": "plans",
+              "program_id": "jnu-010-081202",
+              "kind": "catalog_total",
+              "year": 2027,
+              "value": 24,
+              "source_doc_id": "jnu-016",
+              "found": true,
+              "source_ok": true
+            },
+            {
+              "table": "plans",
+              "program_id": "jnu-010-081203",
+              "kind": "catalog_total",
+              "year": 2027,
+              "value": 24,
+              "source_doc_id": "jnu-016",
+              "found": true,
+              "source_ok": true
+            },
+            {
+              "table": "plans",
+              "program_id": "jnu-010-0812Z3",
+              "kind": "catalog_total",
+              "year": 2027,
+              "value": 24,
+              "source_doc_id": "jnu-016",
+              "found": true,
+              "source_ok": true
+            }
+          ]
+        }
+      ]
+    }
+  }
+}

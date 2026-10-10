@@ -8,7 +8,7 @@ K1 的 18 道验收题。已经被调过参，只作旧集合。`scripts/smoke_k
 
 一行一题，现在 68 道：
 
-- 18 道 `v1-*`：从上面迁过来，`split=dev`。`expected_facts` 还没回填，`reviewed_by` 为空。
+- 18 道 `v1-*`：从上面迁过来，`split=dev`。`expected_facts` 和核对人来自 `v1_review.json`；v1-11（筛选，答案是派生差值）和 v1-14（范围内没有该专业）没有事实。
 - 50 道 `rv-*`：49 道从模板候选题核对后收进来，1 道是审查时手写补的（`origin=handwritten`），都是 `split=unsplit`，有核对人和依据。P1 按“学校 × 类别”抽 test 时再分成 dev / test。
 
 字段：
@@ -21,7 +21,7 @@ K1 的 18 道验收题。已经被调过参，只作旧集合。`scripts/smoke_k
 | `turns` | 多轮时只评最后一轮 |
 | `school` / `program_ids` / `year` | 题目范围 |
 | `expected_intent` | 学校、代码、年份、操作。M0 迁移题的 `metrics` 留空 |
-| `expected_facts` | 库里的键：`table`、`program_id`、`kind`、`year`、`value`、`source_doc_id` |
+| `expected_facts` | 库里的键：`table`、`program_id`、`kind`、`year`、`value`、`source_doc_id`。`table` 是 `score_lines`（kind 为线的口径）、`plans`、`admission_stats` 或 `exam_subjects`（kind 为 `slot1`–`slot4`，value 为科目代码） |
 | `expected_refusal` | `out_of_scope` / `privacy` / `unknown_data` / `null` |
 | `expected_sources` | 事实应引用的 URL |
 | `must_include` / `must_not_include` | 粗的字符串检查。`must_include` 里必须有每条 `expected_facts` 的数值 |
@@ -38,7 +38,7 @@ K1 的 18 道验收题。已经被调过参，只作旧集合。`scripts/smoke_k
 
 ```bash
 python scripts/build_gold_candidates.py --apply-review   # 只替换 rv-* 行
-python scripts/build_gold_candidates.py --migrate-v1     # 只替换 v1-* 行
+python scripts/build_gold_candidates.py --migrate-v1     # 只替换 v1-* 行（kaoyan_qa.json + v1_review.json）
 ```
 
 不要在 `candidates_m0.jsonl` 上手改；`--candidates` 会按库重新生成它。重新生成后 id 若有变化，`--apply-review` 会报出缺决定的题。
