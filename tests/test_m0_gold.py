@@ -7,6 +7,7 @@ ROOT = Path(__file__).resolve().parents[1]
 EVAL = ROOT / "data" / "gold" / "kaoyan_eval_v2.jsonl"
 CANDIDATES = ROOT / "data" / "gold" / "candidates_m0.jsonl"
 REVIEW = ROOT / "data" / "gold" / "review_m0.json"
+ADVERSARIAL = ROOT / "data" / "gold" / "adversarial_m1.json"
 
 
 def _rows(path: Path) -> list[dict]:
@@ -82,3 +83,24 @@ def test_reviewed_rows_check_the_numbers_they_claim():
         assert r["reviewed_by"] and r["reviewed_at"]
         for fact in r["expected_facts"]:
             assert str(fact["value"]) in r["must_include"], r["id"]
+
+
+def test_adversarial_rows_cover_every_trap():
+    spec = json.loads(ADVERSARIAL.read_text(encoding="utf-8"))
+    rows = [r for r in _rows(EVAL) if r["id"].startswith("adv-")]
+    assert [r["id"] for r in rows] == [item["id"] for item in spec["items"]]
+    traps = {"out_of_scope", "privacy", "year", "cross_school", "upper_bound", "pool", "boundary", "no_exam"}
+    assert {r["trap"] for r in rows} == traps
+    assert all(sum(r["trap"] == t for r in rows) >= 10 for t in traps)
+    for r in rows:
+        assert r["split"] == "adversarial"
+        assert r["expected_refusal"] in {None, "out_of_scope", "privacy", "unknown_data"}
+        assert r["judge_rubric"], r["id"]
+        assert r["expected_facts"] or r["expected_refusal"] or r["id"] == "adv-bd-05", r["id"]
+        assert r["expected_intent"]["follow_up"] == (len(r["turns"]) > 1)
+        assert (r["trap"] == "out_of_scope") == (r["expected_refusal"] == "out_of_scope")
+        if r["expected_refusal"] == "privacy":
+            assert r["trap"] == "privacy"
+        assert r["reviewed_by"] and r["reviewed_by"] == spec["reviewed_by"]
+    anonymous = {r["id"] for r in rows if r["trap"] == "privacy" and not r["expected_refusal"]}
+    assert anonymous == {"adv-priv-07", "adv-priv-09"}

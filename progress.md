@@ -1,5 +1,13 @@
 # 进度日志
 
+## 会话：2026-10-10（P1 对抗集）
+
+- **状态：** 分支 `p1/adversarial`（叠在 `p1/v1-facts` 上，PR #5 待合并）
+- **做了：** `data/gold/adversarial_m1.json` 80 道（8 类陷阱 × 10），`build_gold_candidates.py --adversarial` 按键从库取值和来源（只认 verified，`checked` 需写原文依据）；报告、基线、CI 门槛按切分和陷阱分组
+- **审查：** 自查改 5 处意图；和用户定 4 条规则（不带姓名的逐人分数不算隐私、未发布年份可补数但标年份、超范围比较记 lookup、多年份记问的那年）
+- **结果：** 148 道。dev / unsplit 不变；对抗题 L0 62.5%、L1 96.4%，缺口清单留给 P3。报告 `docs/eval/2026-10-10-adversarial.md`
+- **记录：** `docs/kaoyan_p1_notes.md`「对抗集」、`data/gold/README.md`「对抗集」
+
 ## 会话：2026-10-10（P1 回填旧 18 题事实）
 
 - **状态：** 分支 `p1/v1-facts`（从 `main` `8bf7470`，PR #3、#4 已合并）

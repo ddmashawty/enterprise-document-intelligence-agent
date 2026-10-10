@@ -1,31 +1,226 @@
 {
   "meta": {
     "date": "2026-10-10",
-    "commit": "8bf7470-dirty",
+    "commit": "b935897-dirty",
     "gold": "data/gold/kaoyan_eval_v2.jsonl",
     "splits": [],
-    "rows": 68
+    "rows": 148
   },
   "layers": {
     "L0": {
       "summary": {
-        "rows": 68,
-        "exact": 0.9706,
-        "schools": 0.9706,
-        "codes": 1.0,
-        "year": 1.0,
-        "operation": 1.0,
-        "metrics": 1.0,
-        "privacy": 1.0
+        "rows": 148,
+        "exact": 0.7838,
+        "schools": 0.9595,
+        "codes": 0.9122,
+        "year": 0.973,
+        "operation": 0.9797,
+        "metrics": 0.8889,
+        "privacy": 0.973
+      },
+      "by_split": {
+        "adversarial": {
+          "rows": 80,
+          "exact": 0.625,
+          "schools": 0.95,
+          "codes": 0.8375,
+          "year": 0.95,
+          "operation": 0.9625,
+          "metrics": 0.7931,
+          "privacy": 0.95
+        },
+        "dev": {
+          "rows": 18,
+          "exact": 0.8889,
+          "schools": 0.8889,
+          "codes": 1.0,
+          "year": 1.0,
+          "operation": 1.0,
+          "metrics": null,
+          "privacy": 1.0
+        },
+        "unsplit": {
+          "rows": 50,
+          "exact": 1.0,
+          "schools": 1.0,
+          "codes": 1.0,
+          "year": 1.0,
+          "operation": 1.0,
+          "metrics": 1.0,
+          "privacy": 1.0
+        }
+      },
+      "by_trap": {
+        "boundary": {
+          "rows": 10,
+          "exact": 0.7,
+          "schools": 1.0,
+          "codes": 1.0,
+          "year": 0.9,
+          "operation": 1.0,
+          "metrics": 0.8,
+          "privacy": 1.0
+        },
+        "cross_school": {
+          "rows": 10,
+          "exact": 0.0,
+          "schools": 0.7,
+          "codes": 0.0,
+          "year": 0.8,
+          "operation": 1.0,
+          "metrics": 0.4286,
+          "privacy": 1.0
+        },
+        "no_exam": {
+          "rows": 10,
+          "exact": 0.6,
+          "schools": 0.9,
+          "codes": 0.8,
+          "year": 1.0,
+          "operation": 0.9,
+          "metrics": 1.0,
+          "privacy": 1.0
+        },
+        "out_of_scope": {
+          "rows": 10,
+          "exact": 1.0,
+          "schools": 1.0,
+          "codes": 1.0,
+          "year": 1.0,
+          "operation": 1.0,
+          "metrics": 1.0,
+          "privacy": 1.0
+        },
+        "pool": {
+          "rows": 10,
+          "exact": 0.6,
+          "schools": 1.0,
+          "codes": 0.9,
+          "year": 0.9,
+          "operation": 0.8,
+          "metrics": 0.8571,
+          "privacy": 1.0
+        },
+        "privacy": {
+          "rows": 10,
+          "exact": 0.6,
+          "schools": 1.0,
+          "codes": 1.0,
+          "year": 1.0,
+          "operation": 1.0,
+          "metrics": null,
+          "privacy": 0.6
+        },
+        "upper_bound": {
+          "rows": 10,
+          "exact": 0.6,
+          "schools": 1.0,
+          "codes": 1.0,
+          "year": 1.0,
+          "operation": 1.0,
+          "metrics": 0.6,
+          "privacy": 1.0
+        },
+        "year": {
+          "rows": 10,
+          "exact": 0.9,
+          "schools": 1.0,
+          "codes": 1.0,
+          "year": 1.0,
+          "operation": 1.0,
+          "metrics": 0.9,
+          "privacy": 1.0
+        }
       }
     },
     "L1": {
       "summary": {
-        "rows": 66,
+        "rows": 122,
         "unscorable": 0,
-        "row_pass": 1.0,
-        "fact_recall": 1.0,
+        "row_pass": 0.9836,
+        "fact_recall": 0.99,
         "source_match": 1.0
+      },
+      "by_split": {
+        "adversarial": {
+          "rows": 56,
+          "unscorable": 0,
+          "row_pass": 0.9643,
+          "fact_recall": 0.9783,
+          "source_match": 1.0
+        },
+        "dev": {
+          "rows": 16,
+          "unscorable": 0,
+          "row_pass": 1.0,
+          "fact_recall": 1.0,
+          "source_match": 1.0
+        },
+        "unsplit": {
+          "rows": 50,
+          "unscorable": 0,
+          "row_pass": 1.0,
+          "fact_recall": 1.0,
+          "source_match": 1.0
+        }
+      },
+      "by_trap": {
+        "boundary": {
+          "rows": 9,
+          "unscorable": 0,
+          "row_pass": 1.0,
+          "fact_recall": 1.0,
+          "source_match": 1.0
+        },
+        "cross_school": {
+          "rows": 9,
+          "unscorable": 0,
+          "row_pass": 1.0,
+          "fact_recall": 1.0,
+          "source_match": 1.0
+        },
+        "no_exam": {
+          "rows": 10,
+          "unscorable": 0,
+          "row_pass": 1.0,
+          "fact_recall": 1.0,
+          "source_match": 1.0
+        },
+        "out_of_scope": {
+          "rows": 3,
+          "unscorable": 0,
+          "row_pass": 0.6667,
+          "fact_recall": 0.8333,
+          "source_match": 1.0
+        },
+        "pool": {
+          "rows": 10,
+          "unscorable": 0,
+          "row_pass": 0.9,
+          "fact_recall": 0.9286,
+          "source_match": 1.0
+        },
+        "privacy": {
+          "rows": 3,
+          "unscorable": 0,
+          "row_pass": 1.0,
+          "fact_recall": 1.0,
+          "source_match": 1.0
+        },
+        "upper_bound": {
+          "rows": 10,
+          "unscorable": 0,
+          "row_pass": 1.0,
+          "fact_recall": 1.0,
+          "source_match": 1.0
+        },
+        "year": {
+          "rows": 2,
+          "unscorable": 0,
+          "row_pass": 1.0,
+          "fact_recall": 1.0,
+          "source_match": 1.0
+        }
       }
     }
   }
