@@ -92,7 +92,8 @@ def main() -> int:
         print(f"wrote {stem}.md / .json")
 
     if args.write_baseline:
-        summary = {**report, "layers": {k: {"summary": v["summary"]} for k, v in report["layers"].items()}}
+        summary = {**report, "layers": {k: {g: v[g] for g in ("summary", "by_split", "by_trap")}
+                                        for k, v in report["layers"].items()}}
         Path(args.write_baseline).write_text(json.dumps(summary, ensure_ascii=False, indent=2) + "\n",
                                              encoding="utf-8")
         print(f"wrote {args.write_baseline}")

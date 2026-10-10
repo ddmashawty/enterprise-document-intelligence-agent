@@ -76,6 +76,9 @@ def test_l1_passes_fails_and_skips_compare_rows(monkeypatch):
         {"id": "nofacts", "turns": ["华工名单"], "expected_facts": [],
          "expected_intent": {"operation": "lookup", "metrics": [], "schools": [], "codes": [], "year": None}},
     ]
+    for row, split in zip(rows, ("dev", "adversarial", "dev", "dev"), strict=True):
+        row["split"] = split
+    rows[1]["trap"] = "pool"
 
     def fake_calls(intent):
         if "compare" in intent["kinds"]:
@@ -93,12 +96,21 @@ def test_l1_passes_fails_and_skips_compare_rows(monkeypatch):
     assert status == {"ok": "pass", "miss": "fail", "cmp": "unscorable"}
     assert result["summary"] == {"rows": 2, "unscorable": 1, "row_pass": 0.5, "fact_recall": 0.5,
                                  "source_match": 1.0}
+    assert result["by_split"]["dev"]["row_pass"] == 1.0
+    assert result["by_split"]["adversarial"]["row_pass"] == 0.0
+    assert list(result["by_trap"]) == ["pool"]
 
 
 def test_regressions_flag_drops_beyond_threshold():
     base = {"layers": {"L0": {"summary": {"rows": 10, "exact": 0.9, "codes": 1.0}}}}
     now = {"layers": {"L0": {"summary": {"rows": 10, "exact": 0.89, "codes": 0.95}}}}
     assert runner.regressions(now, base, 0.02) == ["L0.codes: 100.00% -> 95.00%"]
+
+
+def test_regressions_check_each_trap():
+    base = {"layers": {"L0": {"summary": {"exact": 0.8}, "by_trap": {"privacy": {"exact": 0.5}}}}}
+    now = {"layers": {"L0": {"summary": {"exact": 0.8}, "by_trap": {"privacy": {"exact": 0.4}}}}}
+    assert runner.regressions(now, base, 0.02) == ["L0[privacy].exact: 50.00% -> 40.00%"]
 
 
 def test_l0_runs_on_the_eval_set_without_a_database():
