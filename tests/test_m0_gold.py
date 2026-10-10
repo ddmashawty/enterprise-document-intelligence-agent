@@ -38,8 +38,12 @@ def test_v1_questions_land_in_dev_only():
     assert len(rows) == 18
     assert {r["split"] for r in rows} == {"dev"}
     assert len({r["id"] for r in rows}) == 18
-    assert all(r["reviewed_by"] == "" for r in rows)
-    assert all(r["expected_facts"] == [] for r in rows)
+    assert all(r["reviewed_by"] and r["reviewed_at"] for r in rows)
+    no_facts = {r["id"] for r in rows if not r["expected_facts"]}
+    assert no_facts == {"v1-11", "v1-14"}
+    assert all(r["judge_rubric"] for r in rows if r["id"] == "v1-11")
+    for r in rows:
+        assert r["program_ids"] == list(dict.fromkeys(f["program_id"] for f in r["expected_facts"]))
     privacy = next(r for r in rows if r["id"] == "v1-17")
     assert privacy["expected_refusal"] == "privacy"
     unknown = next(r for r in rows if r["id"] == "v1-05")

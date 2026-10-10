@@ -36,9 +36,12 @@ def intent_fields(expected: dict[str, Any], predicted: dict[str, Any], expected_
     return fields
 
 
+_FACT_KEYS = ("lines", "score_lines", "plans", "admission_stats", "exam_subjects")
+
+
 def _walk_programs(data: Any):
     if isinstance(data, dict):
-        if "program_id" in data and ("lines" in data or "plans" in data):
+        if "program_id" in data and any(k in data for k in _FACT_KEYS):
             yield data
         for value in data.values():
             yield from _walk_programs(value)
@@ -47,8 +50,23 @@ def _walk_programs(data: Any):
             yield from _walk_programs(value)
 
 
+def _fact(table: str, pid: str, kind: Any, year: Any, value: Any, item: dict[str, Any]) -> dict[str, Any]:
+    return {
+        "table": table,
+        "program_id": pid,
+        "kind": kind,
+        "year": year,
+        "value": value,
+        "source_doc_id": (item.get("source") or {}).get("doc_id"),
+    }
+
+
 def tool_facts(outputs: list[str]) -> list[dict[str, Any]]:
-    """Score lines and plans found in kaoyan tool outputs, keyed like `expected_facts`."""
+    """Facts found in kaoyan tool outputs, keyed like `expected_facts`.
+
+    get_score_lines names the score lines `lines`, search_programs names them `score_lines`.
+    Exam subjects become one fact per slot: kind `slot4`, value the subject code.
+    """
     facts: list[dict[str, Any]] = []
     for output in outputs:
         try:
@@ -57,24 +75,15 @@ def tool_facts(outputs: list[str]) -> list[dict[str, Any]]:
             continue
         for program in _walk_programs(data):
             pid = program["program_id"]
-            for line in program.get("lines") or []:
-                facts.append({
-                    "table": "score_lines",
-                    "program_id": pid,
-                    "kind": line.get("scope"),
-                    "year": line.get("year"),
-                    "value": line.get("total"),
-                    "source_doc_id": (line.get("source") or {}).get("doc_id"),
-                })
-            for plan in program.get("plans") or []:
-                facts.append({
-                    "table": "plans",
-                    "program_id": pid,
-                    "kind": plan.get("kind"),
-                    "year": plan.get("year"),
-                    "value": plan.get("value"),
-                    "source_doc_id": (plan.get("source") or {}).get("doc_id"),
-                })
+            for line in (program.get("lines") or []) + (program.get("score_lines") or []):
+                facts.append(_fact("score_lines", pid, line.get("scope"), line.get("year"), line.get("total"), line))
+            for table in ("plans", "admission_stats"):
+                for item in program.get(table) or []:
+                    facts.append(_fact(table, pid, item.get("kind"), item.get("year"), item.get("value"), item))
+            for entry in program.get("exam_subjects") or []:
+                for subject in entry.get("subjects") or []:
+                    facts.append(_fact("exam_subjects", pid, f"slot{subject.get('slot')}", entry.get("year"),
+                                       subject.get("code"), entry))
     return facts
 
 
