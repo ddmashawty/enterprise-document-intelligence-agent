@@ -1,22 +1,22 @@
 {
   "meta": {
-    "date": "2026-10-10",
-    "commit": "b935897-dirty",
+    "date": "2026-10-11",
+    "commit": "a4fd397-dirty",
     "gold": "data/gold/kaoyan_eval_v2.jsonl",
     "splits": [],
-    "rows": 148
+    "rows": 188
   },
   "layers": {
     "L0": {
       "summary": {
-        "rows": 148,
-        "exact": 0.7838,
-        "schools": 0.9595,
-        "codes": 0.9122,
-        "year": 0.973,
-        "operation": 0.9797,
-        "metrics": 0.8889,
-        "privacy": 0.973
+        "rows": 188,
+        "exact": 0.7128,
+        "schools": 0.9468,
+        "codes": 0.8723,
+        "year": 0.9734,
+        "operation": 0.9415,
+        "metrics": 0.8421,
+        "privacy": 0.9787
       },
       "by_split": {
         "adversarial": {
@@ -40,17 +40,27 @@
           "privacy": 1.0
         },
         "unsplit": {
-          "rows": 50,
-          "exact": 1.0,
-          "schools": 1.0,
-          "codes": 1.0,
-          "year": 1.0,
-          "operation": 1.0,
-          "metrics": 1.0,
+          "rows": 90,
+          "exact": 0.7556,
+          "schools": 0.9556,
+          "codes": 0.8778,
+          "year": 0.9889,
+          "operation": 0.9111,
+          "metrics": 0.88,
           "privacy": 1.0
         }
       },
       "by_trap": {
+        "aggregate": {
+          "rows": 4,
+          "exact": 0.25,
+          "schools": 0.5,
+          "codes": 1.0,
+          "year": 1.0,
+          "operation": 0.75,
+          "metrics": 0.75,
+          "privacy": 1.0
+        },
         "boundary": {
           "rows": 10,
           "exact": 0.7,
@@ -61,6 +71,16 @@
           "metrics": 0.8,
           "privacy": 1.0
         },
+        "colloquial": {
+          "rows": 7,
+          "exact": 0.0,
+          "schools": 0.8571,
+          "codes": 0.2857,
+          "year": 1.0,
+          "operation": 0.7143,
+          "metrics": 0.8333,
+          "privacy": 1.0
+        },
         "cross_school": {
           "rows": 10,
           "exact": 0.0,
@@ -69,6 +89,26 @@
           "year": 0.8,
           "operation": 1.0,
           "metrics": 0.4286,
+          "privacy": 1.0
+        },
+        "false_premise": {
+          "rows": 6,
+          "exact": 0.5,
+          "schools": 0.8333,
+          "codes": 0.8333,
+          "year": 0.8333,
+          "operation": 0.8333,
+          "metrics": 0.6667,
+          "privacy": 1.0
+        },
+        "missing_field": {
+          "rows": 9,
+          "exact": 0.7778,
+          "schools": 1.0,
+          "codes": 0.7778,
+          "year": 1.0,
+          "operation": 0.8889,
+          "metrics": null,
           "privacy": 1.0
         },
         "no_exam": {
@@ -91,6 +131,16 @@
           "metrics": 1.0,
           "privacy": 1.0
         },
+        "policy": {
+          "rows": 5,
+          "exact": 0.2,
+          "schools": 1.0,
+          "codes": 0.8,
+          "year": 1.0,
+          "operation": 0.8,
+          "metrics": 0.25,
+          "privacy": 1.0
+        },
         "pool": {
           "rows": 10,
           "exact": 0.6,
@@ -99,6 +149,16 @@
           "year": 0.9,
           "operation": 0.8,
           "metrics": 0.8571,
+          "privacy": 1.0
+        },
+        "prediction": {
+          "rows": 5,
+          "exact": 0.4,
+          "schools": 1.0,
+          "codes": 0.6,
+          "year": 1.0,
+          "operation": 0.6,
+          "metrics": 0.3333,
           "privacy": 1.0
         },
         "privacy": {
@@ -110,6 +170,16 @@
           "operation": 1.0,
           "metrics": null,
           "privacy": 0.6
+        },
+        "routing": {
+          "rows": 4,
+          "exact": 1.0,
+          "schools": 1.0,
+          "codes": 1.0,
+          "year": 1.0,
+          "operation": 1.0,
+          "metrics": 1.0,
+          "privacy": 1.0
         },
         "upper_bound": {
           "rows": 10,
@@ -135,18 +205,18 @@
     },
     "L1": {
       "summary": {
-        "rows": 122,
+        "rows": 147,
         "unscorable": 0,
-        "row_pass": 0.9836,
-        "fact_recall": 0.99,
+        "row_pass": 0.9592,
+        "fact_recall": 0.9477,
         "source_match": 1.0
       },
       "by_split": {
         "adversarial": {
-          "rows": 56,
+          "rows": 57,
           "unscorable": 0,
-          "row_pass": 0.9643,
-          "fact_recall": 0.9783,
+          "row_pass": 0.9474,
+          "fact_recall": 0.9677,
           "source_match": 1.0
         },
         "dev": {
@@ -157,23 +227,51 @@
           "source_match": 1.0
         },
         "unsplit": {
-          "rows": 50,
+          "rows": 74,
           "unscorable": 0,
-          "row_pass": 1.0,
-          "fact_recall": 1.0,
+          "row_pass": 0.9595,
+          "fact_recall": 0.9161,
           "source_match": 1.0
         }
       },
       "by_trap": {
+        "aggregate": {
+          "rows": 3,
+          "unscorable": 0,
+          "row_pass": 0.6667,
+          "fact_recall": 0.9333,
+          "source_match": 1.0
+        },
         "boundary": {
+          "rows": 10,
+          "unscorable": 0,
+          "row_pass": 0.9,
+          "fact_recall": 0.9333,
+          "source_match": 1.0
+        },
+        "colloquial": {
+          "rows": 6,
+          "unscorable": 0,
+          "row_pass": 0.8333,
+          "fact_recall": 0.6957,
+          "source_match": 1.0
+        },
+        "cross_school": {
           "rows": 9,
           "unscorable": 0,
           "row_pass": 1.0,
           "fact_recall": 1.0,
           "source_match": 1.0
         },
-        "cross_school": {
-          "rows": 9,
+        "false_premise": {
+          "rows": 5,
+          "unscorable": 0,
+          "row_pass": 0.8,
+          "fact_recall": 0.6923,
+          "source_match": 1.0
+        },
+        "missing_field": {
+          "rows": 2,
           "unscorable": 0,
           "row_pass": 1.0,
           "fact_recall": 1.0,
@@ -193,6 +291,13 @@
           "fact_recall": 0.8333,
           "source_match": 1.0
         },
+        "policy": {
+          "rows": 3,
+          "unscorable": 0,
+          "row_pass": 1.0,
+          "fact_recall": 1.0,
+          "source_match": 1.0
+        },
         "pool": {
           "rows": 10,
           "unscorable": 0,
@@ -200,8 +305,22 @@
           "fact_recall": 0.9286,
           "source_match": 1.0
         },
+        "prediction": {
+          "rows": 3,
+          "unscorable": 0,
+          "row_pass": 1.0,
+          "fact_recall": 1.0,
+          "source_match": 1.0
+        },
         "privacy": {
           "rows": 3,
+          "unscorable": 0,
+          "row_pass": 1.0,
+          "fact_recall": 1.0,
+          "source_match": 1.0
+        },
+        "routing": {
+          "rows": 2,
           "unscorable": 0,
           "row_pass": 1.0,
           "fact_recall": 1.0,

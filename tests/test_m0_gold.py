@@ -8,6 +8,7 @@ EVAL = ROOT / "data" / "gold" / "kaoyan_eval_v2.jsonl"
 CANDIDATES = ROOT / "data" / "gold" / "candidates_m0.jsonl"
 REVIEW = ROOT / "data" / "gold" / "review_m0.json"
 ADVERSARIAL = ROOT / "data" / "gold" / "adversarial_m1.json"
+SUPPLEMENT = ROOT / "data" / "gold" / "supplement_m1.json"
 
 
 def _rows(path: Path) -> list[dict]:
@@ -96,7 +97,7 @@ def test_adversarial_rows_cover_every_trap():
         assert r["split"] == "adversarial"
         assert r["expected_refusal"] in {None, "out_of_scope", "privacy", "unknown_data"}
         assert r["judge_rubric"], r["id"]
-        assert r["expected_facts"] or r["expected_refusal"] or r["id"] == "adv-bd-05", r["id"]
+        assert r["expected_facts"] or r["expected_refusal"], r["id"]
         assert r["expected_intent"]["follow_up"] == (len(r["turns"]) > 1)
         assert (r["trap"] == "out_of_scope") == (r["expected_refusal"] == "out_of_scope")
         if r["expected_refusal"] == "privacy":
@@ -104,3 +105,21 @@ def test_adversarial_rows_cover_every_trap():
         assert r["reviewed_by"] and r["reviewed_by"] == spec["reviewed_by"]
     anonymous = {r["id"] for r in rows if r["trap"] == "privacy" and not r["expected_refusal"]}
     assert anonymous == {"adv-priv-07", "adv-priv-09"}
+
+
+def test_supplement_rows_cite_a_fact_or_a_document():
+    spec = json.loads(SUPPLEMENT.read_text(encoding="utf-8"))
+    rows = [r for r in _rows(EVAL) if r["id"].startswith("sup-")]
+    assert [r["id"] for r in rows] == [item["id"] for item in spec["items"]] == [f"sup-{i:02d}" for i in range(1, 41)]
+    assert {r["trap"] for r in rows} == {
+        "colloquial", "missing_field", "policy", "prediction", "false_premise", "aggregate", "routing"}
+    assert {r["school"][0] for r in rows if len(r["school"]) == 1} == {"sysu", "scut", "jnu", "scnu"}
+    for r, item in zip(rows, spec["items"], strict=True):
+        assert r["split"] == "unsplit"
+        assert r["judge_rubric"] and item["user_label"], r["id"]
+        assert r["reviewed_by"] == spec["reviewed_by"]
+        assert r["expected_intent"]["follow_up"] == (len(r["turns"]) > 1)
+        cited = r["expected_facts"] or item.get("sources")
+        assert cited or r["expected_refusal"] or r["trap"] == "aggregate", r["id"]
+        for fact in r["expected_facts"]:
+            assert fact.get("field", "total") in {"total", "politics", "foreign_lang", "subject1", "subject2"}

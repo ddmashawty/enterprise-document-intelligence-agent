@@ -50,12 +50,17 @@ def _walk_programs(data: Any):
             yield from _walk_programs(value)
 
 
-def _fact(table: str, pid: str, kind: Any, year: Any, value: Any, item: dict[str, Any]) -> dict[str, Any]:
+LINE_FIELDS = ("total", "politics", "foreign_lang", "subject1", "subject2")
+
+
+def _fact(table: str, pid: str, kind: Any, year: Any, value: Any, item: dict[str, Any],
+          field: str = "total") -> dict[str, Any]:
     return {
         "table": table,
         "program_id": pid,
         "kind": kind,
         "year": year,
+        "field": field,
         "value": value,
         "source_doc_id": (item.get("source") or {}).get("doc_id"),
     }
@@ -65,7 +70,8 @@ def tool_facts(outputs: list[str]) -> list[dict[str, Any]]:
     """Facts found in kaoyan tool outputs, keyed like `expected_facts`.
 
     get_score_lines names the score lines `lines`, search_programs names them `score_lines`.
-    Exam subjects become one fact per slot: kind `slot4`, value the subject code.
+    Each line yields its total and its single-subject lines (`field` politics, foreign_lang,
+    subject1, subject2). Exam subjects become one fact per slot: kind `slot4`, value the subject code.
     """
     facts: list[dict[str, Any]] = []
     for output in outputs:
@@ -76,7 +82,10 @@ def tool_facts(outputs: list[str]) -> list[dict[str, Any]]:
         for program in _walk_programs(data):
             pid = program["program_id"]
             for line in (program.get("lines") or []) + (program.get("score_lines") or []):
-                facts.append(_fact("score_lines", pid, line.get("scope"), line.get("year"), line.get("total"), line))
+                for field in LINE_FIELDS:
+                    if line.get(field) is not None:
+                        facts.append(_fact("score_lines", pid, line.get("scope"), line.get("year"), line[field],
+                                           line, field))
             for table in ("plans", "admission_stats"):
                 for item in program.get(table) or []:
                     facts.append(_fact(table, pid, item.get("kind"), item.get("year"), item.get("value"), item))
@@ -90,7 +99,8 @@ def tool_facts(outputs: list[str]) -> list[dict[str, Any]]:
 def match_fact(expected: dict[str, Any], facts: list[dict[str, Any]]) -> tuple[bool, bool]:
     """(value found, found with the expected source document)."""
     key = ("table", "program_id", "kind", "year", "value")
-    hits = [f for f in facts if all(f[k] == expected[k] for k in key)]
+    field = expected.get("field", "total")
+    hits = [f for f in facts if all(f[k] == expected[k] for k in key) and f["field"] == field]
     return bool(hits), any(f["source_doc_id"] == expected.get("source_doc_id") for f in hits)
 
 

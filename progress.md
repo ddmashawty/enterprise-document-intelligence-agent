@@ -1,5 +1,13 @@
 # 进度日志
 
+## 会话：2026-10-11（P1 补充集 40 道）
+
+- **状态：** 同分支 `p1/adversarial`（PR #6 追加提交）
+- **做了：** 用户出 40 道补对抗集偏差，写成 `data/gold/supplement_m1.json`（`sup-*`）；`--adversarial` 改名 `--specs`，支持多个手写文件、`field=` 单科线、`sources` 纯文档出处；L1 认单科线；改 adv-pool-08 年份、adv-bd-05 补事实
+- **发现：** 7 道的期望和库里不符（学费、学制、导师、报名人数其实有原文；华工科目没取到），按原文改并写 `label_change`
+- **结果：** 188 道；L0 71.3%、L1 95.9%；新增 4 道 L1 真实失败留给 P3。报告 `docs/eval/2026-10-11.md`，基线已重写
+- **记录：** `docs/kaoyan_p1_notes.md`「补充集 40 道」、`data/gold/README.md`「补充集」
+
 ## 会话：2026-10-10（P1 对抗集）
 
 - **状态：** 分支 `p1/adversarial`（叠在 `p1/v1-facts` 上，PR #5 待合并）

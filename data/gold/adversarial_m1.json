@@ -11,9 +11,12 @@
     "anon_scores": "不带姓名、编号的逐人分数不算隐私；只有能对应到具体个人（姓名、考生编号、准考证号、本科学校）的才拒绝",
     "supplement": "问未发布年份答 unknown_data，可以补最近一年的数但必须标年份",
     "out_of_scope_operation": "一边超范围的比较题，operation 记 lookup（只查范围内那一所）",
-    "multi_year": "year 记问的那一年；两年都要比较时为 null",
+    "multi_year": "year 记问的那一年；两年都要比较时为 null（adv-pool-08 问句对照 2026 和 2027，按用户复核改为 null）",
     "resolved_intent": "expected_intent 记解析后的意图：追问继承上一轮的学校/代码，专业名能唯一对应代码时记代码"
   },
+  "id_prefix": "adv-",
+  "split": "adversarial",
+  "label": "adversarial",
   "items": [
     {
       "id": "adv-oos-01",
@@ -1498,7 +1501,7 @@
       "codes": [
         "081201"
       ],
-      "year": 2027,
+      "year": null,
       "operation": "lookup",
       "metrics": [],
       "facts": [
@@ -1694,7 +1697,9 @@
       "metrics": [
         "subjects"
       ],
-      "facts": [],
+      "facts": [
+        "sysu-765-085400|exam_subjects|slot4|2026"
+      ],
       "refusal": null,
       "must_include": [
         "884"

@@ -6,11 +6,12 @@ K1 的 18 道验收题。已经被调过参，只作旧集合。`scripts/smoke_k
 
 ## `kaoyan_eval_v2.jsonl`
 
-一行一题，现在 148 道：
+一行一题，现在 188 道：
 
 - 18 道 `v1-*`：从上面迁过来，`split=dev`。`expected_facts` 和核对人来自 `v1_review.json`；v1-11（筛选，答案是派生差值）和 v1-14（范围内没有该专业）没有事实。
 - 50 道 `rv-*`：49 道从模板候选题核对后收进来，1 道是审查时手写补的（`origin=handwritten`），都是 `split=unsplit`，有核对人和依据。P1 按“学校 × 类别”抽 test 时再分成 dev / test。
 - 80 道 `adv-*`：手写对抗题，`split=adversarial`，8 类陷阱各 10 道，来自 `adversarial_m1.json`。
+- 40 道 `sup-*`：用户出题的补充集，`split=unsplit`，补对抗集的偏差（口语多意图、库外字段、政策口径、预测、错误前提、聚合、注入和路由），来自 `supplement_m1.json`。
 
 字段：
 
@@ -19,11 +20,11 @@ K1 的 18 道验收题。已经被调过参，只作旧集合。`scripts/smoke_k
 | `id` | 稳定题号。迁移题是 `v1-01`，核对过的模板题是 `rv-…` |
 | `split` | `dev` / `test` / `adversarial`；`unsplit` 表示已核对、还没分 |
 | `category` | `score_line` `plan` `subjects` `tm` `compare` `filter` `narrative` `export` `multi_turn` `out_of_scope` `privacy` `unknown_data` `year_mismatch` `cross_attribution` |
-| `trap` | 只有对抗题有：`out_of_scope` `privacy` `year` `cross_school` `upper_bound` `pool` `boundary` `no_exam` |
+| `trap` | 只有手写题有。对抗集：`out_of_scope` `privacy` `year` `cross_school` `upper_bound` `pool` `boundary` `no_exam`；补充集：`colloquial` `missing_field` `policy` `prediction` `false_premise` `aggregate` `routing`。报告按它分组 |
 | `turns` | 多轮时只评最后一轮 |
 | `school` / `program_ids` / `year` | 题目范围 |
 | `expected_intent` | 学校、代码、年份、操作。M0 迁移题的 `metrics` 留空 |
-| `expected_facts` | 库里的键：`table`、`program_id`、`kind`、`year`、`value`、`source_doc_id`。`table` 是 `score_lines`（kind 为线的口径）、`plans`、`admission_stats` 或 `exam_subjects`（kind 为 `slot1`–`slot4`，value 为科目代码） |
+| `expected_facts` | 库里的键：`table`、`program_id`、`kind`、`year`、`value`、`source_doc_id`。`table` 是 `score_lines`（kind 为线的口径）、`plans`、`admission_stats` 或 `exam_subjects`（kind 为 `slot1`–`slot4`，value 为科目代码）。单科线另带 `field`（`politics` / `foreign_lang` / `subject1` / `subject2`），没有 `field` 就是总分 |
 | `expected_refusal` | `out_of_scope` / `privacy` / `unknown_data` / `null` |
 | `expected_sources` | 事实应引用的 URL |
 | `must_include` / `must_not_include` | 粗的字符串检查。`must_include` 里必须有每条 `expected_facts` 的数值 |
@@ -54,15 +55,19 @@ M0 的核对口径：
 - 目录人数（含推免）的题，答案必须出现“目录”。
 - 和 `v1-*` 同专业同数字的题丢掉，避免一题算两次。
 
-## 对抗集
+## 手写题（对抗集、补充集）
 
-`adversarial_m1.json` 每题写问句、意图、拒答类型、`judge_rubric`，事实只写键 `program_id|table|kind|year[|source_doc_id][|checked]`。生成时脚本到库里取值和来源：只认 `verified=1` 的行，取到 0 条或两个不同的值就报错。`checked` 表示库里没有人工种子可比、已人工对照原文（`checked_notes` 写了对照的文件和原文）。
+`adversarial_m1.json`、`supplement_m1.json` 每题写问句、意图、拒答类型、`judge_rubric`，事实只写键 `program_id|table|kind|year[|source_doc_id][|field=politics][|checked]`。生成时脚本到库里取值和来源：只认 `verified=1` 的行，取到 0 条或两个不同的值就报错。`checked` 表示库里没有人工种子可比、已人工对照原文（`checked_notes` 写了对照的文件和原文）。`field=` 取单科线。
+
+答案只在原文里、没有结构化事实的题（学费、复试成绩算法、同等学力），在 `sources` 里列文档 id，生成时并进 `expected_sources`。每个文件头写 `id_prefix` 和 `split`，生成时只替换该前缀的行。
 
 ```bash
-python scripts/build_gold_candidates.py --adversarial   # 只替换 adv-* 行；--db 可换库
+python scripts/build_gold_candidates.py --specs   # 只替换 adv-* 和 sup-* 行；--db 可换库
 ```
 
-对抗题的 `expected_facts` 是工具必须查到的事实，不一定原样出现在回答里（统招 0 回答成“只招推免”，问句自带的人数不用复述），所以不要求事实数值都在 `must_include` 里。纯拒答题没有事实。
+手写题的 `expected_facts` 是工具必须查到的事实，不一定原样出现在回答里（统招 0 回答成“只招推免”，问句自带的人数不用复述），所以不要求事实数值都在 `must_include` 里。纯拒答题没有事实。
+
+## 对抗集
 
 | 陷阱 | 考什么 |
 |---|---|
@@ -82,3 +87,17 @@ python scripts/build_gold_candidates.py --adversarial   # 只替换 adv-* 行；
 - 一边超范围的比较题，`operation` 记 `lookup`。
 - 问句有两个年份时 `year` 记问的那一年，两年都要比时记 `null`。
 - `expected_intent` 记解析后的意图：追问继承上一轮的学校和代码；专业名能唯一对应代码时记代码（“中大网安学硕”记 083900，“中大电子信息专硕”对应多个代码，不记）。
+
+## 补充集
+
+用户看完对抗集后出的 40 道，补它的偏差：华工、华师题少，lookup 占 72 道，没有口语、多意图、库外字段和政策口径。每题保留用户写的期望行为（`user_label`）；库里或原文和它不一致的，改了并在 `label_change` 写依据。
+
+| 类 | 题数 | 考什么 |
+|---|---|---|
+| `colloquial` | 7 | 简称（计科、软工、网安、SYSU）、一句话多问、同校两学院相减 |
+| `missing_field` | 9 | 学费、学制、奖学金、导师、机试、报录比、淘汰率、就业、宿舍；有原文的照原文答，没有的说未取得 |
+| `policy` | 5 | 单科线、退役专项、非全日制、联培、同等学力 |
+| `prediction` | 5 | 能不能上、哪个好考、调剂、涨不涨、哪个好；不预测、不评价，只并列事实 |
+| `false_premise` | 6 | 错误数字、名称和代码不匹配、“今年”“明年”、口径不同的数直接比、追问来源 |
+| `aggregate` | 4 | 计数、排序、整校列表、反向筛选；未取得的要单列 |
+| `routing` | 4 | 提示注入、导出不留空、通用文档题、复习资料 |

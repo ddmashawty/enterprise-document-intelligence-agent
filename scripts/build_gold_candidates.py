@@ -8,8 +8,8 @@ every other row.
 plan question per program, capped at 60, from the local kaoyan.db.
 --apply-review replaces the reviewed template rows of the eval file with the
 accepted and edited candidates listed in data/gold/review_m0.json.
---adversarial replaces the adv-* rows with data/gold/adversarial_m1.json, reading
-each fact's value and source from verified rows of the kaoyan DB.
+--specs replaces the handwritten rows (adv-* from adversarial_m1.json, sup-* from
+supplement_m1.json), reading each fact's value and source from verified rows of the kaoyan DB.
 """
 
 from __future__ import annotations
@@ -28,6 +28,8 @@ CANDIDATES = ROOT / "data" / "gold" / "candidates_m0.jsonl"
 REVIEW = ROOT / "data" / "gold" / "review_m0.json"
 V1_REVIEW = ROOT / "data" / "gold" / "v1_review.json"
 ADVERSARIAL = ROOT / "data" / "gold" / "adversarial_m1.json"
+SUPPLEMENT = ROOT / "data" / "gold" / "supplement_m1.json"
+SPECS = (ADVERSARIAL, SUPPLEMENT)
 DB_PATH = ROOT / "data" / "kaoyan.db"
 CANDIDATE_CAP = 60
 
@@ -228,38 +230,55 @@ def apply_review() -> list[dict]:
 
 
 _FACT_SQL = {
-    "score_lines": "SELECT DISTINCT total, source_doc_id FROM score_lines WHERE program_id=? AND scope=? AND year=?",
+    "score_lines": "SELECT DISTINCT {field}, source_doc_id FROM score_lines WHERE program_id=? AND scope=? AND year=?",
     "plans": "SELECT DISTINCT value, source_doc_id FROM plans WHERE program_id=? AND kind=? AND year=?",
     "admission_stats": "SELECT DISTINCT value, source_doc_id FROM admission_stats WHERE program_id=? AND kind=? AND year=?",
     "exam_subjects": "SELECT DISTINCT code, source_doc_id FROM exam_subjects WHERE program_id=? AND 'slot'||slot=? AND year=?",
 }
+_LINE_FIELDS = ("total", "politics", "foreign_lang", "subject1", "subject2")
 
 
 def resolve_fact(conn: sqlite3.Connection, key: str) -> dict:
-    """`program_id|table|kind|year[|source_doc_id][|checked]` -> an expected fact.
+    """`program_id|table|kind|year[|source_doc_id][|field=politics][|checked]` -> an expected fact.
 
-    Only verified rows count, unless the key ends in `checked`: the row was read
+    Only verified rows count, unless the key has `checked`: the row was read
     against the official file by hand because no seed exists to verify it.
+    `field=` picks a single-subject score line instead of the total.
     """
     pid, table, kind, year, *rest = key.split("|")
-    checked = bool(rest) and rest[-1] == "checked"
-    doc = rest[:-1] if checked else rest
-    sql = _FACT_SQL[table] + ("" if checked else " AND verified=1") + (" AND source_doc_id=?" if doc else "")
+    checked = "checked" in rest
+    field = next((r.removeprefix("field=") for r in rest if r.startswith("field=")), "total")
+    doc = [r for r in rest if r != "checked" and not r.startswith("field=")]
+    if field not in _LINE_FIELDS or (field != "total" and table != "score_lines"):
+        raise SystemExit(f"fact {key!r}: bad field {field!r}")
+    sql = _FACT_SQL[table].format(field=field) + ("" if checked else " AND verified=1")
+    sql += " AND source_doc_id=?" if doc else ""
     hits = conn.execute(sql, (pid, kind, int(year), *doc)).fetchall()
     if len(hits) != 1:
         raise SystemExit(f"fact {key!r} resolves to {len(hits)} verified rows: {hits}")
     value, source = hits[0]
-    return {"table": table, "program_id": pid, "kind": kind, "year": int(year), "value": value,
+    fact = {"table": table, "program_id": pid, "kind": kind, "year": int(year), "value": value,
             "source_doc_id": source}
+    if field != "total":
+        fact = {**fact, "field": field}
+    return fact
 
 
-def adversarial_row(item: dict, conn: sqlite3.Connection, reviewer: str, reviewed_at: str) -> dict:
+def _page_url(conn: sqlite3.Connection, doc_id: str) -> str | None:
+    row = conn.execute("SELECT page_url FROM documents WHERE id=?", (doc_id,)).fetchone()
+    if row is None:
+        raise SystemExit(f"unknown source document {doc_id!r}")
+    return row[0]
+
+
+def spec_row(item: dict, conn: sqlite3.Connection, spec: dict) -> dict:
+    """One eval row from a handwritten spec item; facts and source URLs come from the DB."""
     facts = [resolve_fact(conn, key) for key in item["facts"]]
-    docs = list(dict.fromkeys(f["source_doc_id"] for f in facts))
-    urls = [conn.execute("SELECT page_url FROM documents WHERE id=?", (d,)).fetchone()[0] for d in docs]
+    docs = list(dict.fromkeys([f["source_doc_id"] for f in facts] + item.get("sources", [])))
+    urls = [_page_url(conn, d) for d in docs]
     return {
         "id": item["id"],
-        "split": "adversarial",
+        "split": spec.get("split", "adversarial"),
         "category": item["category"],
         "trap": item["trap"],
         "turns": item["turns"],
@@ -281,23 +300,30 @@ def adversarial_row(item: dict, conn: sqlite3.Connection, reviewer: str, reviewe
         "must_not_include": item.get("must_not_include") or [],
         "judge_rubric": item["judge_rubric"],
         "origin": "handwritten",
-        "reviewed_by": reviewer,
-        "reviewed_at": reviewed_at,
-        "notes": f"adversarial trap={item['trap']}",
+        "reviewed_by": spec.get("reviewed_by", ""),
+        "reviewed_at": spec.get("reviewed_at", ""),
+        "notes": f"{spec.get('label', 'adversarial')} trap={item['trap']}",
     }
 
 
-def build_adversarial(db_path: Path = DB_PATH) -> list[dict]:
-    spec = json.loads(ADVERSARIAL.read_text(encoding="utf-8"))
+def build_specs(db_path: Path = DB_PATH) -> dict[str, int]:
+    """Replace the rows of every handwritten spec (adv-*, sup-*) in the eval file."""
+    rows = read_jsonl(EVAL_V2)
+    counts = {}
     conn = sqlite3.connect(db_path)
     try:
-        rows = [adversarial_row(item, conn, spec.get("reviewed_by", ""), spec.get("reviewed_at", ""))
-                for item in spec["items"]]
+        for path in SPECS:
+            spec = json.loads(path.read_text(encoding="utf-8"))
+            prefix = spec.get("id_prefix", "adv-")
+            if not all(item["id"].startswith(prefix) for item in spec["items"]):
+                raise SystemExit(f"{path.name}: every id must start with {prefix!r}")
+            new = [spec_row(item, conn, spec) for item in spec["items"]]
+            rows = [r for r in rows if not r["id"].startswith(prefix)] + new
+            counts[path.name] = len(new)
     finally:
         conn.close()
-    kept = [r for r in read_jsonl(EVAL_V2) if not r["id"].startswith("adv-")]
-    write_jsonl(EVAL_V2, kept + rows)
-    return rows
+    write_jsonl(EVAL_V2, rows)
+    return counts
 
 
 def addition_row(addition: dict, reviewer: str, reviewed_at: str) -> dict:
@@ -476,13 +502,14 @@ def main() -> int:
     parser.add_argument("--migrate-v1", action="store_true", help="only rewrite kaoyan_eval_v2.jsonl")
     parser.add_argument("--candidates", action="store_true", help="only rewrite candidates_m0.jsonl")
     parser.add_argument("--apply-review", action="store_true", help="only merge review_m0.json into the eval file")
-    parser.add_argument("--adversarial", action="store_true", help="only rebuild adv-* rows from adversarial_m1.json")
+    parser.add_argument("--specs", action="store_true",
+                        help="only rebuild handwritten rows (adversarial_m1.json, supplement_m1.json)")
     parser.add_argument("--db", default=str(DB_PATH))
     args = parser.parse_args()
 
-    if args.adversarial:
-        rows = build_adversarial(Path(args.db))
-        print(f"wrote {len(rows)} adversarial rows to {EVAL_V2.relative_to(ROOT)}")
+    if args.specs:
+        for name, count in build_specs(Path(args.db)).items():
+            print(f"wrote {count} rows from {name} to {EVAL_V2.relative_to(ROOT)}")
         return 0
     if args.apply_review:
         rows = apply_review()

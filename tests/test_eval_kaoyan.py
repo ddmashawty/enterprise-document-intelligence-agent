@@ -44,6 +44,16 @@ def test_fact_match_needs_value_and_reports_source_separately():
     assert match_fact(_fact(264, year=2025), facts) == (False, False)
 
 
+def test_single_subject_lines_match_only_their_field():
+    line = {**_line(305, scope="school_baseline"), "politics": 50, "foreign_lang": 50, "subject1": 70, "subject2": 70}
+    facts = tool_facts([json.dumps({"programs": [_program(lines=[line])]})])
+    politics = {**_fact(50, kind="school_baseline"), "field": "politics"}
+    assert match_fact(politics, facts) == (True, True)
+    assert match_fact({**politics, "field": "subject1"}, facts) == (False, False)
+    assert match_fact(_fact(50, kind="school_baseline"), facts) == (False, False)
+    assert match_fact(_fact(305, kind="school_baseline"), facts) == (True, True)
+
+
 def test_tool_facts_reads_search_programs_fields():
     program = {
         "program_id": "scut-ft-140500",
