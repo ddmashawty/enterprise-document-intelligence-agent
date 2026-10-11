@@ -145,3 +145,7 @@ def test_test_split_is_frozen():
     assert not changed, f"test rows edited; justify in the PR, then run --rehash-test: {changed}"
     non_adv = [r for r in rows if r["split"] in {"dev", "test"} and not r["id"].startswith("v1-")]
     assert 0.25 <= len(test) / len(non_adv) <= 0.35
+    for prefix, entry in frozen.get("appended", {}).items():
+        group = [r for r in rows if r["id"].startswith(prefix)]
+        assert sorted(entry["test"]) == sorted(r["id"] for r in group if r["split"] == "test")
+        assert 0.25 <= len(entry["test"]) / len(group) <= 0.35

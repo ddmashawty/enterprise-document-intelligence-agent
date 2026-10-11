@@ -6,12 +6,13 @@ K1 的 18 道验收题。已经被调过参，只作旧集合。`scripts/smoke_k
 
 ## `kaoyan_eval_v2.jsonl`
 
-一行一题，现在 188 道：dev 82、test 26、adversarial 80。
+一行一题，现在 218 道：dev 103、test 35、adversarial 80。
 
 - 18 道 `v1-*`：从上面迁过来，`split=dev`。`expected_facts` 和核对人来自 `v1_review.json`；v1-11（筛选，答案是派生差值）和 v1-14（范围内没有该专业）没有事实。
 - 50 道 `rv-*`：49 道从模板候选题核对后收进来，1 道是审查时手写补的（`origin=handwritten`），有核对人和依据。按下面“test 切分”分进 dev / test。
 - 80 道 `adv-*`：手写对抗题，`split=adversarial`，8 类陷阱各 10 道，来自 `adversarial_m1.json`。
 - 40 道 `sup-*`：用户出题的补充集，补对抗集的偏差（口语多意图、库外字段、政策口径、预测、错误前提、聚合、注入和路由），来自 `supplement_m1.json`，同样分进 dev / test。
+- 30 道 `doc-*`：答案只在原文里的文档题（29 道 doc-only 给 L2 检索用，doc-19 是结构化题），来自 `docq_m1.json`。开发助手逐题初核，用户本人看过并认可；按下面“追加冻结”分进 dev / test。
 
 字段：
 
@@ -28,7 +29,9 @@ K1 的 18 道验收题。已经被调过参，只作旧集合。`scripts/smoke_k
 | `expected_refusal` | `out_of_scope` / `privacy` / `unknown_data` / `null` |
 | `expected_sources` | 事实应引用的 URL |
 | `must_include` / `must_not_include` | 粗的字符串检查。`must_include` 里必须有每条 `expected_facts` 的数值。每项可以是字符串或备选列表（任一命中即可），匹配前用 `doc_agent.eval.metrics.normalize_text` 归一化（去空白、全角转半角、2.5万=25000、16,000=16000、两门=2门、不记入=不计入） |
-| `judge_rubric` | 字符串查不准的口径要求（专项线、学校基本线、计划口径），留给 P1 的 L2 裁判。空串表示没有 |
+| `judge_rubric` | 字符串查不准的口径要求（专项线、学校基本线、计划口径），留给 L3 裁判。空串表示没有 |
+| `judge_flags` | 只有部分 `doc-*` 有。错误值，但正确答案做对比时也可能提到（doc-09 的“8门”、doc-14 的“机试成绩不记入”、doc-21 的“50%”），所以不放 `must_not_include`，交给 L3 裁判看是不是误用 |
+| `evidence` | 只有 `doc-*` 有。原文片段列表 `{doc, text}`，每段去空白后都能在原文里原样找到；L2 块级命中和字面重合度分层都用它 |
 | `origin` | `db_template` / `handwritten` / `paraphrase` / `user_log` |
 | `reviewed_by` / `reviewed_at` | 核对人。空着表示还没核对 |
 | `notes` | 来源候选题、核对依据、改了什么 |
@@ -126,6 +129,12 @@ sup-12 的核对顺带改了库：`sources.json` 里 scnu-017 的招生年份从
 - 文件里记了每道 test 题的内容哈希（不含 `split`）。改了 test 题，`tests/test_m0_gold.py` 会失败；确实要改，在 PR 里单独写理由，再跑 `scripts/build_gold_candidates.py --rehash-test`，它会列出改了哪几道。`--freeze-test` 只能跑一次，文件存在就拒绝。
 
 评测脚本默认不跑 test。要跑就显式加 `--split test`（只在里程碑验收时），报告只给 test 的总分：不列逐题结果，test 题也不进陷阱分组。冻结前已经看过逐题结果的题（补充集里 L0 没对上的那些）也在 test 里，只能以后不再逐题看；修 L0 时按能力修规则，不对着单题打补丁。
+
+### 追加冻结
+
+后加的题用 `--freeze-append PREFIX` 冻结：只在这批新题里抽 30%，已冻结的 test 题一道不动，同一前缀只能追加一次。记录在 `split_m1.json` 的 `appended` 里（日期、规则、题号），内容哈希和其他 test 题一起记在 `test` 里。
+
+- `doc-`（2026-10-11）：按“题型 × 字面重合度”分层，种子 `kaoyan-test-m1:doc-`，抽 9 道：doc-02、04、05、11、17、20、21、25、27。题型分结构化 / 单校 / 不带校名 / 跨校 / 原文无答案；重合度是问题的字符二元组落在 evidence 里的比例，低 [0, 0.1)、中 [0.1, 0.3)、高 [0.3, 1]（`doc_agent.eval.drafts.bigram_overlap`）。
 
 ## 回退门槛
 

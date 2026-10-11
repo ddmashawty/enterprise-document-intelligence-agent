@@ -158,3 +158,7 @@ def test_every_personal_data_file_is_git_ignored() -> None:
                          capture_output=True, text=True)
     ignored = set(run.stdout.splitlines())
     assert [p for p in paths if p not in ignored] == []
+    unlisted = ["data/kaoyan/raw/new/某校_2027_拟录取名单.pdf", "data/kaoyan/raw/new/某校_2027_复试名单.xlsx"]
+    run = subprocess.run(["git", "-c", "core.quotepath=off", "check-ignore", "--no-index", "--stdin"], input="\n".join(unlisted),
+                         cwd=ROOT, capture_output=True, text=True)
+    assert set(run.stdout.splitlines()) == set(unlisted)

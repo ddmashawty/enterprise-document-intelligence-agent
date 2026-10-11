@@ -9,6 +9,24 @@ from doc_agent.eval.metrics import contains, normalize_text
 
 _BARE_NUMBER = re.compile(r"^[\d.]+$")
 _ELLIPSIS = ("…", "...")
+_NON_WORD = re.compile(r"[\W_]+")
+OVERLAP_LAYERS = ((0.1, "low"), (0.3, "mid"))
+
+
+def bigrams(text: str) -> set[str]:
+    chars = _NON_WORD.sub("", normalize_text(text))
+    return {chars[i:i + 2] for i in range(len(chars) - 1)}
+
+
+def bigram_overlap(question: str, fragments: list[str]) -> float:
+    """Share of the question's character bigrams that occur in some evidence fragment."""
+    asked = bigrams(question)
+    found = set().union(*(bigrams(f) for f in fragments)) if fragments else set()
+    return len(asked & found) / len(asked) if asked else 0.0
+
+
+def overlap_layer(overlap: float) -> str:
+    return next((name for bound, name in OVERLAP_LAYERS if overlap < bound), "high")
 
 
 def too_short(alternative: str) -> bool:

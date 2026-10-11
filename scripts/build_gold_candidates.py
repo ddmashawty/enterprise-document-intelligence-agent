@@ -9,10 +9,13 @@ plan question per program, capped at 60, from the local kaoyan.db.
 --apply-review replaces the reviewed template rows of the eval file with the
 accepted and edited candidates listed in data/gold/review_m0.json.
 --specs replaces the handwritten rows (adv-* from adversarial_m1.json, sup-* from
-supplement_m1.json), reading each fact's value and source from verified rows of the kaoyan DB.
+supplement_m1.json, doc-* from docq_m1.json), reading each fact's value and source from
+verified rows of the kaoyan DB; an unreviewed spec is refused.
 --freeze-test draws the test split once (30% of the unsplit rows, stratified by school x
 category) into data/gold/split_m1.json; every later write puts those ids in test and the
-other unsplit rows in dev. --rehash-test re-records the frozen rows after a deliberate edit.
+other unsplit rows in dev. --freeze-append PREFIX does the same once for a spec added later
+(stratified by question shape x bigram overlap), leaving earlier test rows untouched.
+--rehash-test re-records the frozen rows after a deliberate edit.
 """
 
 from __future__ import annotations
@@ -34,7 +37,8 @@ REVIEW = ROOT / "data" / "gold" / "review_m0.json"
 V1_REVIEW = ROOT / "data" / "gold" / "v1_review.json"
 ADVERSARIAL = ROOT / "data" / "gold" / "adversarial_m1.json"
 SUPPLEMENT = ROOT / "data" / "gold" / "supplement_m1.json"
-SPECS = (ADVERSARIAL, SUPPLEMENT)
+DOCQ = ROOT / "data" / "gold" / "docq_m1.json"
+SPECS = (ADVERSARIAL, SUPPLEMENT, DOCQ)
 SPLIT = ROOT / "data" / "gold" / "split_m1.json"
 DB_PATH = ROOT / "data" / "kaoyan.db"
 CANDIDATE_CAP = 60
@@ -181,12 +185,29 @@ def stratum(row: dict) -> str:
     return f"{school}/{row['category']}"
 
 
-def draw_test(rows: list[dict], exclude: set[str], share: float = TEST_SHARE, seed: str = TEST_SEED) -> list[str]:
+def doc_stratum(row: dict) -> str:
+    """Retrieval questions: question shape x how much of the question's wording the evidence repeats."""
+    sys.path.insert(0, str(ROOT / "src"))
+    from doc_agent.eval.drafts import bigram_overlap, overlap_layer
+
+    if row["expected_facts"]:
+        return "structured"
+    schools = row["expected_intent"]["schools"]
+    if row["expected_refusal"] == "unknown_data":
+        shape = "unknown"
+    else:
+        shape = "no_school" if not schools else ("cross" if len(schools) > 1 else "single")
+    overlap = bigram_overlap(row["turns"][0], [f["text"] for f in row.get("evidence") or []])
+    return f"{shape}/{overlap_layer(overlap)}"
+
+
+def draw_test(rows: list[dict], exclude: set[str], share: float = TEST_SHARE, seed: str = TEST_SEED,
+              key=stratum) -> list[str]:
     """Proportional stratified sample; leftover seats go to the largest remainders."""
     strata: dict[str, list[str]] = {}
     for r in rows:
         if r["split"] == "unsplit" and r["id"] not in exclude:
-            strata.setdefault(stratum(r), []).append(r["id"])
+            strata.setdefault(key(r), []).append(r["id"])
 
     def order(key: str) -> str:
         return hashlib.sha256(f"{seed}:{key}".encode()).hexdigest()
@@ -228,6 +249,30 @@ def freeze_test() -> list[str]:
         "rule": f"{TEST_SHARE:.0%} of unsplit rows, stratified by school x category, seed {TEST_SEED!r}",
         "excluded": TEST_EXCLUDE,
         "test": {i: row_digest(by_id[i]) for i in ids},
+    }
+    SPLIT.write_text(json.dumps(payload, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+    write_eval(rows)
+    return ids
+
+
+def freeze_append(prefix: str, db_path: Path = DB_PATH) -> list[str]:
+    """Freeze a test share of one new spec's rows; rows frozen earlier are left alone. Once per prefix."""
+    payload = json.loads(SPLIT.read_text(encoding="utf-8"))
+    appended = payload.setdefault("appended", {})
+    if prefix in appended:
+        raise SystemExit(f"{prefix}* rows were frozen on {appended[prefix]['frozen_at']}; appending is once only")
+    rows = spec_rows(db_path)
+    new = [r for r in rows if r["id"].startswith(prefix)]
+    if not new or any(r["id"] in payload["test"] for r in new):
+        raise SystemExit(f"no new {prefix}* rows to freeze")
+    seed = f"{TEST_SEED}:{prefix}"
+    ids = draw_test(new, set(), seed=seed, key=doc_stratum)
+    by_id = {r["id"]: r for r in new}
+    payload["test"].update({i: row_digest(by_id[i]) for i in ids})
+    appended[prefix] = {
+        "frozen_at": dt.date.today().isoformat(),
+        "rule": f"{TEST_SHARE:.0%} of {prefix}* rows, stratified by question shape x bigram overlap, seed {seed!r}",
+        "test": ids,
     }
     SPLIT.write_text(json.dumps(payload, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
     write_eval(rows)
@@ -366,7 +411,7 @@ def spec_row(item: dict, conn: sqlite3.Connection, spec: dict) -> dict:
     facts = [resolve_fact(conn, key) for key in item["facts"]]
     docs = list(dict.fromkeys([f["source_doc_id"] for f in facts] + item.get("sources", [])))
     urls = [_page_url(conn, d) for d in docs]
-    return {
+    row = {
         "id": item["id"],
         "split": spec.get("split", "adversarial"),
         "category": item["category"],
@@ -392,14 +437,17 @@ def spec_row(item: dict, conn: sqlite3.Connection, spec: dict) -> dict:
         "origin": "handwritten",
         "reviewed_by": spec.get("reviewed_by", ""),
         "reviewed_at": spec.get("reviewed_at", ""),
-        "notes": f"{spec.get('label', 'adversarial')} trap={item['trap']}",
+        "notes": f"{item.get('label', spec.get('label', 'adversarial'))} trap={item['trap']}",
     }
+    for key in ("judge_flags", "evidence"):
+        if item.get(key):
+            row[key] = item[key]
+    return row
 
 
-def build_specs(db_path: Path = DB_PATH) -> dict[str, int]:
-    """Replace the rows of every handwritten spec (adv-*, sup-*) in the eval file."""
+def spec_rows(db_path: Path = DB_PATH) -> list[dict]:
+    """The eval rows with every handwritten spec (adv-*, sup-*, doc-*) rebuilt; splits not yet assigned."""
     rows = read_jsonl(EVAL_V2)
-    counts = {}
     conn = sqlite3.connect(db_path)
     try:
         for path in SPECS:
@@ -407,13 +455,21 @@ def build_specs(db_path: Path = DB_PATH) -> dict[str, int]:
             prefix = spec.get("id_prefix", "adv-")
             if not all(item["id"].startswith(prefix) for item in spec["items"]):
                 raise SystemExit(f"{path.name}: every id must start with {prefix!r}")
+            if not spec.get("reviewed_by"):
+                raise SystemExit(f"{path.name}: unreviewed specs stay out of the eval set")
             new = [spec_row(item, conn, spec) for item in spec["items"]]
             rows = [r for r in rows if not r["id"].startswith(prefix)] + new
-            counts[path.name] = len(new)
     finally:
         conn.close()
+    return rows
+
+
+def build_specs(db_path: Path = DB_PATH) -> dict[str, int]:
+    """Replace the rows of every handwritten spec in the eval file."""
+    rows = spec_rows(db_path)
     write_eval(rows)
-    return counts
+    prefixes = {path.name: json.loads(path.read_text(encoding="utf-8")).get("id_prefix", "adv-") for path in SPECS}
+    return {name: sum(r["id"].startswith(p) for r in rows) for name, p in prefixes.items()}
 
 
 def addition_row(addition: dict, reviewer: str, reviewed_at: str) -> dict:
@@ -597,9 +653,15 @@ def main() -> int:
     parser.add_argument("--freeze-test", action="store_true", help="draw and freeze the test split (once)")
     parser.add_argument("--rehash-test", action="store_true",
                         help="re-record frozen test rows after a deliberate edit; lists the changed ids")
+    parser.add_argument("--freeze-append", metavar="PREFIX",
+                        help="freeze a test share of a newly reviewed spec (e.g. doc-), once per prefix")
     parser.add_argument("--db", default=str(DB_PATH))
     args = parser.parse_args()
 
+    if args.freeze_append:
+        ids = freeze_append(args.freeze_append, Path(args.db))
+        print(f"froze {len(ids)} {args.freeze_append}* test rows: {', '.join(ids)}")
+        return 0
     if args.freeze_test:
         ids = freeze_test()
         print(f"froze {len(ids)} test rows in {SPLIT.relative_to(ROOT)}")

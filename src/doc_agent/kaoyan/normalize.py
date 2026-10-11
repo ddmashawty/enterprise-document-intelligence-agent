@@ -60,13 +60,17 @@ def clean(text: str | None) -> str:
 
 
 def parse_count(text: str | None) -> CountValue:
-    """Parse plan/推免 cells: '55', '≤41', '（0812合计≤19）', ''."""
+    """Parse plan/推免 cells: '55', '≤41', '（0812合计≤19）', ''.
+
+    The pooled form is the seed's note; the official table prints a bare '≤19' on each
+    second-level row, so that is what `text` keeps.
+    """
     raw = clean(text)
     if not raw:
         return CountValue(None, text=raw)
     m = re.fullmatch(r"[（(]\s*(\d{4})\s*合计\s*(?:≤|<=)\s*(\d+)\s*[）)]", raw)
     if m:
-        return CountValue(int(m.group(2)), True, m.group(1), raw)
+        return CountValue(int(m.group(2)), True, m.group(1), f"≤{m.group(2)}")
     for mark in _UPPER_BOUND_CHARS:
         if raw.startswith(mark):
             num = re.match(r"\d+", raw[len(mark):].strip())

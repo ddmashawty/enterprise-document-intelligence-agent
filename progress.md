@@ -1,5 +1,13 @@
 # 进度日志
 
+## 会话：2026-10-11（P1 文档题审完并入评测集）
+
+- **状态：** 同分支 `p1/adversarial`（PR #6 追加提交）
+- **做了：** 开发助手初核、用户认可的 30 道文档题（`data/gold/docq_m1.json`）并入评测集；`--freeze-append doc-` 抽 9 道进 test，原 26 道不动，共 218 道（dev 103、test 35、adversarial 80）。doc-09/14/21 的易误伤串改成 `judge_flags`（L3 用）；#4 推免数 value_text 改回原文“≤19”（本机库 SQL 改 8 行）；`.gitignore` 加名单兜底规则和测试
+- **核对：** 抽查 21 条全部一致（开发助手初核，用户确认）；并入时修了文档题的年份标注（没提年份标 null）和 doc-19 的 metrics；新增 3 条 L0 已知失败（检测器漏判），基线已重写
+- **记录：** `docs/kaoyan_p1_notes.md`「文档题审完并入评测集」，`data/gold/README.md`「追加冻结」
+- **之后：** 跑 L2（BM25 进 CI、hybrid 本机）；box 上 `build_part2.py` 要同步名单兜底规则
+
 ## 会话：2026-10-11（P1 文档题草稿和核对清单第一轮修订）
 
 - **状态：** 同分支 `p1/adversarial`（PR #6 追加提交）；草稿仍未审、不进评测集，`reviewed_by` / 核对结果留空

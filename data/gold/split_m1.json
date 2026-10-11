@@ -33,6 +33,32 @@
     "sup-22": "53f39156731b9563",
     "sup-23": "ff28eb69b6a34570",
     "sup-30": "4e8de52b25c37329",
-    "sup-40": "a28c4f981c3f6ed8"
+    "sup-40": "a28c4f981c3f6ed8",
+    "doc-02": "73fb86cd00fd3031",
+    "doc-04": "79cc1361bce75d94",
+    "doc-05": "5e3821e60f8ee47b",
+    "doc-11": "68a995eba1512e9a",
+    "doc-17": "aa1357b7440b9725",
+    "doc-20": "cb18301f29fcbfe7",
+    "doc-21": "4f1bb52481dcadc4",
+    "doc-25": "9dc7f1ab3fec277c",
+    "doc-27": "70f11e41ae888158"
+  },
+  "appended": {
+    "doc-": {
+      "frozen_at": "2026-10-11",
+      "rule": "30% of doc-* rows, stratified by question shape x bigram overlap, seed 'kaoyan-test-m1:doc-'",
+      "test": [
+        "doc-02",
+        "doc-04",
+        "doc-05",
+        "doc-11",
+        "doc-17",
+        "doc-20",
+        "doc-21",
+        "doc-25",
+        "doc-27"
+      ]
+    }
   }
 }

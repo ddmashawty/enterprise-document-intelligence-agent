@@ -4,11 +4,11 @@ from pathlib import Path
 
 import pytest
 
-from doc_agent.eval.drafts import check_item, too_short
+from doc_agent.eval.drafts import bigram_overlap, check_item, overlap_layer, too_short
 from doc_agent.ingest.loaders import load_file
 
 ROOT = Path(__file__).resolve().parents[1]
-DRAFT = ROOT / "data" / "gold" / "docq_m1_draft.json"
+SPEC = ROOT / "data" / "gold" / "docq_m1.json"
 DATA = ROOT / "data" / "kaoyan"
 
 
@@ -18,7 +18,7 @@ def _manifest() -> dict[str, dict]:
 
 
 def _items() -> list[dict]:
-    return json.loads(DRAFT.read_text(encoding="utf-8"))["items"]
+    return json.loads(SPEC.read_text(encoding="utf-8"))["items"]
 
 
 @pytest.fixture(scope="module")
@@ -42,12 +42,27 @@ def test_draft_items_pass_the_checks(texts: dict[str, str]) -> None:
     assert not problems, "\n".join(problems)
 
 
-def test_draft_stays_unreviewed_and_out_of_the_eval_set() -> None:
-    spec = json.loads(DRAFT.read_text(encoding="utf-8"))
-    assert spec["reviewed_by"] == "" and spec["reviewed_at"] == ""
+def test_only_reviewed_questions_are_in_the_eval_set() -> None:
+    spec = json.loads(SPEC.read_text(encoding="utf-8"))
     ids = {item["id"] for item in spec["items"]}
-    eval_ids = {json.loads(line)["id"] for line in (ROOT / "data" / "gold" / "kaoyan_eval_v2.jsonl").open(encoding="utf-8")}
-    assert not ids & eval_ids
+    rows = {r["id"]: r for r in map(json.loads, (ROOT / "data" / "gold" / "kaoyan_eval_v2.jsonl").open(encoding="utf-8"))}
+    if not (spec["reviewed_by"] and spec["reviewed_at"]):
+        assert not ids & set(rows)
+        return
+    assert ids <= set(rows)
+    for item in spec["items"]:
+        row = rows[item["id"]]
+        assert row["reviewed_by"] == spec["reviewed_by"]
+        assert row.get("judge_flags", []) == item.get("judge_flags", [])
+        assert row.get("evidence") == item.get("evidence")
+        assert not item.get("needs_user_check"), item["id"]
+
+
+def test_wrong_values_a_correct_answer_may_mention_are_judge_flags() -> None:
+    items = {i["id"]: i for i in json.loads(SPEC.read_text(encoding="utf-8"))["items"]}
+    flagged = {qid: i["judge_flags"] for qid, i in items.items() if i.get("judge_flags")}
+    assert flagged == {"doc-09": ["8门"], "doc-14": ["机试成绩不记入"], "doc-21": ["50%"]}
+    assert not any(items[qid]["must_not_include"] for qid in flagged)
 
 
 def test_draft_cites_no_personal_data_file() -> None:
@@ -83,3 +98,10 @@ def test_check_item_flags_bad_drafts() -> None:
 def test_too_short() -> None:
     assert too_short("3") and too_short("60") and too_short("2.5") and too_short("年")
     assert not too_short("3年") and not too_short("60分") and not too_short("8000") and not too_short("085411")
+
+
+def test_bigram_overlap_layers() -> None:
+    assert bigram_overlap("学费多少", ["学费为每生每年8000元"]) == 1 / 3
+    assert bigram_overlap("学 费？", ["学费"]) == 1.0
+    assert bigram_overlap("学费", []) == 0.0
+    assert [overlap_layer(x) for x in (0.0, 0.1, 0.29, 0.3, 1.0)] == ["low", "mid", "mid", "high", "high"]

@@ -31,6 +31,10 @@
 /raw/sysu/sysu_sse_2026_复试名单.pdf
 /raw/sysu/sysu_ssse_2026_复试名单.xlsx
 
+# 兜底：新下载的名单类 PDF/表格在 manifest 标 PII 之前也不入库（仓库内手加，构建脚本重新生成时要一并带上）
+/raw/**/*名单*.pdf
+/raw/**/*名单*.xlsx
+
 # 运行期产物
 /kaoyan.db
 /cache/

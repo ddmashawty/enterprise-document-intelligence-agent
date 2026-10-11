@@ -1,22 +1,22 @@
 {
   "meta": {
     "date": "2026-10-11",
-    "commit": "584cc86-dirty",
+    "commit": "d153b48-dirty",
     "gold": "data/gold/kaoyan_eval_v2.jsonl",
     "splits": [],
-    "rows": 162
+    "rows": 183
   },
   "layers": {
     "L0": {
       "summary": {
-        "rows": 162,
-        "exact": 0.7099,
-        "schools": 0.9444,
-        "codes": 0.8765,
-        "year": 0.9753,
-        "operation": 0.9444,
-        "metrics": 0.8378,
-        "privacy": 0.9753
+        "rows": 183,
+        "exact": 0.7268,
+        "schools": 0.9508,
+        "codes": 0.8907,
+        "year": 0.9781,
+        "operation": 0.9399,
+        "metrics": 0.8304,
+        "privacy": 0.9781
       },
       "by_split": {
         "adversarial": {
@@ -30,13 +30,13 @@
           "privacy": 0.95
         },
         "dev": {
-          "rows": 82,
-          "exact": 0.7927,
-          "schools": 0.939,
-          "codes": 0.9146,
+          "rows": 103,
+          "exact": 0.8058,
+          "schools": 0.9515,
+          "codes": 0.932,
           "year": 1.0,
-          "operation": 0.9268,
-          "metrics": 0.8868,
+          "operation": 0.9223,
+          "metrics": 0.8704,
           "privacy": 1.0
         }
       },
@@ -62,13 +62,13 @@
           "privacy": 1.0
         },
         "colloquial": {
-          "rows": 5,
+          "rows": 6,
           "exact": 0.0,
           "schools": 1.0,
-          "codes": 0.2,
+          "codes": 0.3333,
           "year": 1.0,
-          "operation": 0.6,
-          "metrics": 0.8,
+          "operation": 0.6667,
+          "metrics": 0.6667,
           "privacy": 1.0
         },
         "cross_school": {
@@ -79,6 +79,16 @@
           "year": 0.8,
           "operation": 1.0,
           "metrics": 0.4286,
+          "privacy": 1.0
+        },
+        "doc_only": {
+          "rows": 20,
+          "exact": 0.9,
+          "schools": 1.0,
+          "codes": 1.0,
+          "year": 1.0,
+          "operation": 0.9,
+          "metrics": null,
           "privacy": 1.0
         },
         "false_premise": {
@@ -195,9 +205,9 @@
     },
     "L1": {
       "summary": {
-        "rows": 126,
+        "rows": 127,
         "unscorable": 0,
-        "row_pass": 0.9841,
+        "row_pass": 0.9843,
         "fact_recall": 0.9919,
         "source_match": 1.0
       },
@@ -210,7 +220,7 @@
           "source_match": 1.0
         },
         "dev": {
-          "rows": 69,
+          "rows": 70,
           "unscorable": 0,
           "row_pass": 1.0,
           "fact_recall": 1.0,
@@ -233,7 +243,7 @@
           "source_match": 1.0
         },
         "colloquial": {
-          "rows": 4,
+          "rows": 5,
           "unscorable": 0,
           "row_pass": 1.0,
           "fact_recall": 1.0,
@@ -485,6 +495,15 @@
       "sup-36": [
         "metrics",
         "schools"
+      ],
+      "doc-19": [
+        "metrics"
+      ],
+      "doc-26": [
+        "operation"
+      ],
+      "doc-28": [
+        "operation"
       ]
     },
     "L1": {
