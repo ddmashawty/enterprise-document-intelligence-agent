@@ -1,5 +1,12 @@
 # 进度日志
 
+## 会话：2026-10-11（仓库改名 kaoyan，删企业文档演示遗留）
+
+- **状态：** 分支 `chore/drop-enterprise-demo`；GitHub 仓库已改名 `ddmashawty/kaoyan`（旧地址自动跳转），爬虫 User-Agent 里的仓库地址同步改了
+- **删了（25 个，只删文件不动代码）：** 企业文档 PRD 和《复测.md》；`data/raw` 两份演示 txt、`data/README.md`、`data/SOURCES.md`、`data/gold/sample_qa.json`；docs 下阶段 4/5 笔记、前后端验收清单和结果、`perf_baseline.json`；脚本 `demo_repro.sh`、`download_demo_data.py`、`ingest_demo.py`、`perf_baseline.py`、`smoke_chat.py`、`smoke_phase4.py`。`data/raw/` 改为整个不入库
+- **留着：** `findings.md`、`task_plan.md`、`progress.md` 和考研笔记里提到这些文件的历史记录不改
+- **之后：** 第二档——拆掉只服务通用文档问答的代码（通用聊天流程、记忆、年报对比、导出、前端上传/任务面板和 `GENERIC_QUESTIONS`），先出依赖分析，单独开 PR
+
 ## 会话：2026-10-11（P1 文档题审完并入评测集）
 
 - **状态：** 同分支 `p1/adversarial`（PR #6 追加提交）

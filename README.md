@@ -40,9 +40,6 @@ python scripts/seed_kaoyan.py
 python scripts/extract_kaoyan.py
 python scripts/ingest_kaoyan.py
 
-# 通用文档模式的企业演示语料
-bash scripts/demo_repro.sh
-
 python -m uvicorn doc_agent.api:app --host 127.0.0.1 --port 8000
 ```
 
@@ -141,7 +138,7 @@ src/doc_agent/
   api/       FastAPI
 frontend/    Streamlit 演示界面
 data/kaoyan/ 考研种子包（来源清单、人工核对数据、原始文件）
-data/raw/    通用文档模式的演示文档
+data/raw/    通用文档模式的本机文档（不入库）
 ```
 
 旧版 `.doc` 不支持，请另存为 `.docx`。
@@ -153,10 +150,9 @@ pytest -q                                   # 不联网、不调真实 LLM；缺
 python scripts/eval_extraction.py --ocr rapidocr   # 抽取 vs 种子 → docs/kaoyan_extraction_report.md
 python scripts/eval_kaoyan.py --out docs/eval      # 评测集 v2 的 L0 意图 + L1 工具，不调 LLM → docs/eval/<日期>.md
 python scripts/smoke_kaoyan.py --json docs/baseline_2026-10.json   # 18 条旧验收题（需要 LLM_API_KEY；会花钱）
-python scripts/smoke_chat.py                # 通用文档模式
 ```
 
-人工验收清单：`docs/frontend_verification_checklist.md`、`docs/backend_verification_checklist.md`；考研各阶段说明见 `docs/kaoyan_phase*_notes.md`。
+考研各阶段说明见 `docs/kaoyan_phase*_notes.md`，P1 评测见 `docs/kaoyan_p1_notes.md`。
 
 ## 配置
 
