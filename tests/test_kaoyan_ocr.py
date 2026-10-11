@@ -6,10 +6,10 @@ import httpx
 import pytest
 from PIL import Image, ImageDraw
 
-from doc_agent.config import Settings
-from doc_agent.ingest import pipeline
-from doc_agent.ingest.loaders import load_file
-from doc_agent.ingest.ocr import (
+from kaoyan.config import Settings
+from kaoyan.ingest import pipeline
+from kaoyan.ingest.loaders import load_file
+from kaoyan.ingest.ocr import (
     CachedOCR,
     OCRBox,
     OCRResult,
@@ -20,13 +20,13 @@ from doc_agent.ingest.ocr import (
     join_pieces,
     markdown_tables,
 )
-from doc_agent.ingest.ocr_table import rebuild_table
-from doc_agent.ingest.tables import Table
-from doc_agent.kaoyan.db import KaoyanStore
-from doc_agent.kaoyan.extract.base import ExtractContext
-from doc_agent.kaoyan.extract.scut_baseline_img import ScutBaselineImage
-from doc_agent.kaoyan.extract.scut_subjects_img import ScutSubjectsImage
-from doc_agent.kaoyan.roster import count_lines, count_results, roster_counts
+from kaoyan.ingest.ocr_table import rebuild_table
+from kaoyan.ingest.tables import Table
+from kaoyan.db import KaoyanStore
+from kaoyan.extract.base import ExtractContext
+from kaoyan.extract.scut_baseline_img import ScutBaselineImage
+from kaoyan.extract.scut_subjects_img import ScutSubjectsImage
+from kaoyan.roster import count_lines, count_results, roster_counts
 
 DATA_DIR = Path(__file__).resolve().parents[1] / "data" / "kaoyan"
 IMAGE_DOCS = ["scut-040", "scut-049", "scut-061", "sysu-089", "sysu-092", "sysu-095"]
@@ -259,7 +259,7 @@ def _ctx(**kw: object) -> ExtractContext:
 
 
 def _ocr_doc(cells: list[list[str]], origins: list[list[tuple[int, int]]] | None = None):
-    from doc_agent.ingest.loaders import DocumentPage, ParsedDocument
+    from kaoyan.ingest.loaders import DocumentPage, ParsedDocument
 
     return ParsedDocument(source="ocr", pages=[DocumentPage("ocr", 1, "")],
                           tables=[Table(cells=cells, index=0, origins=origins)], meta={"ocr_applied": [1]})
@@ -334,8 +334,8 @@ def test_roster_counts_on_scanned_pdf_reports_no_personal_data(tmp_path: Path) -
 
 def test_real_ocr_extraction_matches_seeds(tmp_path: Path) -> None:
     pytest.importorskip("rapidocr_onnxruntime")
-    from doc_agent.kaoyan.extract.run import document_contexts, run_extraction
-    from doc_agent.kaoyan.seed import seed_kaoyan
+    from kaoyan.extract.run import document_contexts, run_extraction
+    from kaoyan.seed import seed_kaoyan
 
     if not (DATA_DIR / "sources.json").exists():
         pytest.skip("data/kaoyan bundle not present")

@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from doc_agent.agent.guardrails import wants_excel, wants_export
+from kaoyan.agent.guardrails import wants_excel, wants_export
 
 
 def test_wants_export_and_excel():

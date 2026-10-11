@@ -5,28 +5,28 @@ from pathlib import Path
 
 import pytest
 
-from doc_agent.config import get_settings
-from doc_agent.ingest.loaders import DocumentPage, ParsedDocument
-from doc_agent.ingest.tables import Table
-from doc_agent.kaoyan.db import KaoyanStore
-from doc_agent.kaoyan.extract import RULE_EXTRACTORS
-from doc_agent.kaoyan.extract.apply import apply_facts
-from doc_agent.kaoyan.extract.base import ExtractContext, Fact, FactSet, ProgramRef
-from doc_agent.kaoyan.extract.evaluate import evaluate, render_markdown
-from doc_agent.kaoyan.extract.jnu_tm_pdf import JnuTmPdf
-from doc_agent.kaoyan.extract.llm_fallback import LlmFallback
-from doc_agent.kaoyan.extract.run import (
+from kaoyan.config import get_settings
+from kaoyan.ingest.loaders import DocumentPage, ParsedDocument
+from kaoyan.ingest.tables import Table
+from kaoyan.db import KaoyanStore
+from kaoyan.extract import RULE_EXTRACTORS
+from kaoyan.extract.apply import apply_facts
+from kaoyan.extract.base import ExtractContext, Fact, FactSet, ProgramRef
+from kaoyan.extract.evaluate import evaluate, render_markdown
+from kaoyan.extract.jnu_tm_pdf import JnuTmPdf
+from kaoyan.extract.llm_fallback import LlmFallback
+from kaoyan.extract.run import (
     ExtractionRun,
     document_contexts,
     run_extraction,
 )
-from doc_agent.kaoyan.extract.scnu_retest_html import ScnuRetestHtml
-from doc_agent.kaoyan.extract.scnu_zsml_html import ScnuZsmlHtml
-from doc_agent.kaoyan.extract.scut_plan_html import ScutPlan
-from doc_agent.kaoyan.extract.sysu_baseline_pdf import SysuBaselinePdf
-from doc_agent.kaoyan.query import KaoyanQuery
-from doc_agent.kaoyan.extract.sysu_retest_html import SysuRetestHtml
-from doc_agent.kaoyan.seed import seed_kaoyan
+from kaoyan.extract.scnu_retest_html import ScnuRetestHtml
+from kaoyan.extract.scnu_zsml_html import ScnuZsmlHtml
+from kaoyan.extract.scut_plan_html import ScutPlan
+from kaoyan.extract.sysu_baseline_pdf import SysuBaselinePdf
+from kaoyan.query import KaoyanQuery
+from kaoyan.extract.sysu_retest_html import SysuRetestHtml
+from kaoyan.seed import seed_kaoyan
 
 DATA_DIR = Path(__file__).resolve().parents[1] / "data" / "kaoyan"
 FACT_TABLES = ("plans", "score_lines", "exam_subjects", "directions", "admission_stats")

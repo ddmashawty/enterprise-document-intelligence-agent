@@ -1,8 +1,8 @@
 import json
 from pathlib import Path
 
-from doc_agent.eval import runner
-from doc_agent.eval.metrics import (
+from kaoyan.eval import runner
+from kaoyan.eval.metrics import (
     contains,
     forbidden_items,
     intent_fields,
@@ -79,7 +79,7 @@ def test_tool_facts_reads_search_programs_fields():
 
 
 def test_l1_passes_fails_and_skips_compare_rows(monkeypatch):
-    from doc_agent.agent import kaoyan_flow
+    from kaoyan.agent import kaoyan_flow
 
     rows = [
         {"id": "ok", "turns": ["暨大 081201 2026 复试线"], "expected_facts": [_fact(264)],

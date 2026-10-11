@@ -28,7 +28,7 @@ K1 的 18 道验收题。已经被调过参，只作旧集合。`scripts/smoke_k
 | `expected_facts` | 库里的键：`table`、`program_id`、`kind`、`year`、`value`、`source_doc_id`。`table` 是 `score_lines`（kind 为线的口径）、`plans`、`admission_stats`、`exam_subjects`（kind 为 `slot1`–`slot4`，value 为科目代码）或 `directions`（kind 为方向代码，value 为目录“导师”格原文，目前只有暨大）。单科线另带 `field`（`politics` / `foreign_lang` / `subject1` / `subject2`），没有 `field` 就是总分 |
 | `expected_refusal` | `out_of_scope` / `privacy` / `unknown_data` / `null` |
 | `expected_sources` | 事实应引用的 URL |
-| `must_include` / `must_not_include` | 粗的字符串检查。`must_include` 里必须有每条 `expected_facts` 的数值。每项可以是字符串或备选列表（任一命中即可），匹配前用 `doc_agent.eval.metrics.normalize_text` 归一化（去空白、全角转半角、2.5万=25000、16,000=16000、两门=2门、不记入=不计入） |
+| `must_include` / `must_not_include` | 粗的字符串检查。`must_include` 里必须有每条 `expected_facts` 的数值。每项可以是字符串或备选列表（任一命中即可），匹配前用 `kaoyan.eval.metrics.normalize_text` 归一化（去空白、全角转半角、2.5万=25000、16,000=16000、两门=2门、不记入=不计入） |
 | `judge_rubric` | 字符串查不准的口径要求（专项线、学校基本线、计划口径），留给 L3 裁判。空串表示没有 |
 | `judge_flags` | 只有部分 `doc-*` 有。错误值，但正确答案做对比时也可能提到（doc-09 的“8门”、doc-14 的“机试成绩不记入”、doc-21 的“50%”），所以不放 `must_not_include`，交给 L3 裁判看是不是误用 |
 | `evidence` | 只有 `doc-*` 有。原文片段列表 `{doc, text}`，每段去空白后都能在原文里原样找到；L2 块级命中和字面重合度分层都用它 |
@@ -134,7 +134,7 @@ sup-12 的核对顺带改了库：`sources.json` 里 scnu-017 的招生年份从
 
 后加的题用 `--freeze-append PREFIX` 冻结：只在这批新题里抽 30%，已冻结的 test 题一道不动，同一前缀只能追加一次。记录在 `split_m1.json` 的 `appended` 里（日期、规则、题号），内容哈希和其他 test 题一起记在 `test` 里。
 
-- `doc-`（2026-10-11）：按“题型 × 字面重合度”分层，种子 `kaoyan-test-m1:doc-`，抽 9 道：doc-02、04、05、11、17、20、21、25、27。题型分结构化 / 单校 / 不带校名 / 跨校 / 原文无答案；重合度是问题的字符二元组落在 evidence 里的比例，低 [0, 0.1)、中 [0.1, 0.3)、高 [0.3, 1]（`doc_agent.eval.drafts.bigram_overlap`）。
+- `doc-`（2026-10-11）：按“题型 × 字面重合度”分层，种子 `kaoyan-test-m1:doc-`，抽 9 道：doc-02、04、05、11、17、20、21、25、27。题型分结构化 / 单校 / 不带校名 / 跨校 / 原文无答案；重合度是问题的字符二元组落在 evidence 里的比例，低 [0, 0.1)、中 [0.1, 0.3)、高 [0.3, 1]（`kaoyan.eval.drafts.bigram_overlap`）。
 
 ## 回退门槛
 

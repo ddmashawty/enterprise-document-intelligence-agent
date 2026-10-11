@@ -15,11 +15,11 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "src"))
 
-from doc_agent.config import get_settings  # noqa: E402
-from doc_agent.kaoyan.db import KaoyanStore  # noqa: E402
-from doc_agent.kaoyan.extract.evaluate import evaluate, render_markdown  # noqa: E402
-from doc_agent.kaoyan.extract.run import run_extraction  # noqa: E402
-from doc_agent.kaoyan.seed import seed_kaoyan  # noqa: E402
+from kaoyan.config import get_settings  # noqa: E402
+from kaoyan.db import KaoyanStore  # noqa: E402
+from kaoyan.extract.evaluate import evaluate, render_markdown  # noqa: E402
+from kaoyan.extract.run import run_extraction  # noqa: E402
+from kaoyan.seed import seed_kaoyan  # noqa: E402
 
 
 def main() -> int:

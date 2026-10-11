@@ -40,7 +40,7 @@ python scripts/seed_kaoyan.py
 python scripts/extract_kaoyan.py
 python scripts/ingest_kaoyan.py
 
-python -m uvicorn doc_agent.api:app --host 127.0.0.1 --port 8000
+python -m uvicorn kaoyan.api:app --host 127.0.0.1 --port 8000
 ```
 
 ### 可选：OCR（图片表格、扫描 PDF）
@@ -122,11 +122,13 @@ curl -s localhost:8000/v1/chat/async -H 'Content-Type: application/json' \
 ## 目录
 
 ```
-src/doc_agent/
+src/kaoyan/
+  db.py / schema.sql / models.py / normalize.py   结构化库、口径归一
+  seed.py / extract/ / roster.py / privacy.py      种子导入、规则抽取、名单统计与隐私闸门
+  query.py / index.py                              结构化查询、考研原文索引
   agent/     LangGraph 规划、执行、反思；考研意图识别与数字校验
   tools/     考研结构化查询、原文检索、导出
   ingest/    多格式加载（PDF / DOCX / HTML / xlsx / 图片）、表格还原、OCR、切片、脱敏
-  kaoyan/    结构化库、种子导入、规则抽取、名单统计
   collect/   礼貌爬虫、站点适配、变更检测
   rag/       混合检索
   memory/    会话记忆与 SQLite 轨迹

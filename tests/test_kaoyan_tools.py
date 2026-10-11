@@ -5,10 +5,10 @@ import re
 
 import pytest
 
-from doc_agent.kaoyan.db import KaoyanStore
-from doc_agent.kaoyan.query import KaoyanQuery, baseline_discipline
-from doc_agent.tools import kaoyan as ky
-from doc_agent.tools.registry import get_tool_list
+from kaoyan.db import KaoyanStore
+from kaoyan.query import KaoyanQuery, baseline_discipline
+from kaoyan.tools import kaoyan as ky
+from kaoyan.tools.registry import get_tool_list
 
 PII_RE = re.compile(r"[\u4e00-\u9fff]某|\d{15}|考生编号")
 

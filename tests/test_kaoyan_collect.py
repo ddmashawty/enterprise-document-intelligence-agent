@@ -13,16 +13,16 @@ import httpx
 import pytest
 from fastapi.testclient import TestClient
 
-from doc_agent.collect.adapters import build_adapter
-from doc_agent.collect.adapters.scnu import (
+from kaoyan.collect.adapters import build_adapter
+from kaoyan.collect.adapters.scnu import (
     DRP_COLLEGE,
     DRP_YEAR,
     ScnuAdapter,
     webforms_state,
 )
-from doc_agent.collect.adapters.sysu import fix_page_url
-from doc_agent.collect.base import ListSource, ProbeContext
-from doc_agent.collect.crawler import (
+from kaoyan.collect.adapters.sysu import fix_page_url
+from kaoyan.collect.base import ListSource, ProbeContext
+from kaoyan.collect.crawler import (
     Crawler,
     CrawlOptions,
     get_run,
@@ -30,17 +30,17 @@ from doc_agent.collect.crawler import (
     import_manual,
     looks_personal,
 )
-from doc_agent.collect.dedupe import (
+from kaoyan.collect.dedupe import (
     content_text,
     normalize_url,
     page_text,
     safe_filename,
     text_fingerprint,
 )
-from doc_agent.collect.http import HostThrottle, PoliteClient, ValidatorCache
-from doc_agent.collect.sites import SITES_PATH, build_sites, load_sites
-from doc_agent.config import Settings
-from doc_agent.kaoyan.db import KaoyanStore
+from kaoyan.collect.http import HostThrottle, PoliteClient, ValidatorCache
+from kaoyan.collect.sites import SITES_PATH, build_sites, load_sites
+from kaoyan.config import Settings
+from kaoyan.db import KaoyanStore
 
 DATA = Path(__file__).resolve().parents[1] / "data" / "kaoyan"
 RAW = DATA / "raw"
@@ -582,9 +582,9 @@ def test_sites_json_in_sync_with_sources() -> None:
 
 @pytest.fixture()
 def api(store: KaoyanStore, settings: Settings) -> TestClient:
-    from doc_agent.api import create_app
-    from doc_agent.api.routes_kaoyan import crawl_runner, kaoyan_query
-    from doc_agent.kaoyan.query import KaoyanQuery
+    from kaoyan.api import create_app
+    from kaoyan.api.routes_kaoyan import crawl_runner, kaoyan_query
+    from kaoyan.query import KaoyanQuery
 
     app = create_app()
     app.dependency_overrides[kaoyan_query] = lambda: KaoyanQuery(store)

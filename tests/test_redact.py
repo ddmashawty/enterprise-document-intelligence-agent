@@ -6,10 +6,10 @@ from pathlib import Path
 
 import pytest
 
-from doc_agent.config import Settings
-from doc_agent.ingest.loaders import DocumentPage, ParsedDocument, load_file
-from doc_agent.ingest.pipeline import load_document
-from doc_agent.ingest.redact import (
+from kaoyan.config import Settings
+from kaoyan.ingest.loaders import DocumentPage, ParsedDocument, load_file
+from kaoyan.ingest.pipeline import load_document
+from kaoyan.ingest.redact import (
     NAME_HEADER,
     find_header,
     is_personal_table,
@@ -19,7 +19,7 @@ from doc_agent.ingest.redact import (
     redact_tables,
     redact_text,
 )
-from doc_agent.ingest.tables import Table, render_page
+from kaoyan.ingest.tables import Table, render_page
 
 ROOT = Path(__file__).resolve().parents[1]
 DATA = ROOT / "data" / "kaoyan"

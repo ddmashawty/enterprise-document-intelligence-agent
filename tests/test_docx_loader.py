@@ -7,7 +7,7 @@ from docx import Document
 from docx.oxml import OxmlElement
 from docx.oxml.ns import qn
 
-from doc_agent.ingest.loaders import iter_source_files, load_docx, load_file
+from kaoyan.ingest.loaders import iter_source_files, load_docx, load_file
 
 
 def _page_break(paragraph) -> None:

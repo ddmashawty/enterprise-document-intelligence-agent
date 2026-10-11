@@ -18,10 +18,10 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "src"))
 
-from doc_agent.config import get_settings
-from doc_agent.ingest.ocr import get_ocr_backend
-from doc_agent.kaoyan.index import source_documents
-from doc_agent.kaoyan.roster import roster_counts
+from kaoyan.config import get_settings
+from kaoyan.ingest.ocr import get_ocr_backend
+from kaoyan.index import source_documents
+from kaoyan.roster import roster_counts
 
 
 def _pages(spec: str | None) -> list[int] | None:

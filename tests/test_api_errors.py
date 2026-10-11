@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from fastapi.testclient import TestClient
 
-from doc_agent.api import create_app
+from kaoyan.api import create_app
 
 
 def test_health_ok():

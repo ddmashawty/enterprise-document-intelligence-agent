@@ -11,8 +11,8 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "src"))
 
-from doc_agent.config import get_settings  # noqa: E402
-from doc_agent.kaoyan.index import ingest_kaoyan  # noqa: E402
+from kaoyan.config import get_settings  # noqa: E402
+from kaoyan.index import ingest_kaoyan  # noqa: E402
 
 
 def main() -> int:

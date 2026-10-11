@@ -1,4 +1,4 @@
-from doc_agent.kaoyan.normalize import (
+from kaoyan.normalize import (
     CollegeName,
     CountValue,
     Subject,

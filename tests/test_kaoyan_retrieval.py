@@ -3,14 +3,14 @@ from pathlib import Path
 
 import pytest
 
-from doc_agent.config import Settings
-from doc_agent.ingest.chunking import TextChunk, _table_blocks, chunk_document, table_header_rows
-from doc_agent.ingest.loaders import DocumentPage, LoadedDocument
-from doc_agent.ingest.tables import Table
-from doc_agent.kaoyan.index import ingest_kaoyan
-from doc_agent.rag.embeddings import Hit
-from doc_agent.rag.query_expand import expand_queries, kaoyan_prior
-from doc_agent.rag.store import DocumentStore, get_store, reset_store
+from kaoyan.config import Settings
+from kaoyan.ingest.chunking import TextChunk, _table_blocks, chunk_document, table_header_rows
+from kaoyan.ingest.loaders import DocumentPage, LoadedDocument
+from kaoyan.ingest.tables import Table
+from kaoyan.index import ingest_kaoyan
+from kaoyan.rag.embeddings import Hit
+from kaoyan.rag.query_expand import expand_queries, kaoyan_prior
+from kaoyan.rag.store import DocumentStore, get_store, reset_store
 
 DATA = Path(__file__).resolve().parents[1] / "data" / "kaoyan"
 FIXTURES = [
@@ -93,7 +93,7 @@ def test_table_blocks_keep_header(ky) -> None:
 
 
 def test_rag_search_tool_filters_by_school(ky, monkeypatch) -> None:
-    from doc_agent.tools import registry
+    from kaoyan.tools import registry
 
     s, _, _ = ky
     monkeypatch.setattr(registry, "get_settings", lambda: s)

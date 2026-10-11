@@ -3,7 +3,7 @@ requires = ["setuptools>=68"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "doc-agent"
+name = "kaoyan"
 version = "0.4.0"
 description = "广东四校计算机考研信息 Agent。"
 readme = "README.md"

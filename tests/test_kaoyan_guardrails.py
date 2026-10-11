@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import pytest
 
-from doc_agent.agent.guardrails import (
+from kaoyan.agent.guardrails import (
     detect_kaoyan_intent,
     find_unsupported_numbers,
     strip_unsupported_numbers,

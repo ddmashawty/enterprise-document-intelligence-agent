@@ -20,7 +20,7 @@ class ApiError(Exception):
         super().__init__(f"{status_code} {code}: {message}")
 
 
-def is_doc_agent_health(payload: dict[str, Any]) -> bool:
+def is_kaoyan_health(payload: dict[str, Any]) -> bool:
     return "version" in payload and "llm" in payload and "retrieval_backend" in payload
 
 
@@ -80,7 +80,7 @@ class DocAgentClient:
 
     def health(self) -> dict[str, Any]:
         data = self._request("GET", "/health", timeout=10)
-        if not is_doc_agent_health(data):
+        if not is_kaoyan_health(data):
             raise ApiError(
                 200,
                 "wrong_service",

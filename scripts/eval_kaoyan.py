@@ -56,8 +56,8 @@ def main() -> int:
     if args.db:
         os.environ["KAOYAN_DB"] = str(Path(args.db).resolve())
 
-    from doc_agent.config import get_settings
-    from doc_agent.eval.runner import (
+    from kaoyan.config import get_settings
+    from kaoyan.eval.runner import (
         failure_changes,
         known_failures,
         load_rows,

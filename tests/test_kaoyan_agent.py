@@ -8,11 +8,11 @@ from typing import Any
 import pytest
 from langchain_core.messages import AIMessage
 
-from doc_agent.agent import kaoyan_flow, nodes
-from doc_agent.agent.graph import run_agent
-from doc_agent.kaoyan.db import KaoyanStore
-from doc_agent.tools import export as export_mod
-from doc_agent.tools import kaoyan as ky
+from kaoyan.agent import kaoyan_flow, nodes
+from kaoyan.agent.graph import run_agent
+from kaoyan.db import KaoyanStore
+from kaoyan.tools import export as export_mod
+from kaoyan.tools import kaoyan as ky
 
 
 class FakeModel:
@@ -52,7 +52,7 @@ def test_score_line_question_uses_structured_tools(kaoyan_env) -> None:
 
 
 def test_lookup_with_two_codes_queries_each(kaoyan_env) -> None:
-    from doc_agent.agent.kaoyan_flow import structured_calls
+    from kaoyan.agent.kaoyan_flow import structured_calls
 
     calls = structured_calls({"schools": ["sysu"], "codes": ["083500", "085405"], "kinds": ["plan"], "year": None})
     assert calls == [("search_programs", {"school": "sysu", "code": "083500"}),

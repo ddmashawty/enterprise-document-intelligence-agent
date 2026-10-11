@@ -153,7 +153,7 @@ flowchart LR
   - test 约占 30%，按“学校 × 类别”分层抽样，抽完就冻结，只在里程碑验收时运行，日常改提示词只看 dev；
   - test 题改动要在 PR 里单独说明理由；
   - 目标总量 ≥ 150 题（dev 约 90 / test 约 45 / adversarial ≥ 60，adversarial 单独报告）。
-- [ ] `src/doc_agent/eval/`（新增包）：
+- [ ] `src/kaoyan/eval/`（新增包）：
   - `metrics.py`：Numeric EM、Attribution、Refusal P/R、Citation、意图准确率、hit@k/MRR；
   - `runner.py`：读取 jsonl，按层运行。
 - [ ] `scripts/eval_kaoyan.py`（新增，替代 `scripts/smoke_kaoyan.py`；旧脚本保留到 M2 结束）：
@@ -167,7 +167,7 @@ flowchart LR
 
 - [ ] 需要人工判断的指标（P2 之前的 Attribution）：
   - `--judge` 模式用 DeepSeek 做评审，并抽 20 题人工复核来校准评审的准确度；
-  - 评审提示词放在 `src/doc_agent/eval/judge_prompt.py`。
+  - 评审提示词放在 `src/kaoyan/eval/judge_prompt.py`。
 - [ ] `.github/workflows/ci.yml`（新增）：在 Python 3.12 上运行 `ruff check`、`pytest -q`、`scripts/seed_kaoyan.py`、`scripts/extract_kaoyan.py`、`eval_kaoyan.py --layers L0,L1,L2`。L0–L2 的 dev 指标比 `main` 上次结果下降超过 2 个百分点时 CI 失败。
 - [ ] `.github/workflows/nightly-eval.yml`（新增，可选）：跑 L3，需要你在仓库 Settings 里配置 `LLM_API_KEY` secret〔你来决定；不配置就只做本地手动跑〕。
 - [ ] 报告输出到 `docs/eval/<date>.md` 和 `.json`，带 commit hash。
@@ -201,7 +201,7 @@ flowchart LR
    这个 ID 对合并后的事实保持稳定，同一事实多个来源时来源列表也计入哈希。
 2. **给模型看的证据改为短编号**（`tools/kaoyan.py` 的 `llm_view`）：每条事实加短别名 `F1`、`F2`…，在 state 里保存 `{F1: fid}` 映射，存到 `facts["fact_map"]`。
 3. **模型输出规则**（`prompts.py` 新规则）：所有来自证据的数字一律写成 `[[F3]]`，不直接写数字；派生说明（如“≥X”）也必须引用对应的事实编号。
-4. **渲染**（新增 `src/doc_agent/kaoyan/render.py`）：
+4. **渲染**（新增 `src/kaoyan/render.py`）：
    - `[[Fk]]` 替换为 `value_text`，并在句末或表格行尾自动加来源（标题、URL、发布日期）；
    - 引用的编号不存在时，标“依据不足”并记录到 validation 里。
 5. **归属校验**（`kaoyan_flow.finalize`）：
@@ -248,8 +248,8 @@ CREATE TABLE IF NOT EXISTS data_gaps (
 **验收（dev 集 L3）：**
 - Attribution ≥ 99%，Numeric EM 不低于 P1 基线；
 - 跨校混淆对抗题 100% 不错位；
-- `rg "华工|中大|暨南|华师|765|0812" src/doc_agent/agent/prompts.py` 只命中学校简称说明，不命中事实；
-- `rg "2026" src/doc_agent --glob '!**/extract/**' --glob '!**/sites.json'` 不再命中业务默认值。
+- `rg "华工|中大|暨南|华师|765|0812" src/kaoyan/agent/prompts.py` 只命中学校简称说明，不命中事实；
+- `rg "2026" src/kaoyan --glob '!**/extract/**' --glob '!**/sites.json'` 不再命中业务默认值。
 
 **风险：** DeepSeek 不一定稳定地使用占位符。缓解：重写一次，再加上裸数字校验兜底；L3 里统计“占位遵从率”，低于 95% 就把更多题型改成模板直出。
 
@@ -265,7 +265,7 @@ CREATE TABLE IF NOT EXISTS data_gaps (
   - “北大计算机复试线”判为考研，但 schools 为空，只会检索四校文本，没有说明“不在覆盖范围”。
 - `nodes.plan_node` 在考研分支里不读 `session_context`。
 
-### 设计：意图 JSON（Pydantic 模型，新增 `src/doc_agent/agent/intent.py`）
+### 设计：意图 JSON（Pydantic 模型，新增 `src/kaoyan/agent/intent.py`）
 
 ```python
 class KaoyanIntent(BaseModel):
@@ -439,7 +439,7 @@ CREATE TABLE IF NOT EXISTS transfer_notices (     -- 调剂
   - `max_retries=2` 保留，并加熔断（连续失败 N 次后直接降级 60 s）。
 
 **可观测性**
-- [ ] 新增 `src/doc_agent/obs.py`：
+- [ ] 新增 `src/kaoyan/obs.py`：
   - 每次请求记录一条 JSON 日志：task_id、意图来源、调用了哪些工具、每个节点耗时、token（`usage_metadata`）、成本（单价写在配置 `LLM_PRICE_*` 里）、校验结果（重写、删除、错位次数）；
   - 可选接 Langfuse 自托管或 OpenTelemetry〔LangSmith 是海外服务，国内网络可用性待确认〕；
   - `/v1/tasks/{id}` 返回以上信息，`frontend/components/trace_panel.py` 展示。
