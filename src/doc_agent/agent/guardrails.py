@@ -166,6 +166,8 @@ _PRIVACY_RE = re.compile(
 _THRESHOLD_RE = re.compile(
     r"(统招|统考|公开招考)[^0-9]{0,6}?(>=|≥|>|＞|大于等于|大于|超过|多于|不少于|至少)\s*(\d+)"
 )
+_SKIP_SUBJECT_RE = re.compile(r"不(?:用|需要)?考\s*(\d{3}|数学[一二]?|英语[一二]?|政治|日语|俄语)")
+_SUBJECT_CODES = {"数学一": "301", "数学二": "302", "英语一": "201", "英语二": "204"}
 _NAME_KW_RE = re.compile(r"有没有([\u4e00-\u9fffA-Za-z]{2,12}?)(?:学硕|专硕|专业|方向|学位|[（(？?，,]|$)")
 _COLLEGE_PREFIX_STRIP = "的在查看问请帮我"
 
@@ -210,8 +212,11 @@ def detect_kaoyan_intent(goal: str) -> dict[str, Any]:
 
     filters: dict[str, Any] = {}
     if "filter" in kinds or "compare" in kinds:
-        if re.search(r"不考\s*408", text):
+        skip = _SKIP_SUBJECT_RE.search(text)
+        if skip and skip.group(1) == "408":
             filters["is_408"] = False
+        elif skip:
+            filters["exclude_subject"] = _SUBJECT_CODES.get(skip.group(1), skip.group(1))
         elif "408" in text:
             filters["is_408"] = True
         if "非全日制" in text or "非全" in text:

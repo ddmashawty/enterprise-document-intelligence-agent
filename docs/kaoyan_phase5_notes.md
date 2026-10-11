@@ -48,7 +48,7 @@
 
 | 方法 | 路径 | 说明 |
 |------|------|------|
-| GET | `/v1/programs` | 参数同 `search_programs`（`school, college, code, name_kw, degree_type, study_mode, exam_subject, is_408, min_public_plan, year`）；返回 `programs`（完整事实）、`unknown`（带原因）、`excluded`、`public_plan_rule` |
+| GET | `/v1/programs` | 参数同 `search_programs`（`school, college, code, name_kw, degree_type, study_mode, exam_subject, exclude_subject, is_408, min_public_plan, year`）；返回 `programs`（完整事实）、`unknown`（带原因）、`excluded`（个数）、`excluded_programs`（被筛掉的专业、原因和依据的科目或计划）、`public_plan_rule` |
 | GET | `/v1/programs/{program_id}` | 单个专业全部事实；不存在 → 404 `program_not_found` |
 | GET | `/v1/score-lines?school=&code=&college=&year=2026&include_special=true` | `school` 必填（缺 → 422 `validation_error`）；未知学校 → 404 `school_not_found` |
 | GET | `/v1/documents?school=&doc_type=&year=` | 只有元数据；`content_available` 恒为 false，不返回本地路径 |

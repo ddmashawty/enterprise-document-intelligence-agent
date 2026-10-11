@@ -59,6 +59,7 @@ def list_programs(
     degree_type: str | None = Query(None, description="学硕 / 专硕"),
     study_mode: str | None = Query(None, description="全日制 / 非全日制"),
     exam_subject: str | None = None,
+    exclude_subject: str | None = Query(None, description="去掉初试含该科目的专业（不考数学 → 数学）"),
     is_408: bool | None = None,
     min_public_plan: int | None = Query(None, ge=0, description="统招 ≥ N"),
     year: int | None = _YEAR,
@@ -66,7 +67,7 @@ def list_programs(
     _school_or_404(q, school)
     result = q.search_programs(
         school=school, college=college, code=code, name_kw=name_kw, degree_type=degree_type,
-        study_mode=study_mode, exam_subject=exam_subject, is_408=is_408,
+        study_mode=study_mode, exam_subject=exam_subject, exclude_subject=exclude_subject, is_408=is_408,
         min_public_plan=min_public_plan, year=year, detail=True,
     )
     return ProgramSearchResponse(**result)

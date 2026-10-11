@@ -1,7 +1,7 @@
 {
   "meta": {
     "date": "2026-10-11",
-    "commit": "03a8998-dirty",
+    "commit": "0d2e748-dirty",
     "gold": "data/gold/kaoyan_eval_v2.jsonl",
     "splits": [],
     "rows": 162
@@ -197,23 +197,23 @@
       "summary": {
         "rows": 125,
         "unscorable": 0,
-        "row_pass": 0.952,
-        "fact_recall": 0.9388,
+        "row_pass": 0.984,
+        "fact_recall": 0.9918,
         "source_match": 1.0
       },
       "by_split": {
         "adversarial": {
           "rows": 57,
           "unscorable": 0,
-          "row_pass": 0.9474,
-          "fact_recall": 0.9677,
+          "row_pass": 0.9649,
+          "fact_recall": 0.9785,
           "source_match": 1.0
         },
         "dev": {
           "rows": 68,
           "unscorable": 0,
-          "row_pass": 0.9559,
-          "fact_recall": 0.9211,
+          "row_pass": 1.0,
+          "fact_recall": 1.0,
           "source_match": 1.0
         }
       },
@@ -221,22 +221,22 @@
         "aggregate": {
           "rows": 3,
           "unscorable": 0,
-          "row_pass": 0.6667,
-          "fact_recall": 0.9333,
+          "row_pass": 1.0,
+          "fact_recall": 1.0,
           "source_match": 1.0
         },
         "boundary": {
           "rows": 10,
           "unscorable": 0,
-          "row_pass": 0.9,
-          "fact_recall": 0.9333,
+          "row_pass": 1.0,
+          "fact_recall": 1.0,
           "source_match": 1.0
         },
         "colloquial": {
           "rows": 4,
           "unscorable": 0,
-          "row_pass": 0.75,
-          "fact_recall": 0.5625,
+          "row_pass": 1.0,
+          "fact_recall": 1.0,
           "source_match": 1.0
         },
         "cross_school": {
@@ -249,8 +249,8 @@
         "false_premise": {
           "rows": 5,
           "unscorable": 0,
-          "row_pass": 0.8,
-          "fact_recall": 0.6923,
+          "row_pass": 1.0,
+          "fact_recall": 1.0,
           "source_match": 1.0
         },
         "missing_field": {
@@ -493,27 +493,6 @@
       ],
       "adv-pool-09": [
         "jnu-044-0812Z3 college 2026 total=276"
-      ],
-      "adv-bd-05": [
-        "sysu-765-085400 slot4 2026 total=884"
-      ],
-      "sup-07": [
-        "sysu-725-083500 catalog_total 2026 total=11",
-        "sysu-725-083500 public_exam 2026 total=4",
-        "sysu-725-083500 tm 2026 total=9",
-        "sysu-725-085405 catalog_total 2026 total=37",
-        "sysu-725-085405 public_exam 2026 total=23",
-        "sysu-725-085405 rules_total 2026 total=53",
-        "sysu-725-085405 tm 2026 total=30"
-      ],
-      "sup-29": [
-        "scnu-019-081200 catalog_total 2026 total=48",
-        "scnu-019-083500 catalog_total 2026 total=20",
-        "scnu-019-085404 catalog_total 2026 total=50",
-        "scnu-019-085405 catalog_total 2026 total=23"
-      ],
-      "sup-36": [
-        "sysu-765-085400 slot3 2026 total=302"
       ]
     }
   }

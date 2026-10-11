@@ -51,6 +51,14 @@ def test_score_line_question_uses_structured_tools(kaoyan_env) -> None:
     assert len(model.calls) == 1  # plan/reflect are deterministic on this path
 
 
+def test_lookup_with_two_codes_queries_each(kaoyan_env) -> None:
+    from doc_agent.agent.kaoyan_flow import structured_calls
+
+    calls = structured_calls({"schools": ["sysu"], "codes": ["083500", "085405"], "kinds": ["plan"], "year": None})
+    assert calls == [("search_programs", {"school": "sysu", "code": "083500"}),
+                     ("search_programs", {"school": "sysu", "code": "085405"})]
+
+
 def test_unsupported_number_regenerates_once(kaoyan_env) -> None:
     model = kaoyan_env(FakeModel("复试线 379，推免 999 人。", "复试线 379。"))
     r = run_agent("中大计算机学院 085404 的 2026 复试线是多少？", persist=False)
