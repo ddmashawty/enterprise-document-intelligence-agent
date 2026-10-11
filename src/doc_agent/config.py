@@ -42,7 +42,7 @@ class Settings(BaseSettings):
     vision_api_key: str = ""
     vision_timeout: float = 60.0
 
-    crawl_user_agent: str = "kaoyan-info-agent/0.4 (+https://github.com/ddmashawty/enterprise-document-intelligence-agent)"
+    crawl_user_agent: str = "kaoyan-info-agent/0.4 (+https://github.com/ddmashawty/kaoyan)"
     crawl_contact: str = ""
     crawl_min_interval_sec: float = 3.0
     crawl_respect_robots: bool = True

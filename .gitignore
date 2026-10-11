@@ -31,8 +31,8 @@ docs/audit/**/*.jpeg
 docs/audit/**/*.webp
 docs/audit/**/*.gif
 
-# Large public demo PDFs (re-download via scripts/download_demo_data.py)
-data/raw/**/*.pdf
+# 通用文档模式的本机文档（RAW_DIR），不入库
+data/raw/
 
 # Local planning scratch (optional keep; uncomment to ignore)
 # task_plan.md
