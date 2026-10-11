@@ -36,7 +36,7 @@ def intent_fields(expected: dict[str, Any], predicted: dict[str, Any], expected_
     return fields
 
 
-_FACT_KEYS = ("lines", "score_lines", "plans", "admission_stats", "exam_subjects")
+_FACT_KEYS = ("lines", "score_lines", "plans", "admission_stats", "exam_subjects", "directions")
 
 
 def _walk_programs(data: Any):
@@ -72,6 +72,7 @@ def tool_facts(outputs: list[str]) -> list[dict[str, Any]]:
     get_score_lines names the score lines `lines`, search_programs names them `score_lines`.
     Each line yields its total and its single-subject lines (`field` politics, foreign_lang,
     subject1, subject2). Exam subjects become one fact per slot: kind `slot4`, value the subject code.
+A direction with a 导师 cell becomes kind = direction code, value = the cell verbatim.
     """
     facts: list[dict[str, Any]] = []
     for output in outputs:
@@ -93,6 +94,10 @@ def tool_facts(outputs: list[str]) -> list[dict[str, Any]]:
                 for subject in entry.get("subjects") or []:
                     facts.append(_fact("exam_subjects", pid, f"slot{subject.get('slot')}", entry.get("year"),
                                        subject.get("code"), entry))
+            for direction in program.get("directions") or []:
+                if direction.get("advisors"):
+                    facts.append(_fact("directions", pid, direction.get("code"), direction.get("year"),
+                                       direction["advisors"], direction))
     return facts
 
 

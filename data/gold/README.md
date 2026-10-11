@@ -24,7 +24,7 @@ K1 的 18 道验收题。已经被调过参，只作旧集合。`scripts/smoke_k
 | `turns` | 多轮时只评最后一轮 |
 | `school` / `program_ids` / `year` | 题目范围 |
 | `expected_intent` | 学校、代码、年份、操作。M0 迁移题的 `metrics` 留空 |
-| `expected_facts` | 库里的键：`table`、`program_id`、`kind`、`year`、`value`、`source_doc_id`。`table` 是 `score_lines`（kind 为线的口径）、`plans`、`admission_stats` 或 `exam_subjects`（kind 为 `slot1`–`slot4`，value 为科目代码）。单科线另带 `field`（`politics` / `foreign_lang` / `subject1` / `subject2`），没有 `field` 就是总分 |
+| `expected_facts` | 库里的键：`table`、`program_id`、`kind`、`year`、`value`、`source_doc_id`。`table` 是 `score_lines`（kind 为线的口径）、`plans`、`admission_stats`、`exam_subjects`（kind 为 `slot1`–`slot4`，value 为科目代码）或 `directions`（kind 为方向代码，value 为目录“导师”格原文，目前只有暨大）。单科线另带 `field`（`politics` / `foreign_lang` / `subject1` / `subject2`），没有 `field` 就是总分 |
 | `expected_refusal` | `out_of_scope` / `privacy` / `unknown_data` / `null` |
 | `expected_sources` | 事实应引用的 URL |
 | `must_include` / `must_not_include` | 粗的字符串检查。`must_include` 里必须有每条 `expected_facts` 的数值 |

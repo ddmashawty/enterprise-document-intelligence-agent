@@ -322,6 +322,8 @@ _FACT_SQL = {
     "plans": "SELECT DISTINCT value, source_doc_id FROM plans WHERE program_id=? AND kind=? AND year=?",
     "admission_stats": "SELECT DISTINCT value, source_doc_id FROM admission_stats WHERE program_id=? AND kind=? AND year=?",
     "exam_subjects": "SELECT DISTINCT code, source_doc_id FROM exam_subjects WHERE program_id=? AND 'slot'||slot=? AND year=?",
+    "directions": "SELECT DISTINCT advisors, source_doc_id FROM directions "
+                  "WHERE program_id=? AND code=? AND year=? AND advisors IS NOT NULL",
 }
 _LINE_FIELDS = ("total", "politics", "foreign_lang", "subject1", "subject2")
 

@@ -301,7 +301,9 @@
       "year": null,
       "operation": "lookup",
       "metrics": [],
-      "facts": [],
+      "facts": [
+        "jnu-010-085404|directions|01|2027"
+      ],
       "sources": [
         "jnu-016"
       ],

@@ -1,7 +1,7 @@
 {
   "meta": {
     "date": "2026-10-11",
-    "commit": "0d2e748-dirty",
+    "commit": "584cc86-dirty",
     "gold": "data/gold/kaoyan_eval_v2.jsonl",
     "splits": [],
     "rows": 162
@@ -195,10 +195,10 @@
     },
     "L1": {
       "summary": {
-        "rows": 125,
+        "rows": 126,
         "unscorable": 0,
-        "row_pass": 0.984,
-        "fact_recall": 0.9918,
+        "row_pass": 0.9841,
+        "fact_recall": 0.9919,
         "source_match": 1.0
       },
       "by_split": {
@@ -210,7 +210,7 @@
           "source_match": 1.0
         },
         "dev": {
-          "rows": 68,
+          "rows": 69,
           "unscorable": 0,
           "row_pass": 1.0,
           "fact_recall": 1.0,
@@ -254,7 +254,7 @@
           "source_match": 1.0
         },
         "missing_field": {
-          "rows": 1,
+          "rows": 2,
           "unscorable": 0,
           "row_pass": 1.0,
           "fact_recall": 1.0,

@@ -1,7 +1,8 @@
 """暨南大学《硕士研究生招生专业目录》HTML (one big table per year).
 
 Rows: 学院行 "010信息科学技术学院 | 拟招生总人数： | 235 | 备注"; 专业行 "085404计算机技术(专业学位) | 54";
-方向行 "01(全日制)不分方向 | 导师 | ①101… | 复试科目 | …". Programs under a 一级学科 counted as a
+方向行 "01(全日制)不分方向 | 导师 | ①101… | 复试科目 | …"; the 导师 cell is kept verbatim on the direction.
+Programs under a 一级学科 counted as a
 whole ("计算机科学与技术指标为24个，以上均按一级学科统筹") leave their own count empty; they get
 the pooled count with ``pool_scope``.
 """
@@ -35,8 +36,8 @@ class _Program:
     name: str
     count: int | None
     evidence: str
-    # (code, name, study mode, exam subjects cell, raw first cell)
-    directions: list[tuple[str, str, str, str, str]] = field(default_factory=list)
+    # (code, name, study mode, exam subjects cell, raw first cell, 导师 cell)
+    directions: list[tuple[str, str, str, str, str, str]] = field(default_factory=list)
 
 
 def pool_clauses(note: str) -> dict[str, tuple[int, str]]:
@@ -80,7 +81,10 @@ class JnuCatalogHtml:
                     program = _Program(college, m.group(1), name, count, row_text(table, r))
                 elif program and (m := _DIRECTION_RE.match(first)):
                     subjects = next((v for v in vals[1:] if "①" in v), "")
-                    program.directions.append((m.group(1), m.group(3).strip(), m.group(2), subjects, first))
+                    advisors = vals[1] if len(vals) > 1 and "①" not in vals[1] else ""
+                    program.directions.append(
+                        (m.group(1), m.group(3).strip(), m.group(2), subjects, first, advisors)
+                    )
             self._flush(program, pools, ctx, facts)
         return facts
 
@@ -123,5 +127,6 @@ class JnuCatalogHtml:
                 subjects = split_subjects(text)
                 if subjects:
                     facts.subjects(ProgramRef(program.college, program.code, d_mode), subjects, evidence=text)
-        for code, name, d_mode, _, raw in program.directions:
-            facts.direction(ProgramRef(program.college, program.code, d_mode), code, name, evidence=raw)
+        for code, name, d_mode, _, raw, advisors in program.directions:
+            facts.direction(ProgramRef(program.college, program.code, d_mode), code, name, evidence=raw,
+                            advisors=advisors)

@@ -39,7 +39,7 @@ VALUE_FIELDS: dict[str, tuple[str, ...]] = {
     "score_lines": ("total", "politics", "foreign_lang", "subject1", "subject2"),
     "admission_stats": ("value", "pool_scope"),
     "exam_subjects": ("code", "name", "status"),
-    "directions": ("name",),
+    "directions": ("name", "advisors"),
 }
 OPTIONAL_FIELDS = frozenset({"politics", "foreign_lang", "subject1", "subject2"})
 _MODELS: dict[str, type[BaseModel]] = {

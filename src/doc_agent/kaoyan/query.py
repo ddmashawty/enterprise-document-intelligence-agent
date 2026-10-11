@@ -42,6 +42,10 @@ STAT_LABELS = {
 EXPLICIT_PUBLIC_KINDS = ("public_exam", "college_exam_plan", "available_exam")
 METHOD_RANK = {"manual_seed": 0, "seed_note_regex": 1, "rule": 2, "ocr": 3, "llm": 4}
 NOTES_SOURCE = "majors.csv 人工核对备注"
+ADVISORS_NOTE = (
+    "招生目录该方向所列导师，原样照录；目录列出不代表每位导师当年都有该专业（含专硕）名额，"
+    "库里没有导师的评价、主页或联系方式。只有暨大目录带导师列。"
+)
 PUBLIC_PLAN_RULE = (
     "统招取值：优先用明确的公开招考 / 学院统考计划 / 学校统考可用计划（逐条标口径）；"
     "否则用 目录拟招生人数 − 推免数（两者都是精确值）；推免为“≤N”上限时只能得出统招下限“≥X”，"
@@ -203,8 +207,9 @@ class KaoyanQuery:
                 kept = out[k]
                 kept["verified"] = bool(kept["verified"]) or bool(r["verified"])
                 kept["_methods"].add(r["extraction_method"])
-                if not kept.get("evidence_text") and r.get("evidence_text"):
-                    kept["evidence_text"] = r["evidence_text"]
+                for f in ("evidence_text", "advisors"):
+                    if not kept.get(f) and r.get(f):
+                        kept[f] = r[f]
                 continue
             out[k] = {**r, "verified": bool(r["verified"]), "_methods": {r["extraction_method"]}}
         return list(out.values())
@@ -326,7 +331,11 @@ class KaoyanQuery:
             if (r["year"], r["code"], r["name"]) in seen:
                 continue
             seen.add((r["year"], r["code"], r["name"]))
-            out.append({"year": r["year"], "code": r["code"], "name": r["name"], "source": self.source(r["source_doc_id"])})
+            item = {"year": r["year"], "code": r["code"], "name": r["name"], "source": self.source(r["source_doc_id"])}
+            if r.get("advisors"):
+                item["advisors"] = r["advisors"]
+                item["advisors_note"] = ADVISORS_NOTE
+            out.append(item)
         return out
 
     def admission_stats(self, program_id: str, year: int | None = None) -> list[dict[str, Any]]:

@@ -299,6 +299,7 @@ class FactSet(list[Fact]):
         evidence: str,
         note: str | None = None,
         year: int | None = None,
+        advisors: str | None = None,
     ) -> None:
         if not clean(name):
             return
@@ -307,7 +308,7 @@ class FactSet(list[Fact]):
             "direction",
             program,
             evidence,
-            {"code": code, "name": clean(name), "note": note},
+            {"code": code, "name": clean(name), "advisors": clean(advisors) or None, "note": note},
             year=year,
         )
 

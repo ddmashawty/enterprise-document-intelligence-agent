@@ -69,6 +69,7 @@ CREATE TABLE IF NOT EXISTS directions (
     year INTEGER,
     code TEXT,
     name TEXT NOT NULL,
+    advisors TEXT,
     note TEXT,
     source_doc_id TEXT REFERENCES documents(id),
     evidence_text TEXT,

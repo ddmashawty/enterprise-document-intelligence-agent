@@ -24,6 +24,7 @@ from doc_agent.kaoyan.extract.scnu_retest_html import ScnuRetestHtml
 from doc_agent.kaoyan.extract.scnu_zsml_html import ScnuZsmlHtml
 from doc_agent.kaoyan.extract.scut_plan_html import ScutPlan
 from doc_agent.kaoyan.extract.sysu_baseline_pdf import SysuBaselinePdf
+from doc_agent.kaoyan.query import KaoyanQuery
 from doc_agent.kaoyan.extract.sysu_retest_html import SysuRetestHtml
 from doc_agent.kaoyan.seed import seed_kaoyan
 
@@ -312,11 +313,13 @@ def test_old_db_gets_evidence_columns(tmp_path: Path) -> None:
     with sqlite3.connect(db) as conn:
         conn.execute("DROP VIEW IF EXISTS v_program_facts")
         conn.execute("ALTER TABLE directions DROP COLUMN evidence_text")
+        conn.execute("ALTER TABLE directions DROP COLUMN advisors")
         conn.execute("ALTER TABLE exam_subjects DROP COLUMN evidence_text")
     KaoyanStore(db)
     with sqlite3.connect(db) as conn:
         for table in ("directions", "exam_subjects"):
             assert "evidence_text" in {r[1] for r in conn.execute(f"PRAGMA table_info({table})")}
+        assert "advisors" in {r[1] for r in conn.execute("PRAGMA table_info(directions)")}
 
 
 # --- real bundle documents ---------------------------------------------------
@@ -395,6 +398,16 @@ def test_real_jnu_2027_catalog_pool(extracted: tuple[KaoyanStore, ExtractionRun]
     (row,) = _rule(store, "plans", "jnu-044-085410", "jnu-016", kind="catalog_total")
     assert row["value"] == 58
     assert len(_rule(store, "exam_subjects", None, "jnu-016", year=2027)) >= 44
+
+
+def test_real_jnu_catalog_keeps_advisor_cell(extracted: tuple[KaoyanStore, ExtractionRun]) -> None:
+    store, _ = extracted
+    rows = _rule(store, "directions", None, "jnu-016", year=2027)
+    assert rows and all(r["advisors"] and "①" not in r["advisors"] for r in rows)
+    facts = KaoyanQuery(store).program("jnu-010-085404")
+    (d,) = [d for d in facts["directions"] if d["year"] == 2027]
+    assert d["advisors"] and "不代表" in d["advisors_note"] and d["source"]["doc_id"] == "jnu-016"
+    assert all("advisors" not in d for d in KaoyanQuery(store).program("sysu-670-085404")["directions"])
 
 
 def test_real_jnu_tm_upper_bound(extracted: tuple[KaoyanStore, ExtractionRun]) -> None:

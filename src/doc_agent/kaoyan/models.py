@@ -84,6 +84,7 @@ class Direction(BaseModel):
     year: int | None = None
     code: str | None = None
     name: str
+    advisors: str | None = None
     note: str | None = None
     source_doc_id: str | None = None
     evidence_text: str | None = None
