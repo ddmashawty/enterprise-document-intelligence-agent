@@ -545,10 +545,10 @@
       "college": "研究生院（校级）",
       "title": "2025年各专业硕士研究生报名人数统计表",
       "publish_date": "2025-10-15",
-      "intake_year": 2026,
+      "intake_year": 2025,
       "doc_type": "applicant_stats",
       "format": "html",
-      "page_url": null,
+      "page_url": "http://yz.scnu.edu.cn/a/20251015/658.html",
       "attachment_url": null,
       "article_id": null,
       "local_path": "raw/scnu/scnu_2025_各专业报名人数统计_20251015.html",
@@ -558,7 +558,7 @@
       "has_table": true,
       "contains_personal_data": false,
       "commit_to_git": true,
-      "notes": "sources.md 未记录来源页 URL；sources.md 标注招生年份 2026。"
+      "notes": "页面在“往年数据”栏目，2025-10-15 08:48 发布，当天才开始 2026 年考试的网上报名，所以是 2025 年入学（2024 年 10 月报名）这一届的人数；同系列 2024 表 2024-09-02 发布，规律一致。原标注 2026 有误，2026-10-11 改为 2025。URL 取自本地页面的文章链接。"
     },
     {
       "doc_id": "scnu-018",

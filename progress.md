@@ -1,5 +1,61 @@
 # 进度日志
 
+## 会话：2026-10-11（P1 文档题审完并入评测集）
+
+- **状态：** 同分支 `p1/adversarial`（PR #6 追加提交）
+- **做了：** 开发助手初核、用户认可的 30 道文档题（`data/gold/docq_m1.json`）并入评测集；`--freeze-append doc-` 抽 9 道进 test，原 26 道不动，共 218 道（dev 103、test 35、adversarial 80）。doc-09/14/21 的易误伤串改成 `judge_flags`（L3 用）；#4 推免数 value_text 改回原文“≤19”（本机库 SQL 改 8 行）；`.gitignore` 加名单兜底规则和测试
+- **核对：** 抽查 21 条全部一致（开发助手初核，用户确认）；并入时修了文档题的年份标注（没提年份标 null）和 doc-19 的 metrics；新增 3 条 L0 已知失败（检测器漏判），基线已重写
+- **记录：** `docs/kaoyan_p1_notes.md`「文档题审完并入评测集」，`data/gold/README.md`「追加冻结」
+- **之后：** 跑 L2（BM25 进 CI、hybrid 本机）；box 上 `build_part2.py` 要同步名单兜底规则
+
+## 会话：2026-10-11（P1 文档题草稿和核对清单第一轮修订）
+
+- **状态：** 同分支 `p1/adversarial`（PR #6 追加提交）；草稿仍未审、不进评测集，`reviewed_by` / 核对结果留空
+- **做了：** 草稿 evidence 改成原文片段列表，评审说超出证据的几处都在原文找到并补上；doc-19 改结构化题；新增 8 道（不带校名 3、跨校 3、原文无答案 2）；must_include 支持备选和归一化（`metrics.normalize_text`），`drafts.check_item` 校验片段和 must_include 覆盖；核对清单加核对提示、按文件分组、两组交叉核对、第二轮抽样计划；L2 评测设计写进笔记
+- **隐私：** 27 份含个人信息文件 `git check-ignore` 全部忽略、无一跟踪（本机缺 1 份）；加测试防新名单漏忽略；核对截图规则加进 `.gitignore`
+- **待用户：** 5 道 `needs_user_check`（doc-08、09、19、27、29）和 21 条核对
+- **记录：** `docs/kaoyan_p1_notes.md`「文档题草稿第一轮修订」「L2 检索评测设计」
+
+## 会话：2026-10-11（P1 导师试点 + 核对清单 + 研招网）
+
+- **状态：** 同分支 `p1/adversarial`（PR #6 追加提交）
+- **做了：** 暨大目录“导师”列存进 `directions.advisors`，查询带口径说明；sup-10 加导师事实，L1 通过；`docs/audit/fact_audit_m1.md` 21 条人工核对清单（用户本人核）
+- **研招网：** 版权声明禁止未经同意的其他用途和镜像，目录多页要登录；不批量抽，等用户决定人工查询还是找华工学院页面
+- **记录：** `docs/kaoyan_p1_notes.md`「导师试点、人工核对清单、研招网」
+- **之后：** 用户定华工科目先不补；22 道文档题草稿 `data/gold/docq_m1_draft.json` 待用户逐题审（学费 5、同等学力 4、复试算分和形式 6、推免 2、其他 5；中大 8、暨大 5、华师 5、华工 4）
+
+## 会话：2026-10-11（P1 修 L1 四个失败）
+
+- **状态：** 同分支 `p1/adversarial`（PR #6 追加提交）
+- **做了：** 精简视图保留每条计划数和口径；多代码查询按代码分别调用；筛选返回 `excluded_programs`（原因 + 科目或计划依据）；新增 `exclude_subject` 反向筛选（工具、API、意图识别）
+- **结果：** L1 整题命中 98.4%（原 95.2%），L0 不变；已知失败清单只删不增。报告 `docs/eval/2026-10-11-l1-fixes.md`
+- **代价：** 全库精简视图输出约 5.2 万 → 8.6 万字符
+- **记录：** `docs/kaoyan_p1_notes.md`「L1 四个失败」
+
+## 会话：2026-10-11（P1 冻结 test + 已知失败清单）
+
+- **状态：** 同分支 `p1/adversarial`（PR #6 追加提交）
+- **做了：** 核第 12 题年份：scnu-017 是 2025 届报名数，`sources.json` 改年份，sup-12 改为不能算报录比；第 10 题按用户四条重写裁判要求；`--freeze-test` 按“学校 × 类别”分层抽 26 道 test 并冻结（`data/gold/split_m1.json`，记内容哈希）；评测默认不跑 test，跑也只报总分；baseline 加逐题 `known_failures`，CI 拦新失败，也拦“修好了还挂在清单上”
+- **核对：** 加题前后逐题比，原 148 道无一从对变错；比例门槛确实被加题拉低，逐题清单补上了这个口子
+- **结果：** 默认切分 162 道，L0 71.0%、L1 95.2%。报告 `docs/eval/2026-10-11-split.md`
+- **记录：** `docs/kaoyan_p1_notes.md`「冻结 test 和已知失败清单」、`data/gold/README.md`「test 切分」「回退门槛」
+
+## 会话：2026-10-11（P1 补充集 40 道）
+
+- **状态：** 同分支 `p1/adversarial`（PR #6 追加提交）
+- **做了：** 用户出 40 道补对抗集偏差，写成 `data/gold/supplement_m1.json`（`sup-*`）；`--adversarial` 改名 `--specs`，支持多个手写文件、`field=` 单科线、`sources` 纯文档出处；L1 认单科线；改 adv-pool-08 年份、adv-bd-05 补事实
+- **发现：** 7 道的期望和库里不符（学费、学制、导师、报名人数其实有原文；华工科目没取到），按原文改并写 `label_change`
+- **结果：** 188 道；L0 71.3%、L1 95.9%；新增 4 道 L1 真实失败留给 P3。报告 `docs/eval/2026-10-11.md`，基线已重写
+- **记录：** `docs/kaoyan_p1_notes.md`「补充集 40 道」、`data/gold/README.md`「补充集」
+
+## 会话：2026-10-10（P1 对抗集）
+
+- **状态：** 分支 `p1/adversarial`（叠在 `p1/v1-facts` 上，PR #5 待合并）
+- **做了：** `data/gold/adversarial_m1.json` 80 道（8 类陷阱 × 10），`build_gold_candidates.py --adversarial` 按键从库取值和来源（只认 verified，`checked` 需写原文依据）；报告、基线、CI 门槛按切分和陷阱分组
+- **审查：** 自查改 5 处意图；和用户定 4 条规则（不带姓名的逐人分数不算隐私、未发布年份可补数但标年份、超范围比较记 lookup、多年份记问的那年）
+- **结果：** 148 道。dev / unsplit 不变；对抗题 L0 62.5%、L1 96.4%，缺口清单留给 P3。报告 `docs/eval/2026-10-10-adversarial.md`
+- **记录：** `docs/kaoyan_p1_notes.md`「对抗集」、`data/gold/README.md`「对抗集」
+
 ## 会话：2026-10-10（P1 回填旧 18 题事实）
 
 - **状态：** 分支 `p1/v1-facts`（从 `main` `8bf7470`，PR #3、#4 已合并）

@@ -23,6 +23,14 @@ data/exports/
 data/uploads/
 *.db
 
+# Manual fact-audit screenshots stay local (they can show 🔒 roster pages)
+audit_screenshots/
+docs/audit/**/*.png
+docs/audit/**/*.jpg
+docs/audit/**/*.jpeg
+docs/audit/**/*.webp
+docs/audit/**/*.gif
+
 # Large public demo PDFs (re-download via scripts/download_demo_data.py)
 data/raw/**/*.pdf
 

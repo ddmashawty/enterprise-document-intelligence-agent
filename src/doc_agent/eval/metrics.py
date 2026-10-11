@@ -3,7 +3,49 @@
 from __future__ import annotations
 
 import json
+import re
+import unicodedata
+from decimal import Decimal
 from typing import Any
+
+_THOUSANDS = re.compile(r"(?<=\d),(?=\d{3}(?!\d))")
+_WAN = re.compile(r"(\d+(?:\.\d+)?)万")
+_COUNTED = re.compile(r"(?<![一二两三四五六七八九十百千万\d])([一二两三四五六七八九十])(?=[门年个科项名次人])")
+_CN_DIGIT = dict(zip("一二两三四五六七八九十", ("1", "2", "2", "3", "4", "5", "6", "7", "8", "9", "10")))
+_REPLACE = (("∶", ":"), ("、", ","), ("—", "-"), ("–", "-"), ("~", "-"), ("记入", "计入"))
+
+
+def _wan(match: re.Match) -> str:
+    value = Decimal(match.group(1)) * 10000
+    return str(int(value)) if value == value.to_integral_value() else match.group(0)
+
+
+def normalize_text(text: str) -> str:
+    """Canonical form for must_include matching: 2.5 万 / 25,000 / 25000 and 两门 / 2 门 compare equal.
+
+    Thousands separators go first, while ASCII commas are still distinguishable from list commas.
+    """
+    text = _THOUSANDS.sub("", text)
+    text = re.sub(r"\s+", "", unicodedata.normalize("NFKC", text))
+    for old, new in _REPLACE:
+        text = text.replace(old, new)
+    text = _COUNTED.sub(lambda m: _CN_DIGIT[m.group(1)], text)
+    return _WAN.sub(_wan, text)
+
+
+def contains(text: str, item: str | list[str]) -> bool:
+    """`item` is one string or a list of alternatives; any alternative counts."""
+    norm = normalize_text(text)
+    alternatives = item if isinstance(item, list) else [item]
+    return any(normalize_text(alt) in norm for alt in alternatives)
+
+
+def missing_items(text: str, must_include: list[str | list[str]]) -> list[str | list[str]]:
+    return [item for item in must_include if not contains(text, item)]
+
+
+def forbidden_items(text: str, must_not_include: list[str | list[str]]) -> list[str | list[str]]:
+    return [item for item in must_not_include if contains(text, item)]
 
 
 def predicted_operation(intent: dict[str, Any]) -> str:
@@ -36,7 +78,7 @@ def intent_fields(expected: dict[str, Any], predicted: dict[str, Any], expected_
     return fields
 
 
-_FACT_KEYS = ("lines", "score_lines", "plans", "admission_stats", "exam_subjects")
+_FACT_KEYS = ("lines", "score_lines", "plans", "admission_stats", "exam_subjects", "directions")
 
 
 def _walk_programs(data: Any):
@@ -50,12 +92,17 @@ def _walk_programs(data: Any):
             yield from _walk_programs(value)
 
 
-def _fact(table: str, pid: str, kind: Any, year: Any, value: Any, item: dict[str, Any]) -> dict[str, Any]:
+LINE_FIELDS = ("total", "politics", "foreign_lang", "subject1", "subject2")
+
+
+def _fact(table: str, pid: str, kind: Any, year: Any, value: Any, item: dict[str, Any],
+          field: str = "total") -> dict[str, Any]:
     return {
         "table": table,
         "program_id": pid,
         "kind": kind,
         "year": year,
+        "field": field,
         "value": value,
         "source_doc_id": (item.get("source") or {}).get("doc_id"),
     }
@@ -65,7 +112,9 @@ def tool_facts(outputs: list[str]) -> list[dict[str, Any]]:
     """Facts found in kaoyan tool outputs, keyed like `expected_facts`.
 
     get_score_lines names the score lines `lines`, search_programs names them `score_lines`.
-    Exam subjects become one fact per slot: kind `slot4`, value the subject code.
+    Each line yields its total and its single-subject lines (`field` politics, foreign_lang,
+    subject1, subject2). Exam subjects become one fact per slot: kind `slot4`, value the subject code.
+A direction with a 导师 cell becomes kind = direction code, value = the cell verbatim.
     """
     facts: list[dict[str, Any]] = []
     for output in outputs:
@@ -76,7 +125,10 @@ def tool_facts(outputs: list[str]) -> list[dict[str, Any]]:
         for program in _walk_programs(data):
             pid = program["program_id"]
             for line in (program.get("lines") or []) + (program.get("score_lines") or []):
-                facts.append(_fact("score_lines", pid, line.get("scope"), line.get("year"), line.get("total"), line))
+                for field in LINE_FIELDS:
+                    if line.get(field) is not None:
+                        facts.append(_fact("score_lines", pid, line.get("scope"), line.get("year"), line[field],
+                                           line, field))
             for table in ("plans", "admission_stats"):
                 for item in program.get(table) or []:
                     facts.append(_fact(table, pid, item.get("kind"), item.get("year"), item.get("value"), item))
@@ -84,13 +136,18 @@ def tool_facts(outputs: list[str]) -> list[dict[str, Any]]:
                 for subject in entry.get("subjects") or []:
                     facts.append(_fact("exam_subjects", pid, f"slot{subject.get('slot')}", entry.get("year"),
                                        subject.get("code"), entry))
+            for direction in program.get("directions") or []:
+                if direction.get("advisors"):
+                    facts.append(_fact("directions", pid, direction.get("code"), direction.get("year"),
+                                       direction["advisors"], direction))
     return facts
 
 
 def match_fact(expected: dict[str, Any], facts: list[dict[str, Any]]) -> tuple[bool, bool]:
     """(value found, found with the expected source document)."""
     key = ("table", "program_id", "kind", "year", "value")
-    hits = [f for f in facts if all(f[k] == expected[k] for k in key)]
+    field = expected.get("field", "total")
+    hits = [f for f in facts if all(f[k] == expected[k] for k in key) and f["field"] == field]
     return bool(hits), any(f["source_doc_id"] == expected.get("source_doc_id") for f in hits)
 
 

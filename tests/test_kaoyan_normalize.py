@@ -33,7 +33,7 @@ def test_parse_count_exact_upper_bound_and_pool() -> None:
     ub = parse_count("≤41")
     assert (ub.value, ub.is_upper_bound, ub.pool_scope) == (41, True, None)
     pool = parse_count("（0812合计≤19）")
-    assert (pool.value, pool.is_upper_bound, pool.pool_scope) == (19, True, "0812")
+    assert (pool.value, pool.is_upper_bound, pool.pool_scope, pool.text) == (19, True, "0812", "≤19")
     assert parse_count("(0812合计<=19)").pool_scope == "0812"
     assert parse_count("").is_empty
     assert parse_count("未知").is_empty

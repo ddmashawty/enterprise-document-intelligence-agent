@@ -97,6 +97,35 @@ def test_filter_408_fulltime_public_over_20(q: KaoyanQuery) -> None:
 def test_no_exam_program_is_excluded_from_408_filter(q: KaoyanQuery) -> None:
     r = q.search_programs(school="中大", code="083900", is_408=True)
     assert r["count"] == 0 and r["unknown"] == [] and r["excluded"] == 1
+    assert "不设初试科目" in r["excluded_programs"][0]["reasons"][0]
+
+
+def test_excluded_program_keeps_the_subjects_that_excluded_it(q: KaoyanQuery) -> None:
+    r = q.search_programs(school="中大", code="085400", is_408=True)
+    (out,) = r["excluded_programs"]
+    assert r["count"] == 0 and r["excluded"] == 1
+    assert out["program_id"] == "sysu-765-085400" and "884" in out["reasons"][0]
+    (grp,) = out["exam_subjects"]
+    assert [s["code"] for s in grp["subjects"]] == ["101", "204", "302", "884"]
+    assert grp["source"]["doc_id"]
+
+
+def test_exclude_subject_keeps_unknown_subjects_undecided(q: KaoyanQuery) -> None:
+    r = q.search_programs(exclude_subject="数学")
+    assert r["count"] == 0
+    assert all("数学" in " ".join(p["reasons"]) or "不设初试" in " ".join(p["reasons"]) for p in r["excluded_programs"])
+    assert "scut-cs-085404" in {p["program_id"] for p in r["unknown"]}
+    no_302 = q.search_programs(school="中大", code="085400", exclude_subject="302")
+    assert no_302["count"] == 0 and no_302["excluded"] == 1
+    assert q.search_programs(school="中大", code="085400", exclude_subject="408")["count"] == 1
+
+
+def test_compact_view_keeps_each_plan_with_its_label_and_source(q: KaoyanQuery) -> None:
+    r = q.search_programs(school="华师")
+    assert r["count"] > 6
+    plans = [p for prog in r["programs"] for p in prog["plans"]]
+    assert plans and all(p["label"] and p["year"] and p["source"]["doc_id"] for p in plans)
+    assert "definition" not in plans[0] and "evidence" not in plans[0]
 
 
 def test_college_alias_and_code_prefix(q: KaoyanQuery) -> None:

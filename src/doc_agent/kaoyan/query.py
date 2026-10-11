@@ -42,6 +42,10 @@ STAT_LABELS = {
 EXPLICIT_PUBLIC_KINDS = ("public_exam", "college_exam_plan", "available_exam")
 METHOD_RANK = {"manual_seed": 0, "seed_note_regex": 1, "rule": 2, "ocr": 3, "llm": 4}
 NOTES_SOURCE = "majors.csv 人工核对备注"
+ADVISORS_NOTE = (
+    "招生目录该方向所列导师，原样照录；目录列出不代表每位导师当年都有该专业（含专硕）名额，"
+    "库里没有导师的评价、主页或联系方式。只有暨大目录带导师列。"
+)
 PUBLIC_PLAN_RULE = (
     "统招取值：优先用明确的公开招考 / 学院统考计划 / 学校统考可用计划（逐条标口径）；"
     "否则用 目录拟招生人数 − 推免数（两者都是精确值）；推免为“≤N”上限时只能得出统招下限“≥X”，"
@@ -52,6 +56,11 @@ _EVIDENCE_CHARS = 160
 
 def _compact(text: str | None) -> str:
     return re.sub(r"\s+", "", str(text or ""))
+
+
+def _has_subject(group: dict[str, Any], keyword: str) -> bool:
+    kw = _compact(keyword)
+    return any(kw in (s["code"] or "") or kw in (s["name"] or "") for s in group["subjects"])
 
 
 def is_professional(code: str) -> bool:
@@ -198,8 +207,9 @@ class KaoyanQuery:
                 kept = out[k]
                 kept["verified"] = bool(kept["verified"]) or bool(r["verified"])
                 kept["_methods"].add(r["extraction_method"])
-                if not kept.get("evidence_text") and r.get("evidence_text"):
-                    kept["evidence_text"] = r["evidence_text"]
+                for f in ("evidence_text", "advisors"):
+                    if not kept.get(f) and r.get(f):
+                        kept[f] = r[f]
                 continue
             out[k] = {**r, "verified": bool(r["verified"]), "_methods": {r["extraction_method"]}}
         return list(out.values())
@@ -321,7 +331,11 @@ class KaoyanQuery:
             if (r["year"], r["code"], r["name"]) in seen:
                 continue
             seen.add((r["year"], r["code"], r["name"]))
-            out.append({"year": r["year"], "code": r["code"], "name": r["name"], "source": self.source(r["source_doc_id"])})
+            item = {"year": r["year"], "code": r["code"], "name": r["name"], "source": self.source(r["source_doc_id"])}
+            if r.get("advisors"):
+                item["advisors"] = r["advisors"]
+                item["advisors_note"] = ADVISORS_NOTE
+            out.append(item)
         return out
 
     def admission_stats(self, program_id: str, year: int | None = None) -> list[dict[str, Any]]:
@@ -443,7 +457,8 @@ class KaoyanQuery:
 
     @staticmethod
     def compact_facts(facts: dict[str, Any]) -> dict[str, Any]:
-        """Filter-result view: identity, 统招 candidates, latest subjects, notes."""
+        """Filter-result view: identity, every plan number with its 口径, 统招 candidates,
+        latest subjects, notes. Drops definitions and evidence text, never the label of a number."""
         def slim(src: dict[str, Any] | None) -> dict[str, Any] | None:
             return src and {k: src[k] for k in ("doc_id", "title", "url", "page", "year")}
 
@@ -451,6 +466,12 @@ class KaoyanQuery:
         keep = ("program_id", "school", "school_name", "college", "college_code", "code", "name",
                 "degree_type", "study_mode", "is_boundary", "public_plan_unknown", "notes")
         out = {k: facts[k] for k in keep}
+        plan_keys = ("kind", "label", "year", "value", "value_text", "upper_bound", "pool_scope", "note")
+        out["plans"] = [
+            {**{k: p[k] for k in plan_keys if p.get(k) is not None},
+             "source": p["source"] and {k: p["source"][k] for k in ("doc_id", "url", "page")}}
+            for p in facts["plans"]
+        ]
         out["public_plan"] = [{**e, "sources": [slim(s) for s in e["sources"]]} for e in facts["public_plan"]]
         out["subjects"] = subj and {
             **{k: subj[k] for k in ("year", "status", "codes", "is_408", "unknown_reason")},
@@ -470,6 +491,7 @@ class KaoyanQuery:
         degree_type: str | None = None,
         study_mode: str | None = None,
         exam_subject: str | None = None,
+        exclude_subject: str | None = None,
         is_408: bool | None = None,
         min_public_plan: int | None = None,
         year: int | None = None,
@@ -480,36 +502,49 @@ class KaoyanQuery:
         )
         matches: list[dict[str, Any]] = []
         unknown: list[dict[str, Any]] = []
-        excluded = 0
+        excluded: list[dict[str, Any]] = []
         for row in rows:
             facts = self.program_facts(row, year)
-            ok, why = True, []
-            if is_408 is not None or exam_subject:
+            ok, why, evidence = True, [], {}
+            if is_408 is not None or exam_subject or exclude_subject:
                 grp = self.latest_subjects(facts["exam_subjects"])
                 if grp is None or grp["status"] == "unknown":
                     why.append("初试科目未知：" + ((grp or {}).get("unknown_reason") or "库中没有初试科目"))
                 elif grp["status"] == "no_exam":
                     ok = False
+                    why.append(f"{grp['year']} 不设初试科目")
                 else:
                     if is_408 is not None and grp["is_408"] != is_408:
                         ok = False
-                    if exam_subject:
-                        kw = _compact(exam_subject)
-                        if not any(kw in (s["code"] or "") or kw in (s["name"] or "") for s in grp["subjects"]):
-                            ok = False
+                        why.append(f"{grp['year']} 初试科目 {grp['codes']}，{'不考' if is_408 else '考'} 408")
+                    if exam_subject and not _has_subject(grp, exam_subject):
+                        ok = False
+                        why.append(f"{grp['year']} 初试科目 {grp['codes']}，不含“{exam_subject}”")
+                    if exclude_subject and _has_subject(grp, exclude_subject):
+                        ok = False
+                        why.append(f"{grp['year']} 初试科目 {grp['codes']}，含“{exclude_subject}”")
+                if not ok:
+                    src = grp["source"] and {k: grp["source"][k] for k in ("doc_id", "title", "url", "page", "year")}
+                    evidence["exam_subjects"] = [
+                        {**{k: grp[k] for k in ("year", "status", "subjects", "codes")}, "source": src}
+                    ]
             if min_public_plan is not None and ok:
                 basis = self.public_plan_basis(facts["public_plan"])
                 if any(e["value"] >= min_public_plan for e in basis):
                     pass
                 elif any(not e["lower_bound"] for e in basis):
                     ok = False
+                    texts = "、".join(f"{e['year']} {e['label']} {e['text']}" for e in basis)
+                    why.append(f"统招 {texts}，不到 {min_public_plan}")
+                    evidence["public_plan"] = basis
                 elif basis:
                     lbs = "、".join(f"{e['year']} {e['text']}（{e['formula']}）" for e in basis)
                     why.append(f"推免数为“≤N”上限，统招只能得出下限 {lbs}，不能判断是否 ≥{min_public_plan}")
                 else:
                     why.append("统招取不到：" + "；".join(facts["public_plan_unknown"]))
             if not ok:
-                excluded += 1
+                ident = ("program_id", "school", "college", "code", "name", "degree_type", "study_mode")
+                excluded.append({**{k: facts[k] for k in ident}, "reasons": why, **evidence})
                 continue
             if why:
                 unknown.append({**self.compact_facts(facts), "reasons": why})
@@ -522,14 +557,15 @@ class KaoyanQuery:
                 for k, v in {
                     "school": school, "college": college, "code": code, "name_kw": name_kw,
                     "degree_type": degree_type, "study_mode": study_mode, "exam_subject": exam_subject,
-                    "is_408": is_408, "min_public_plan": min_public_plan, "year": year,
+                    "exclude_subject": exclude_subject, "is_408": is_408, "min_public_plan": min_public_plan, "year": year,
                 }.items()
                 if v not in (None, "")
             },
             "count": len(matches),
             "programs": matches if full else [self.compact_facts(f) for f in matches],
             "unknown": unknown,
-            "excluded": excluded,
+            "excluded": len(excluded),
+            "excluded_programs": excluded,
             "public_plan_rule": PUBLIC_PLAN_RULE if min_public_plan is not None else None,
             "scope_note": "数据范围：中大 / 华工 / 暨大 / 华师 的泛计算机类 37 个专业（种子包），范围外的专业库中没有记录。",
         }

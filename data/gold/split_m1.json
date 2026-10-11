@@ -1,0 +1,64 @@
+{
+  "frozen_at": "2026-10-11",
+  "rule": "30% of unsplit rows, stratified by school x category, seed 'kaoyan-test-m1'",
+  "excluded": {
+    "sup-07": "L1 修复目标：一句里两个代码被丢",
+    "sup-10": "导师试点会给它补事实",
+    "sup-29": "L1 修复目标：精简视图丢口径",
+    "sup-36": "L1 修复目标：不考数学的排除筛选"
+  },
+  "test": {
+    "rv-jnu-010-0812-score_line-2026": "e80c04c177ceb998",
+    "rv-jnu-010-081201-score_line-2026": "aa19c20a25a70be4",
+    "rv-jnu-010-081202-plan-2026": "f96b06d714f7ef6c",
+    "rv-jnu-010-0812Z3-plan-2026": "0f659ee0156d879f",
+    "rv-jnu-052-083900-plan-2027": "6bc03dd75501b922",
+    "rv-jnu-063-085410-pt-score_line-2026": "1345136be2e47edc",
+    "rv-scnu-019-081200-plan-2026": "689adbd3ab349b47",
+    "rv-scnu-019-085405-plan-2026": "f54d5fa080154f42",
+    "rv-scnu-019-085405-score_line-2026": "219ddb495a9a4a97",
+    "rv-scnu-041-081200-plan-2026": "a4b75682b70bf230",
+    "rv-scnu-041-085405-score_line-2026": "333263fdc2aa2a18",
+    "rv-scut-ft-140500-plan-2026": "7099ab62fe4c0c7f",
+    "rv-scut-sse-085405-score_line-2026": "e63912487176e843",
+    "rv-sysu-724-081200-score_line-2026": "1139449c3703d28f",
+    "rv-sysu-724-085410-score_line-2026": "57ff8219b1cde9d8",
+    "rv-sysu-771-081200-score_line-2026": "476dbe3a1504003b",
+    "sup-03": "6db6095eeec8824d",
+    "sup-06": "3615700ea600aea1",
+    "sup-09": "cfa81e7a61e5baf8",
+    "sup-12": "f9c67a91456b1de9",
+    "sup-19": "b0f12d14311b0ed2",
+    "sup-20": "7870e31a0daafe58",
+    "sup-22": "53f39156731b9563",
+    "sup-23": "ff28eb69b6a34570",
+    "sup-30": "4e8de52b25c37329",
+    "sup-40": "a28c4f981c3f6ed8",
+    "doc-02": "73fb86cd00fd3031",
+    "doc-04": "79cc1361bce75d94",
+    "doc-05": "5e3821e60f8ee47b",
+    "doc-11": "68a995eba1512e9a",
+    "doc-17": "aa1357b7440b9725",
+    "doc-20": "cb18301f29fcbfe7",
+    "doc-21": "4f1bb52481dcadc4",
+    "doc-25": "9dc7f1ab3fec277c",
+    "doc-27": "70f11e41ae888158"
+  },
+  "appended": {
+    "doc-": {
+      "frozen_at": "2026-10-11",
+      "rule": "30% of doc-* rows, stratified by question shape x bigram overlap, seed 'kaoyan-test-m1:doc-'",
+      "test": [
+        "doc-02",
+        "doc-04",
+        "doc-05",
+        "doc-11",
+        "doc-17",
+        "doc-20",
+        "doc-21",
+        "doc-25",
+        "doc-27"
+      ]
+    }
+  }
+}
