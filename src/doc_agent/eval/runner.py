@@ -21,24 +21,34 @@ Invoke = Callable[[str, dict[str, Any]], str]
 L0_FIELDS = ("schools", "codes", "year", "operation", "metrics", "privacy")
 
 
+HIDDEN_SPLIT = "test"
+
+
 def load_rows(path: Path, splits: set[str] | None = None) -> list[dict[str, Any]]:
+    """Rows of the given splits; by default every split except the frozen test split."""
     rows = [json.loads(line) for line in path.read_text(encoding="utf-8").splitlines() if line.strip()]
-    return [r for r in rows if not splits or r["split"] in splits]
+    if not splits:
+        return [r for r in rows if r["split"] != HIDDEN_SPLIT]
+    return [r for r in rows if r["split"] in splits]
 
 
 def _groups(per_row: list[dict[str, Any]], summarize: Callable[[list[dict[str, Any]]], dict[str, Any]]) -> dict:
-    """Overall summary plus one per split and one per adversarial trap."""
+    """Overall summary plus one per split and one per trap.
+
+    Test rows only count toward the totals: they get no trap group and no per-row entry,
+    so a report never shows which test question failed.
+    """
     by_split: dict[str, list] = {}
     by_trap: dict[str, list] = {}
     for r in per_row:
         by_split.setdefault(r["split"], []).append(r)
-        if r.get("trap"):
+        if r.get("trap") and r["split"] != HIDDEN_SPLIT:
             by_trap.setdefault(r["trap"], []).append(r)
     return {
         "summary": summarize(per_row),
         "by_split": {k: summarize(v) for k, v in sorted(by_split.items())},
         "by_trap": {k: summarize(v) for k, v in sorted(by_trap.items())},
-        "rows": per_row,
+        "rows": [r for r in per_row if r["split"] != HIDDEN_SPLIT],
     }
 
 
@@ -140,6 +150,45 @@ def regressions(current: dict[str, Any], baseline: dict[str, Any], max_drop: flo
     return out
 
 
+def known_failures(report: dict[str, Any]) -> dict[str, dict[str, list[str]]]:
+    """Per layer, each failing row id -> its wrong L0 fields or missing L1 facts."""
+    out: dict[str, dict[str, list[str]]] = {}
+    l0 = report.get("layers", {}).get("L0")
+    if l0:
+        out["L0"] = {r["id"]: sorted(k for k, ok in r["fields"].items() if not ok) for r in l0["rows"] if not r["exact"]}
+    l1 = report.get("layers", {}).get("L1")
+    if l1:
+        out["L1"] = {
+            r["id"]: sorted(
+                f"{c['program_id']} {c['kind']} {c['year']} {c.get('field', 'total')}={c['value']}"
+                for c in r["facts"] if not c["found"]
+            )
+            for r in l1["rows"] if r["status"] == "fail"
+        }
+    return out
+
+
+def failure_changes(current: dict[str, Any], known: dict[str, dict[str, list[str]]]) -> tuple[list[str], list[str]]:
+    """(new failures, listed failures that now pass) among the rows this report scored.
+
+    Compared per field / per fact, so the list neither hides a second bug in a failing
+    row nor keeps excusing a part that has been fixed.
+    """
+    now = known_failures(current)
+    new, fixed = [], []
+    for layer, rows in current.get("layers", {}).items():
+        scored = {r["id"] for r in rows["rows"]}
+        listed = known.get(layer, {})
+        failing = now.get(layer, {})
+        for rid in sorted(scored):
+            was, is_ = set(listed.get(rid, [])), set(failing.get(rid, []))
+            if is_ - was:
+                new.append(f"{layer} {rid}: {', '.join(sorted(is_ - was))}")
+            if was - is_:
+                fixed.append(f"{layer} {rid}: {', '.join(sorted(was - is_))}")
+    return new, fixed
+
+
 def _pct(value: float | None) -> str:
     return "—" if value is None else f"{value:.1%}"
 
@@ -161,10 +210,12 @@ def render_markdown(report: dict[str, Any]) -> str:
         f"# 考研评测报告 {meta['date']}",
         "",
         f"- commit：`{meta['commit']}`",
-        f"- 评测集：`{meta['gold']}`，切分 {meta['splits'] or '全部'}，{meta['rows']} 道",
+        f"- 评测集：`{meta['gold']}`，切分 {meta['splits'] or f'除 {HIDDEN_SPLIT} 外全部'}，{meta['rows']} 道",
         f"- 层：{', '.join(report['layers'])}（不调用 LLM）",
         "",
     ]
+    if HIDDEN_SPLIT in meta["splits"]:
+        lines += [f"{HIDDEN_SPLIT} 切分已冻结，只报总分，不列逐题结果，也不进陷阱分组。", ""]
     l0 = report["layers"].get("L0")
     if l0:
         s = l0["summary"]

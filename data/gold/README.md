@@ -6,19 +6,19 @@ K1 的 18 道验收题。已经被调过参，只作旧集合。`scripts/smoke_k
 
 ## `kaoyan_eval_v2.jsonl`
 
-一行一题，现在 188 道：
+一行一题，现在 188 道：dev 82、test 26、adversarial 80。
 
 - 18 道 `v1-*`：从上面迁过来，`split=dev`。`expected_facts` 和核对人来自 `v1_review.json`；v1-11（筛选，答案是派生差值）和 v1-14（范围内没有该专业）没有事实。
-- 50 道 `rv-*`：49 道从模板候选题核对后收进来，1 道是审查时手写补的（`origin=handwritten`），都是 `split=unsplit`，有核对人和依据。P1 按“学校 × 类别”抽 test 时再分成 dev / test。
+- 50 道 `rv-*`：49 道从模板候选题核对后收进来，1 道是审查时手写补的（`origin=handwritten`），有核对人和依据。按下面“test 切分”分进 dev / test。
 - 80 道 `adv-*`：手写对抗题，`split=adversarial`，8 类陷阱各 10 道，来自 `adversarial_m1.json`。
-- 40 道 `sup-*`：用户出题的补充集，`split=unsplit`，补对抗集的偏差（口语多意图、库外字段、政策口径、预测、错误前提、聚合、注入和路由），来自 `supplement_m1.json`。
+- 40 道 `sup-*`：用户出题的补充集，补对抗集的偏差（口语多意图、库外字段、政策口径、预测、错误前提、聚合、注入和路由），来自 `supplement_m1.json`，同样分进 dev / test。
 
 字段：
 
 | 字段 | 含义 |
 |---|---|
 | `id` | 稳定题号。迁移题是 `v1-01`，核对过的模板题是 `rv-…` |
-| `split` | `dev` / `test` / `adversarial`；`unsplit` 表示已核对、还没分 |
+| `split` | `dev` / `test` / `adversarial`。生成脚本里新写的行先标 `unsplit`，写文件时按 `split_m1.json` 落到 test 或 dev |
 | `category` | `score_line` `plan` `subjects` `tm` `compare` `filter` `narrative` `export` `multi_turn` `out_of_scope` `privacy` `unknown_data` `year_mismatch` `cross_attribution` |
 | `trap` | 只有手写题有。对抗集：`out_of_scope` `privacy` `year` `cross_school` `upper_bound` `pool` `boundary` `no_exam`；补充集：`colloquial` `missing_field` `policy` `prediction` `false_premise` `aggregate` `routing`。报告按它分组 |
 | `turns` | 多轮时只评最后一轮 |
@@ -92,6 +92,20 @@ python scripts/build_gold_candidates.py --specs   # 只替换 adv-* 和 sup-* �
 
 用户看完对抗集后出的 40 道，补它的偏差：华工、华师题少，lookup 占 72 道，没有口语、多意图、库外字段和政策口径。每题保留用户写的期望行为（`user_label`）；库里或原文和它不一致的，改了并在 `label_change` 写依据。
 
+**40 道里有 7 道的期望被原文推翻**（sup-02、08、09、10、12、21、29），说明这批题是对着库和原文逐题核过的，不是照出题人的印象收的：
+
+| 题 | 原期望 | 原文 / 库里实际 |
+|---|---|---|
+| sup-02 | 华工初试科目能答 | 计算机、软件两个学院 4 个专业的科目在库里都是未取得，改为 `unknown_data` |
+| sup-08 | 华师学费未知 | 2026 招生简章（scnu-030）第十一节有学费表 |
+| sup-09 | 华工学制、奖学金都未知 | 学费学制一览表（scut-042）有学制，招生章程（scut-047）有奖助种类，只有金额未知 |
+| sup-10 | 导师未知 | 暨大 2026、2027 目录都有“导师”列；另外三校目录没有 |
+| sup-12 | 能算报录比 | 报名人数表（scnu-017）是 2025 年入学那一届，和 2026 拟录取数不是同一届，不能相除 |
+| sup-21 | 同等学力只指向简章 | 暨大 2027 目录逐专业写了是否接收和加试科目 |
+| sup-29 | 两校 2027 目录都已出 | 暨大出了，华师只有 2027 推免目录 |
+
+sup-12 的核对顺带改了库：`sources.json` 里 scnu-017 的招生年份从 2026 改为 2025，并补上来源页。依据是它发在“往年数据”栏、发布时间 2025-10-15 08:48，正是 2026 届网报第一天；2024 年那张表发在 2024-09-02。
+
 | 类 | 题数 | 考什么 |
 |---|---|---|
 | `colloquial` | 7 | 简称（计科、软工、网安、SYSU）、一句话多问、同校两学院相减 |
@@ -101,3 +115,24 @@ python scripts/build_gold_candidates.py --specs   # 只替换 adv-* 和 sup-* �
 | `false_premise` | 6 | 错误数字、名称和代码不匹配、“今年”“明年”、口径不同的数直接比、追问来源 |
 | `aggregate` | 4 | 计数、排序、整校列表、反向筛选；未取得的要单列 |
 | `routing` | 4 | 提示注入、导出不留空、通用文档题、复习资料 |
+
+## test 切分
+
+2026-10-11 抽定并冻结，记录在 `split_m1.json`：
+
+- 从 90 道已核对的 `rv-*` 和 `sup-*` 里，按“学校 × 类别”分层抽 30%，共 26 道。学校取 `expected_intent.schools`，单校记该校，多校记 `multi`，没有学校记 `none`。每层按比例取整，剩下的名额给余数最大的层，层内顺序由固定种子 `kaoyan-test-m1` 的哈希决定，可复现。
+- 4 道不进 test，直接放 dev：sup-07、sup-29、sup-36 已被点名作 L1 修复目标，sup-10 要给导师试点补事实。对着它们改代码，再放进 test 就不干净了。
+- `v1-*` 已经调过参，`adv-*` 单独报告，都不参与抽样。
+- 文件里记了每道 test 题的内容哈希（不含 `split`）。改了 test 题，`tests/test_m0_gold.py` 会失败；确实要改，在 PR 里单独写理由，再跑 `scripts/build_gold_candidates.py --rehash-test`，它会列出改了哪几道。`--freeze-test` 只能跑一次，文件存在就拒绝。
+
+评测脚本默认不跑 test。要跑就显式加 `--split test`（只在里程碑验收时），报告只给 test 的总分：不列逐题结果，test 题也不进陷阱分组。冻结前已经看过逐题结果的题（补充集里 L0 没对上的那些）也在 test 里，只能以后不再逐题看；修 L0 时按能力修规则，不对着单题打补丁。
+
+## 回退门槛
+
+`docs/eval/baseline.json` 除了各分组的比例，还存一份已知失败清单 `known_failures`：L0 记每道失败题错的字段，L1 记每道失败题缺的事实。CI 用 `--baseline` 比较时：
+
+- 比例：总体、每个切分、每类陷阱各自下降超过 2 个百分点就失败；
+- 逐题：清单外的题失败，或清单里的题多错了一个字段、多缺了一条事实，都算新失败；
+- 清单里的题修好了（整题或其中一个字段）也让 CI 失败，提示重写基线。这样清单只会在有人主动重写时缩小，不会留着过期条目替以后的回退打掩护。
+
+`--write-baseline` 遇到清单要新增条目时会拒绝写入，除非加 `--accept-new-failures`，新增的条目要在 PR 里列出来。

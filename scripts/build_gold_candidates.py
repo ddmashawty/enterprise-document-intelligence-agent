@@ -10,11 +10,16 @@ plan question per program, capped at 60, from the local kaoyan.db.
 accepted and edited candidates listed in data/gold/review_m0.json.
 --specs replaces the handwritten rows (adv-* from adversarial_m1.json, sup-* from
 supplement_m1.json), reading each fact's value and source from verified rows of the kaoyan DB.
+--freeze-test draws the test split once (30% of the unsplit rows, stratified by school x
+category) into data/gold/split_m1.json; every later write puts those ids in test and the
+other unsplit rows in dev. --rehash-test re-records the frozen rows after a deliberate edit.
 """
 
 from __future__ import annotations
 
 import argparse
+import datetime as dt
+import hashlib
 import json
 import re
 import sqlite3
@@ -30,8 +35,18 @@ V1_REVIEW = ROOT / "data" / "gold" / "v1_review.json"
 ADVERSARIAL = ROOT / "data" / "gold" / "adversarial_m1.json"
 SUPPLEMENT = ROOT / "data" / "gold" / "supplement_m1.json"
 SPECS = (ADVERSARIAL, SUPPLEMENT)
+SPLIT = ROOT / "data" / "gold" / "split_m1.json"
 DB_PATH = ROOT / "data" / "kaoyan.db"
 CANDIDATE_CAP = 60
+TEST_SHARE = 0.3
+TEST_SEED = "kaoyan-test-m1"
+# Rows already named as fix targets; tuning against them would leak into test.
+TEST_EXCLUDE = {
+    "sup-07": "L1 修复目标：一句里两个代码被丢",
+    "sup-10": "导师试点会给它补事实",
+    "sup-29": "L1 修复目标：精简视图丢口径",
+    "sup-36": "L1 修复目标：不考数学的排除筛选",
+}
 
 _SCHOOLS = (
     ("华南师范大学", "scnu"),
@@ -155,6 +170,79 @@ def read_jsonl(path: Path) -> list[dict]:
     return [json.loads(line) for line in path.read_text(encoding="utf-8").splitlines() if line.strip()]
 
 
+def row_digest(row: dict) -> str:
+    body = {k: v for k, v in row.items() if k != "split"}
+    return hashlib.sha256(json.dumps(body, ensure_ascii=False, sort_keys=True).encode()).hexdigest()[:16]
+
+
+def stratum(row: dict) -> str:
+    schools = row["expected_intent"]["schools"]
+    school = schools[0] if len(schools) == 1 else ("multi" if schools else "none")
+    return f"{school}/{row['category']}"
+
+
+def draw_test(rows: list[dict], exclude: set[str], share: float = TEST_SHARE, seed: str = TEST_SEED) -> list[str]:
+    """Proportional stratified sample; leftover seats go to the largest remainders."""
+    strata: dict[str, list[str]] = {}
+    for r in rows:
+        if r["split"] == "unsplit" and r["id"] not in exclude:
+            strata.setdefault(stratum(r), []).append(r["id"])
+
+    def order(key: str) -> str:
+        return hashlib.sha256(f"{seed}:{key}".encode()).hexdigest()
+
+    quota = {k: share * len(ids) for k, ids in strata.items()}
+    take = {k: int(q) for k, q in quota.items()}
+    target = round(share * sum(len(ids) for ids in strata.values()))
+    for k in sorted(strata, key=lambda k: (take[k] - quota[k], order(k)))[: target - sum(take.values())]:
+        take[k] += 1
+    return sorted(i for k, ids in strata.items() for i in sorted(ids, key=order)[: take[k]])
+
+
+def assign_splits(rows: list[dict]) -> list[dict]:
+    if not SPLIT.exists():
+        return rows
+    frozen = json.loads(SPLIT.read_text(encoding="utf-8"))["test"]
+    for r in rows:
+        if r["id"] in frozen:
+            r["split"] = "test"
+        elif r["split"] == "test":
+            raise SystemExit(f"{r['id']}: split=test but not in {SPLIT.name}; the test split is frozen")
+        elif r["split"] == "unsplit":
+            r["split"] = "dev"
+    return rows
+
+
+def write_eval(rows: list[dict]) -> None:
+    write_jsonl(EVAL_V2, assign_splits(rows))
+
+
+def freeze_test() -> list[str]:
+    if SPLIT.exists():
+        raise SystemExit(f"{SPLIT.relative_to(ROOT)} exists; the test split is drawn only once")
+    rows = read_jsonl(EVAL_V2)
+    ids = draw_test(rows, set(TEST_EXCLUDE))
+    by_id = {r["id"]: r for r in rows}
+    payload = {
+        "frozen_at": dt.date.today().isoformat(),
+        "rule": f"{TEST_SHARE:.0%} of unsplit rows, stratified by school x category, seed {TEST_SEED!r}",
+        "excluded": TEST_EXCLUDE,
+        "test": {i: row_digest(by_id[i]) for i in ids},
+    }
+    SPLIT.write_text(json.dumps(payload, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+    write_eval(rows)
+    return ids
+
+
+def rehash_test() -> list[str]:
+    payload = json.loads(SPLIT.read_text(encoding="utf-8"))
+    by_id = {r["id"]: r for r in read_jsonl(EVAL_V2)}
+    changed = [i for i, old in payload["test"].items() if row_digest(by_id[i]) != old]
+    payload["test"] = {i: row_digest(by_id[i]) for i in payload["test"]}
+    SPLIT.write_text(json.dumps(payload, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+    return changed
+
+
 def apply_v1_review(row: dict, decision: dict, reviewer: str, reviewed_at: str) -> dict:
     facts = decision.get("expected_facts") or []
     row["expected_facts"] = facts
@@ -178,7 +266,7 @@ def migrate_v1() -> list[dict]:
             for r in rows
         ]
     kept = [r for r in read_jsonl(EVAL_V2) if not r["id"].startswith("v1-")]
-    write_jsonl(EVAL_V2, rows + kept)
+    write_eval(rows + kept)
     return rows
 
 
@@ -225,7 +313,7 @@ def apply_review() -> list[dict]:
     ]
     rows += [addition_row(a, review["reviewer"], review["reviewed_at"]) for a in review.get("additions") or []]
     kept = [r for r in read_jsonl(EVAL_V2) if not r["id"].startswith("rv-")]
-    write_jsonl(EVAL_V2, kept + rows)
+    write_eval(kept + rows)
     return rows
 
 
@@ -322,7 +410,7 @@ def build_specs(db_path: Path = DB_PATH) -> dict[str, int]:
             counts[path.name] = len(new)
     finally:
         conn.close()
-    write_jsonl(EVAL_V2, rows)
+    write_eval(rows)
     return counts
 
 
@@ -504,9 +592,19 @@ def main() -> int:
     parser.add_argument("--apply-review", action="store_true", help="only merge review_m0.json into the eval file")
     parser.add_argument("--specs", action="store_true",
                         help="only rebuild handwritten rows (adversarial_m1.json, supplement_m1.json)")
+    parser.add_argument("--freeze-test", action="store_true", help="draw and freeze the test split (once)")
+    parser.add_argument("--rehash-test", action="store_true",
+                        help="re-record frozen test rows after a deliberate edit; lists the changed ids")
     parser.add_argument("--db", default=str(DB_PATH))
     args = parser.parse_args()
 
+    if args.freeze_test:
+        ids = freeze_test()
+        print(f"froze {len(ids)} test rows in {SPLIT.relative_to(ROOT)}")
+        return 0
+    if args.rehash_test:
+        print("changed test rows:", ", ".join(rehash_test()) or "none")
+        return 0
     if args.specs:
         for name, count in build_specs(Path(args.db)).items():
             print(f"wrote {count} rows from {name} to {EVAL_V2.relative_to(ROOT)}")

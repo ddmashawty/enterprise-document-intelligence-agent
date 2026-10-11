@@ -123,6 +123,41 @@ def test_regressions_check_each_trap():
     assert runner.regressions(now, base, 0.02) == ["L0[privacy].exact: 50.00% -> 40.00%"]
 
 
+def test_test_split_is_skipped_by_default_and_reported_as_totals_only(tmp_path):
+    gold = tmp_path / "gold.jsonl"
+    rows = [
+        {"id": "d", "split": "dev", "trap": "", "turns": ["中大 085400 2026 复试线"],
+         "expected_intent": {"operation": "lookup", "metrics": ["score_line"], "schools": ["sysu"],
+                             "codes": ["085400"], "year": 2026}},
+        {"id": "t", "split": "test", "trap": "colloquial", "turns": ["华工今年招几个"],
+         "expected_intent": {"operation": "lookup", "metrics": ["plan"], "schools": ["scnu"],
+                             "codes": [], "year": None}},
+    ]
+    gold.write_text("".join(json.dumps(r, ensure_ascii=False) + "\n" for r in rows), encoding="utf-8")
+    assert [r["id"] for r in runner.load_rows(gold)] == ["d"]
+    report = runner.run_l0(runner.load_rows(gold, {"dev", "test"}))
+    assert report["summary"]["rows"] == 2
+    assert report["by_split"]["test"]["rows"] == 1
+    assert [r["id"] for r in report["rows"]] == ["d"]
+    assert report["by_trap"] == {}
+
+
+def _l0_report(fields_by_id):
+    rows = [{"id": i, "fields": f, "exact": all(f.values())} for i, f in fields_by_id.items()]
+    return {"layers": {"L0": {"rows": rows}}}
+
+
+def test_known_failures_gate_new_and_fixed_parts_of_a_row():
+    known = runner.known_failures(_l0_report({"a": {"codes": False, "year": False}, "b": {"codes": True}}))
+    assert known == {"L0": {"a": ["codes", "year"]}}
+    now = _l0_report({"a": {"codes": False, "year": True}, "b": {"codes": False}, "c": {"codes": True}})
+    new, fixed = runner.failure_changes(now, known)
+    assert new == ["L0 b: codes"]
+    assert fixed == ["L0 a: year"]
+    unscored = runner.failure_changes(_l0_report({"b": {"codes": True}}), known)
+    assert unscored == ([], [])
+
+
 def test_l0_runs_on_the_eval_set_without_a_database():
     report = runner.run_l0(runner.load_rows(GOLD))
     assert report["summary"]["rows"] == len(runner.load_rows(GOLD))
