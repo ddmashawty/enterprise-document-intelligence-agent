@@ -9,13 +9,7 @@ from rank_bm25 import BM25Okapi
 from doc_agent.config import Settings, get_settings
 from doc_agent.ingest.chunking import CHUNK_META_FIELDS, TextChunk
 from doc_agent.rag.embeddings import Hit, get_remote_embeddings
-from doc_agent.rag.query_expand import (
-    expand_queries,
-    infer_doc_name,
-    infer_school,
-    kaoyan_prior,
-    keyword_boost,
-)
+from doc_agent.rag.query_expand import expand_queries, infer_school, kaoyan_prior, keyword_boost
 
 
 def _tokenize(text: str) -> list[str]:
@@ -52,15 +46,10 @@ def _matches(meta: dict[str, Any], doc_name: str | None, filters: dict[str, Any]
 
 
 class DocumentStore:
-    """Phase-1 store: BM25 always; Chroma dense vectors when remote embedding configured.
+    """The 考研 index: BM25 always; Chroma dense vectors when remote embedding configured."""
 
-    ``profile="kaoyan"`` points at the 考研 index (own chroma dir / collection) and
-    switches query expansion to the 考研 rules.
-    """
-
-    def __init__(self, settings: Settings | None = None, profile: str = "enterprise"):
-        self.profile = profile
-        self.settings = (settings or get_settings()).for_profile(profile)
+    def __init__(self, settings: Settings | None = None):
+        self.settings = settings or get_settings()
         self.meta_path = self.settings.chroma_path / "chunks.jsonl"
         self.bm25_path = self.settings.chroma_path / "bm25_corpus.json"
         self.settings.chroma_path.mkdir(parents=True, exist_ok=True)
@@ -196,23 +185,18 @@ class DocumentStore:
         doc_type: str | None = None,
     ) -> list[Hit]:
         """Hybrid search. ``school`` / ``year`` / ``doc_type`` filter on chunk metadata;
-        in the kaoyan profile a query naming exactly one school is pinned to it."""
+        a query naming exactly one school is pinned to it."""
         k = top_k or self.settings.top_k
         if not self._chunks:
             return []
 
-        if self.profile == "enterprise":
-            doc_filter = doc_name or infer_doc_name(
-                query, [d["doc_name"] for d in self.list_documents()]
-            )
-        else:
-            doc_filter = doc_name
-            school = school or infer_school(query)
+        doc_filter = doc_name
+        school = school or infer_school(query)
         filters = _normalize_filters(school, year, doc_type)
-        queries = expand_queries(query, profile=self.profile)
+        queries = expand_queries(query)
         # name-list chunks repeat program codes on every row; a wider pool lets the
         # metadata priors below reach the documents that actually answer the query
-        pool = max(k * 4, 20) if self.profile == "enterprise" else max(k * 8, 60)
+        pool = max(k * 8, 60)
         fused: dict[str, dict[str, Any]] = {}
 
         embedder = get_remote_embeddings(self.settings)
@@ -229,9 +213,8 @@ class DocumentStore:
             return []
 
         for item in fused.values():
-            item["score"] += keyword_boost(query, item["hit"].text, profile=self.profile)
-            if self.profile == "kaoyan":
-                item["score"] *= kaoyan_prior(query, item["hit"].metadata)
+            item["score"] += keyword_boost(query, item["hit"].text)
+            item["score"] *= kaoyan_prior(query, item["hit"].metadata)
 
         ranked = sorted(fused.values(), key=lambda x: x["score"], reverse=True)[:k]
         out: list[Hit] = []
@@ -376,18 +359,17 @@ class DocumentStore:
         return "bm25"
 
 
-_stores: dict[tuple[str, str, str], DocumentStore] = {}
+_stores: dict[tuple[str, str], DocumentStore] = {}
 
 
-def get_store(settings: Settings | None = None, profile: str = "enterprise") -> DocumentStore:
-    """Cached store per (profile, chroma dir, collection); default is the enterprise index."""
-    s = (settings or get_settings()).for_profile(profile)
-    key = (profile, str(s.chroma_path), s.collection_name)
+def get_store(settings: Settings | None = None) -> DocumentStore:
+    """Cached store per (chroma dir, collection)."""
+    s = settings or get_settings()
+    key = (str(s.chroma_path), s.collection_name)
     if key not in _stores:
-        _stores[key] = DocumentStore(settings or get_settings(), profile=profile)
+        _stores[key] = DocumentStore(s)
     return _stores[key]
 
 
-def reset_store(profile: str | None = None) -> None:
-    for key in [k for k in _stores if profile is None or k[0] == profile]:
-        del _stores[key]
+def reset_store() -> None:
+    _stores.clear()

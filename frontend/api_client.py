@@ -128,14 +128,6 @@ class DocAgentClient:
     def get_session(self, session_id: str) -> dict[str, Any]:
         return self._request("GET", f"/v1/sessions/{session_id}", timeout=15)
 
-    def ingest(self, paths: list[str], *, reindex: bool = False) -> dict[str, Any]:
-        return self._request(
-            "POST",
-            "/v1/ingest",
-            json={"paths": paths, "reindex": reindex},
-            timeout=300,
-        )
-
     def list_programs(self, **filters: Any) -> dict[str, Any]:
         """GET /v1/programs; filters as in the API (school, code, is_408, min_public_plan, year, ...)."""
         return self._request("GET", "/v1/programs", params=_params(filters), timeout=30)

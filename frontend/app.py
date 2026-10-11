@@ -12,7 +12,6 @@ if str(ROOT) not in sys.path:
 
 from frontend.api_client import ApiError, DocAgentClient
 from frontend.components.chat_panel import render_chat
-from frontend.components.ingest_panel import render_ingest
 from frontend.components.programs_panel import render_programs
 from frontend.components.tasks_panel import render_tasks
 
@@ -36,13 +35,6 @@ DEMO_QUESTIONS = [
     "中大电子与通信工程学院 085400 的人工智能方向考 408 吗？",
     "帮我查华工计算机学院拟录取名单里有没有某某某",
     "把四校 085404 的复试线和计划导出 Excel",
-]
-
-# 通用文档模式 (the original enterprise demo corpus under data/raw).
-GENERIC_QUESTIONS = [
-    "演示产品手册里 TopK 和切片大小分别是多少？",
-    "保密等级分为哪几级？",
-    "对比演示产品参数手册和演示企业文档管理制度的要点",
 ]
 
 
@@ -132,11 +124,6 @@ def _demo_tab() -> None:
         if st.button(f"{i}. {question}", key=f"demo-{i}", use_container_width=True):
             st.session_state.draft_question = question
             st.rerun()
-    with st.expander("通用文档模式（企业演示语料 data/raw）"):
-        for i, question in enumerate(GENERIC_QUESTIONS, start=1):
-            if st.button(question, key=f"generic-{i}", use_container_width=True):
-                st.session_state.draft_question = question
-                st.rerun()
 
 
 def main() -> None:
@@ -156,7 +143,7 @@ def main() -> None:
     if notice:
         st.info(notice)
 
-    tab_chat, tab_programs, tab_kb, tab_tasks, tab_demo = st.tabs(["对话", "专业筛选", "知识库", "任务中心", "演示剧本"])
+    tab_chat, tab_programs, tab_tasks, tab_demo = st.tabs(["对话", "专业筛选", "任务中心", "演示剧本"])
     with tab_chat:
         render_chat(
             client,
@@ -165,8 +152,6 @@ def main() -> None:
         )
     with tab_programs:
         render_programs(client)
-    with tab_kb:
-        render_ingest(client)
     with tab_tasks:
         render_tasks(client)
     with tab_demo:

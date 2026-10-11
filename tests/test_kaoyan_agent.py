@@ -8,7 +8,7 @@ from typing import Any
 import pytest
 from langchain_core.messages import AIMessage
 
-from doc_agent.agent import nodes
+from doc_agent.agent import kaoyan_flow, nodes
 from doc_agent.agent.graph import run_agent
 from doc_agent.kaoyan.db import KaoyanStore
 from doc_agent.tools import export as export_mod
@@ -118,7 +118,12 @@ def test_smoke_check_and_summary() -> None:
     assert smoke.summarize([ok, {**bad, "group": "privacy"}])["accepted"] is False
 
 
-def test_enterprise_question_keeps_old_path(monkeypatch: pytest.MonkeyPatch) -> None:
+def _no_llm():
+    raise AssertionError("direct replies must not call the LLM")
+
+
+@pytest.mark.parametrize("question", ["你好", "茅台和五粮液2024年营收对比"])
+def test_off_topic_questions_are_refused_without_llm(monkeypatch: pytest.MonkeyPatch, question: str) -> None:
     called = {"available": 0}
 
     def available() -> bool:
@@ -126,7 +131,14 @@ def test_enterprise_question_keeps_old_path(monkeypatch: pytest.MonkeyPatch) -> 
         return True
 
     monkeypatch.setattr(ky, "kaoyan_available", available)
-    monkeypatch.setattr(nodes, "get_chat_model", lambda: FakeModel('{"route": "direct", "plan": ["寒暄"]}'))
-    out = nodes.plan_node({"user_goal": "你好", "session_context": ""})  # type: ignore[typeddict-item]
-    assert out["route"] == "direct" and out["intent"]["is_kaoyan"] is False
+    monkeypatch.setattr(nodes, "get_chat_model", _no_llm)
+    r = run_agent(question, persist=False)
+    assert r["answer"] == kaoyan_flow.OUT_OF_SCOPE_REPLY and r["trace"] == []
     assert called["available"] == 0
+
+
+def test_kaoyan_question_without_db_says_so(monkeypatch: pytest.MonkeyPatch) -> None:
+    monkeypatch.setattr(ky, "kaoyan_available", lambda: False)
+    monkeypatch.setattr(nodes, "get_chat_model", _no_llm)
+    r = run_agent("中大 085404 复试线多少？", persist=False)
+    assert r["answer"] == kaoyan_flow.UNAVAILABLE_REPLY and r["intent"]["is_kaoyan"] is True

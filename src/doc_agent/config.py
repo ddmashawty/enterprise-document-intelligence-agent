@@ -24,17 +24,13 @@ class Settings(BaseSettings):
     embedding_model: str = "qwen3-embedding:0.6b"
     embedding_batch_size: int = 8
 
-    chroma_dir: str = "data/chroma"
-    raw_dir: str = "data/raw"
     export_dir: str = "data/exports"
     memory_db: str = "data/memory.db"
-    collection_name: str = "enterprise_docs"
 
     kaoyan_db: str = "data/kaoyan.db"
     kaoyan_data_dir: str = "data/kaoyan"
     kaoyan_chroma_dir: str = "data/chroma_kaoyan"
     kaoyan_collection: str = "kaoyan_docs"
-    rag_profile: str = "enterprise"
     ocr_backend: str = "none"
     ocr_cache_dir: str = "data/kaoyan/ocr_cache"
     vision_base_url: str = ""
@@ -69,11 +65,11 @@ class Settings(BaseSettings):
 
     @property
     def chroma_path(self) -> Path:
-        return self.resolve(self.chroma_dir)
+        return self.resolve(self.kaoyan_chroma_dir)
 
     @property
-    def raw_path(self) -> Path:
-        return self.resolve(self.raw_dir)
+    def collection_name(self) -> str:
+        return self.kaoyan_collection
 
     @property
     def export_path(self) -> Path:
@@ -103,16 +99,6 @@ class Settings(BaseSettings):
     def crawl_user_agent_full(self) -> str:
         contact = self.crawl_contact.strip()
         return f"{self.crawl_user_agent} ({contact})" if contact else self.crawl_user_agent
-
-    def for_profile(self, profile: str) -> Settings:
-        """Settings whose chroma_dir / collection_name point at the given index."""
-        if profile == "enterprise":
-            return self
-        if profile == "kaoyan":
-            return self.model_copy(
-                update={"chroma_dir": self.kaoyan_chroma_dir, "collection_name": self.kaoyan_collection}
-            )
-        raise ValueError(f"Unknown RAG profile: {profile!r} (expected 'enterprise' or 'kaoyan')")
 
     @property
     def embedding_enabled(self) -> bool:

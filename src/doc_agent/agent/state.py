@@ -18,7 +18,6 @@ class AgentState(TypedDict):
     reflection: str
     should_retry: bool
     retry_hint: str
-    session_context: str
     iteration: int
     final_answer: str
     status: str

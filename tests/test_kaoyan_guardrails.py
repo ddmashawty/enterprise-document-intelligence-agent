@@ -58,7 +58,7 @@ def test_detect_privacy() -> None:
 
 
 @pytest.mark.parametrize("question", ["茅台和五粮液2024年营收对比", "公司差旅报销标准是什么", "导出茅台年报摘要为Excel"])
-def test_enterprise_questions_are_not_kaoyan(question: str) -> None:
+def test_off_topic_questions_are_not_kaoyan(question: str) -> None:
     assert not detect_kaoyan_intent(question)["is_kaoyan"]
 
 

@@ -27,11 +27,19 @@ _EVIDENCE_BUDGET = 28000
 _RAG_SNIPPETS = 6
 PRIVACY_NOTICE = "按隐私规则，不能提供名单中的个人信息（姓名、考生编号、个人成绩），只能给统计数字。"
 UNSUPPORTED_NOTE = "（注：部分数字在官方资料证据中找不到，已标为“依据不足”。）"
+OUT_OF_SCOPE_REPLY = (
+    "我只回答广东四校（中山大学、华南理工大学、暨南大学、华南师范大学）计算机类硕士招生的问题，"
+    "比如招生计划、复试线、初试科目、推免人数。请换一个考研相关的问题。"
+)
+UNAVAILABLE_REPLY = (
+    "考研结构化库还没建好，暂时答不了。"
+    "请先运行 scripts/seed_kaoyan.py 和 scripts/extract_kaoyan.py 建库。"
+)
 
 
-def is_kaoyan(state: dict[str, Any]) -> bool:
-    intent = state.get("intent") or {}
-    return bool(intent.get("is_kaoyan") and intent.get("available"))
+def direct_reply(intent: dict[str, Any]) -> str:
+    """Fixed answer for questions that never reach the tools: off-topic, or the 考研 DB is missing."""
+    return UNAVAILABLE_REPLY if intent.get("is_kaoyan") else OUT_OF_SCOPE_REPLY
 
 
 def plan_steps(intent: dict[str, Any]) -> list[str]:

@@ -56,17 +56,17 @@ def ingest_kaoyan(
     paths: list[str | Path] | None = None,
     reindex: bool = False,
 ) -> dict[str, Any]:
-    """Index bundle files (default ``<kaoyan_data_dir>/raw``) into the kaoyan profile store.
+    """Index bundle files (default ``<kaoyan_data_dir>/raw``) into the 考研 store.
 
     Personal-data files are redacted by ``load_document`` and their chunks carry
     ``redacted=True``; tables are chunked by rows with caption + header repeated.
     """
     s = settings or get_settings()
-    store = get_store(s, profile="kaoyan")
+    store = get_store(s)
     if reindex:
         store.clear()
-        reset_store("kaoyan")
-        store = get_store(s, profile="kaoyan")
+        reset_store()
+        store = get_store(s)
 
     data_dir = s.kaoyan_data_path
     listed = source_documents(data_dir)
@@ -118,7 +118,6 @@ def ingest_kaoyan(
 
     added = store.upsert_chunks(all_chunks, reindex=False)
     return {
-        "profile": "kaoyan",
         "docs_indexed": docs_ok,
         "docs_failed": docs_failed,
         "docs_needs_ocr": docs_needs_ocr,

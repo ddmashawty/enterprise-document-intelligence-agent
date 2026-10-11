@@ -36,7 +36,7 @@ class TextChunk:
     redacted: bool = False
 
     def metadata(self) -> dict[str, Any]:
-        """Non-empty retrieval metadata (empty for enterprise chunks)."""
+        """Non-empty retrieval metadata."""
         return {k: v for k in CHUNK_META_FIELDS if (v := getattr(self, k))}
 
 

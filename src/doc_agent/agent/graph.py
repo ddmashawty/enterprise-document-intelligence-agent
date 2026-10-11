@@ -42,23 +42,6 @@ def get_graph():
     return build_graph()
 
 
-def _format_session_context(session_id: str) -> str:
-    mem = get_session_memory()
-    turns = mem.history(session_id, limit=6)
-    if not turns:
-        # fall back to durable turns if process restarted
-        turns = get_task_store().session_history(session_id, limit=6)
-        turns = [{"role": t["role"], "content": t["content"]} for t in turns]
-    if not turns:
-        return ""
-    lines = []
-    for t in turns:
-        role = t.get("role", "")
-        content = (t.get("content") or "").replace("\n", " ")[:240]
-        lines.append(f"- {role}: {content}")
-    return "\n".join(lines)
-
-
 def token_usage(messages: list) -> dict[str, int]:
     """Sum LangChain usage_metadata. Messages without usage count as zero."""
     prompt = completion = calls = 0
@@ -89,7 +72,6 @@ def run_agent(
 ) -> dict[str, Any]:
     sid = session_id or str(uuid4())
     tid = task_id or new_task_id()
-    session_context = _format_session_context(sid)
     graph = get_graph()
     initial: AgentState = {
         "messages": [HumanMessage(content=message)],
@@ -104,7 +86,6 @@ def run_agent(
         "reflection": "",
         "should_retry": False,
         "retry_hint": "",
-        "session_context": session_context,
         "iteration": 0,
         "final_answer": "",
         "status": "started",

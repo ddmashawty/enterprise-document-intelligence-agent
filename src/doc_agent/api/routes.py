@@ -11,14 +11,11 @@ from doc_agent.api.schemas import (
     ChatRequest,
     ChatResponse,
     HealthResponse,
-    IngestRequest,
-    IngestResponse,
     SessionHistoryResponse,
     TaskListResponse,
     TaskResponse,
 )
 from doc_agent.config import get_settings
-from doc_agent.ingest.pipeline import ingest_paths
 from doc_agent.kaoyan.db import get_kaoyan_store
 from doc_agent.memory import get_session_memory, get_task_store
 from doc_agent.rag.store import get_store
@@ -44,15 +41,6 @@ def health() -> HealthResponse:
         memory_db=s.memory_db,
         **kaoyan,
     )
-
-
-@router.post("/v1/ingest", response_model=IngestResponse)
-def ingest(req: IngestRequest) -> IngestResponse:
-    try:
-        result = ingest_paths(req.paths or ["data/raw"], reindex=req.reindex)
-        return IngestResponse(**result)
-    except Exception as exc:  # noqa: BLE001
-        raise http_error(500, "ingest_failed", str(exc)) from exc
 
 
 def _chat_options(req: ChatRequest) -> tuple[int | None, float | None]:

@@ -1,3 +1,3 @@
-"""Document intelligence agent backend (enterprise documents + 广东四校计算机考研信息)."""
+"""广东四校计算机考研信息 Agent."""
 
 __version__ = "0.4.0"
