@@ -228,4 +228,4 @@ sup-10 加了一条事实 `jnu-010-085404|directions|01|2027`（L1 认 `directio
 
 ## 下一刀
 
-等用户核完 21 条事实；华工科目缺口按用户选的路补；文档题（答案只在原文里的题）扩到 25–30 道后再比 BM25 和 hybrid 的 hit@k；按能力修 L0（只看 dev 和 adversarial 的逐题结果）。
+等用户核完 21 条事实；用户逐题审 `data/gold/docq_m1_draft.json`（22 道文档题草稿，审完才进评测集，和现有 8 道凑成 30 道），然后比 BM25 和 hybrid 的 hit@k；按能力修 L0（只看 dev 和 adversarial 的逐题结果）。华工科目缺口用户决定先不补，回答继续说“未取得”。
