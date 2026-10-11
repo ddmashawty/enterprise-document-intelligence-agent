@@ -188,7 +188,7 @@ def stratum(row: dict) -> str:
 def doc_stratum(row: dict) -> str:
     """Retrieval questions: question shape x how much of the question's wording the evidence repeats."""
     sys.path.insert(0, str(ROOT / "src"))
-    from doc_agent.eval.drafts import bigram_overlap, overlap_layer
+    from kaoyan.eval.drafts import bigram_overlap, overlap_layer
 
     if row["expected_facts"]:
         return "structured"

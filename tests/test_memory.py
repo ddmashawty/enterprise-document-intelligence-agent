@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from pathlib import Path
 
-from doc_agent.memory import SessionMemory, TaskRecord, TaskStore
+from kaoyan.memory import SessionMemory, TaskRecord, TaskStore
 
 
 def test_session_memory_ring():

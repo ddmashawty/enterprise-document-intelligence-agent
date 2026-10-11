@@ -3,16 +3,16 @@ from pathlib import Path
 
 import pytest
 
-from doc_agent.ingest.loaders import (
+from kaoyan.ingest.loaders import (
     ParsedDocument,
     decode_html,
     iter_source_files,
     load_file,
     parse_html,
 )
-from doc_agent.ingest.ocr import get_ocr_backend
-from doc_agent.ingest.tables import Table, expand_spans, join_wrapped, render_page
-from doc_agent.kaoyan.normalize import parse_total_tm
+from kaoyan.ingest.ocr import get_ocr_backend
+from kaoyan.ingest.tables import Table, expand_spans, join_wrapped, render_page
+from kaoyan.normalize import parse_total_tm
 
 RAW = Path(__file__).resolve().parents[1] / "data" / "kaoyan" / "raw"
 

@@ -23,16 +23,16 @@ from typing import Any
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "src"))
 
-from doc_agent.collect.crawler import (
+from kaoyan.collect.crawler import (
     MODES,
     Crawler,
     CrawlOptions,
     import_manual,
 )
-from doc_agent.collect.sites import load_sites, write_sites
-from doc_agent.config import get_settings
-from doc_agent.kaoyan.db import KaoyanStore
-from doc_agent.kaoyan.normalize import resolve_school
+from kaoyan.collect.sites import load_sites, write_sites
+from kaoyan.config import get_settings
+from kaoyan.db import KaoyanStore
+from kaoyan.normalize import resolve_school
 
 
 def _summary(report: dict[str, Any]) -> list[str]:

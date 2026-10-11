@@ -1,8 +1,8 @@
-# 广东四校计算机考研信息 Agent（Document Intelligence Agent）
+# 广东四校计算机考研信息 Agent
 
 查询中山大学、华南理工大学、暨南大学、华南师范大学泛计算机类 37 个硕士专业的招生计划、复试线、初试科目和推免数。每个数字都带**年份、口径和官方来源**；官方没给的写“未知 / 未取得”，不猜、不拿第三方聚合站的数字补。名单类文件只给统计，不输出姓名、考生编号或个人成绩。
 
-原来的企业文档问答保留为**通用文档模式**：PDF、Word、txt、Markdown 导入后检索、对比、抽取，并导出 Markdown / Excel。
+只回答这四所学校计算机类考研的问题；其他问题直接回一句说明，不调用模型。
 
 作者：的懒
 
@@ -11,9 +11,9 @@
 - **结构化库**：`data/kaoyan.db`（SQLite），由人工核对的 `data/kaoyan/majors.csv` 种子和官方文档的规则抽取生成。同一事实的多个口径（目录总数、学院细则公开招考、学校统考可用计划……）并列保存，冲突只记录不覆盖。
 - **多格式解析**：PDF（含表格）、`.docx`、txt、Markdown、HTML、xlsx / xls、图片。图片和扫描页可选 OCR（`rapidocr` 本地识别或 OpenAI 兼容的多模态模型），表格按线框还原，合并单元格展开。
 - **检索**：Ollama `qwen3-embedding:0.6b`（Chroma）与 BM25 混合检索，按学校 / 年份 / 文档类型过滤；未配置向量服务时退回 BM25。
-- **Agent**：LangGraph 图 `plan → act → reflect`，最多 5 轮工具调用。考研问题优先查结构化库，答案里的数字要和工具结果对得上（数字校验），并给出来源。
+- **Agent**：LangGraph 图 `plan → act → reflect`，最多 5 轮工具调用。规则识别意图后优先查结构化库，叙述类问题再检索原文；答案里的数字要和工具结果对得上（数字校验），并给出来源。
 - **采集**：礼貌抓取四校研招网（遵守 robots.txt，同一主机串行、间隔 ≥3 秒，单次有页数上限，不绕过登录或验证码），新文档登记进库，按 304 / sha256 / 正文指纹识别是否更新。
-- **界面**：FastAPI 服务，外加 Streamlit 演示页（对话、专业筛选、知识库、任务中心、演示剧本）。
+- **界面**：FastAPI 服务，外加 Streamlit 演示页（对话、专业筛选、任务中心、演示剧本）。
 
 ## 环境
 
@@ -40,7 +40,7 @@ python scripts/seed_kaoyan.py
 python scripts/extract_kaoyan.py
 python scripts/ingest_kaoyan.py
 
-python -m uvicorn doc_agent.api:app --host 127.0.0.1 --port 8000
+python -m uvicorn kaoyan.api:app --host 127.0.0.1 --port 8000
 ```
 
 ### 可选：OCR（图片表格、扫描 PDF）
@@ -71,7 +71,7 @@ bash scripts/run_frontend.sh
 ```
 
 - 接口文档：http://127.0.0.1:8000/docs
-- 演示界面：http://127.0.0.1:8501（“专业筛选”页调 `/v1/programs`，表格列出口径和来源链接；“演示剧本”是 18 条考研验收问句，企业演示问句放在“通用文档模式”里）
+- 演示界面：http://127.0.0.1:8501（“专业筛选”页调 `/v1/programs`，表格列出口径和来源链接；“演示剧本”是 18 条考研验收问句）
 
 界面标题下会显示当前 API 地址，默认是 `http://127.0.0.1:8000`。若 8000 上不是本服务，而 8001 上是，界面会改连 8001 并提示。请求体里的 `message` 只写一层字符串。
 
@@ -97,10 +97,6 @@ curl -s 'localhost:8000/v1/score-lines?school=华师&code=085404' | python3 -m j
 curl -s localhost:8000/v1/chat/async -H 'Content-Type: application/json' \
   -d '{"session_id":"demo-1","message":"把四校 085404 的复试线和计划导出 Excel"}'
 # 用返回的 task_id 轮询 GET /v1/tasks/<task_id>
-
-# 通用文档模式
-curl -s localhost:8000/v1/chat -H 'Content-Type: application/json' \
-  -d '{"session_id":"demo-2","message":"演示产品手册里 TopK 是多少？"}'
 ```
 
 ## 接口
@@ -108,7 +104,6 @@ curl -s localhost:8000/v1/chat -H 'Content-Type: application/json' \
 | 方法 | 路径 | 说明 |
 |------|------|------|
 | GET | `/health` | 状态、模型是否配置、检索后端、切片数；考研库存在时加 `kaoyan_db`、`programs`、`documents` |
-| POST | `/v1/ingest` | 按路径导入文档（含 `data/kaoyan/raw`），`reindex` 可清空后重建 |
 | POST | `/v1/chat` | 同步问答 |
 | POST | `/v1/chat/async` | 异步排队，返回 `task_id` |
 | GET | `/v1/tasks` | 任务列表，可用 `session_id` 过滤 |
@@ -127,18 +122,19 @@ curl -s localhost:8000/v1/chat -H 'Content-Type: application/json' \
 ## 目录
 
 ```
-src/doc_agent/
+src/kaoyan/
+  db.py / schema.sql / models.py / normalize.py   结构化库、口径归一
+  seed.py / extract/ / roster.py / privacy.py      种子导入、规则抽取、名单统计与隐私闸门
+  query.py / index.py                              结构化查询、考研原文索引
   agent/     LangGraph 规划、执行、反思；考研意图识别与数字校验
-  tools/     检索、解析、对比、导出；考研结构化查询
+  tools/     考研结构化查询、原文检索、导出
   ingest/    多格式加载（PDF / DOCX / HTML / xlsx / 图片）、表格还原、OCR、切片、脱敏
-  kaoyan/    结构化库、种子导入、规则抽取、名单统计
   collect/   礼貌爬虫、站点适配、变更检测
   rag/       混合检索
   memory/    会话记忆与 SQLite 轨迹
   api/       FastAPI
 frontend/    Streamlit 演示界面
 data/kaoyan/ 考研种子包（来源清单、人工核对数据、原始文件）
-data/raw/    通用文档模式的本机文档（不入库）
 ```
 
 旧版 `.doc` 不支持，请另存为 `.docx`。
@@ -156,6 +152,6 @@ python scripts/smoke_kaoyan.py --json docs/baseline_2026-10.json   # 18 条旧�
 
 ## 配置
 
-密钥只放 `.env`，不要提交。常用项见 `.env.example`：`LLM_API_KEY`、`EMBEDDING_BASE_URL`、`KAOYAN_DB`、`RAG_PROFILE`、`OCR_BACKEND`、`VISION_*`、`CRAWL_*`、`CHUNK_SIZE`、`TOP_K`、`MAX_TOOL_CALLS`。
+密钥只放 `.env`，不要提交。常用项见 `.env.example`：`LLM_API_KEY`、`EMBEDDING_BASE_URL`、`KAOYAN_DB`、`OCR_BACKEND`、`VISION_*`、`CRAWL_*`、`CHUNK_SIZE`、`TOP_K`、`MAX_TOOL_CALLS`。
 
 `data/chroma*`、`data/kaoyan.db`、`data/memory.db`、`data/exports`、`data/uploads`、`data/kaoyan/cache`、`data/kaoyan/ocr_cache`、名单类文件和大于 3MB 的文件不入库。

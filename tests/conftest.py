@@ -4,8 +4,8 @@ from pathlib import Path
 
 import pytest
 
-from doc_agent.kaoyan.db import KaoyanStore
-from doc_agent.kaoyan.seed import seed_kaoyan
+from kaoyan.db import KaoyanStore
+from kaoyan.seed import seed_kaoyan
 
 KAOYAN_DATA_DIR = Path(__file__).resolve().parents[1] / "data" / "kaoyan"
 

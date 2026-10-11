@@ -2,7 +2,7 @@ from pathlib import Path
 
 import pytest
 
-from doc_agent.collect.attachments import discover_attachments
+from kaoyan.collect.attachments import discover_attachments
 
 RAW = Path(__file__).resolve().parents[1] / "data" / "kaoyan" / "raw"
 

@@ -16,9 +16,9 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "src"))
 
-from doc_agent.config import get_settings  # noqa: E402
-from doc_agent.kaoyan.db import KaoyanStore  # noqa: E402
-from doc_agent.kaoyan.extract.run import run_extraction  # noqa: E402
+from kaoyan.config import get_settings  # noqa: E402
+from kaoyan.db import KaoyanStore  # noqa: E402
+from kaoyan.extract.run import run_extraction  # noqa: E402
 
 
 def main() -> int:
@@ -41,7 +41,7 @@ def main() -> int:
         return 1
     model = None
     if args.llm:
-        from doc_agent.kaoyan.extract.llm_fallback import build_llm_model
+        from kaoyan.extract.llm_fallback import build_llm_model
 
         model = build_llm_model(settings)
     run = run_extraction(store, settings, doc_ids=args.docs, llm_model=model, write=not args.dry_run)

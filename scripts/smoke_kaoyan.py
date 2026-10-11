@@ -19,10 +19,10 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "src"))
 
-from doc_agent.agent.graph import run_agent  # noqa: E402
-from doc_agent.config import get_settings  # noqa: E402
-from doc_agent.eval.metrics import forbidden_items, missing_items  # noqa: E402
-from doc_agent.tools.kaoyan import kaoyan_available  # noqa: E402
+from kaoyan.agent.graph import run_agent  # noqa: E402
+from kaoyan.config import get_settings  # noqa: E402
+from kaoyan.eval.metrics import forbidden_items, missing_items  # noqa: E402
+from kaoyan.tools.kaoyan import kaoyan_available  # noqa: E402
 
 GOLD = ROOT / "data" / "gold" / "kaoyan_qa.json"
 

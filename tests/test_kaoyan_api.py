@@ -3,11 +3,11 @@ from __future__ import annotations
 import pytest
 from fastapi.testclient import TestClient
 
-from doc_agent import __version__
-from doc_agent.api import create_app
-from doc_agent.api.routes_kaoyan import kaoyan_query
-from doc_agent.kaoyan.db import KaoyanStore
-from doc_agent.kaoyan.query import KaoyanQuery
+from kaoyan import __version__
+from kaoyan.api import create_app
+from kaoyan.api.routes_kaoyan import kaoyan_query
+from kaoyan.db import KaoyanStore
+from kaoyan.query import KaoyanQuery
 
 
 @pytest.fixture()
@@ -79,7 +79,7 @@ def test_documents(client: TestClient) -> None:
 def test_kaoyan_db_missing_is_503(tmp_path, monkeypatch: pytest.MonkeyPatch) -> None:
     from types import SimpleNamespace
 
-    import doc_agent.api.routes_kaoyan as rk
+    import kaoyan.api.routes_kaoyan as rk
 
     monkeypatch.setattr(rk, "get_settings", lambda: SimpleNamespace(kaoyan_db_path=tmp_path / "missing.db"))
     _error(TestClient(create_app()).get("/v1/programs"), 503, "kaoyan_db_missing")

@@ -3,14 +3,14 @@ from pathlib import Path
 
 import pytest
 
-from doc_agent.config import Settings
-from doc_agent.ingest.chunking import TextChunk, _table_blocks, chunk_document, table_header_rows
-from doc_agent.ingest.loaders import DocumentPage, LoadedDocument
-from doc_agent.ingest.tables import Table
-from doc_agent.kaoyan.index import ingest_kaoyan
-from doc_agent.rag.embeddings import Hit
-from doc_agent.rag.query_expand import expand_queries, kaoyan_prior
-from doc_agent.rag.store import DocumentStore, get_store, reset_store
+from kaoyan.config import Settings
+from kaoyan.ingest.chunking import TextChunk, _table_blocks, chunk_document, table_header_rows
+from kaoyan.ingest.loaders import DocumentPage, LoadedDocument
+from kaoyan.ingest.tables import Table
+from kaoyan.index import ingest_kaoyan
+from kaoyan.rag.embeddings import Hit
+from kaoyan.rag.query_expand import expand_queries, kaoyan_prior
+from kaoyan.rag.store import DocumentStore, get_store, reset_store
 
 DATA = Path(__file__).resolve().parents[1] / "data" / "kaoyan"
 FIXTURES = [
@@ -32,8 +32,8 @@ def ky(tmp_path_factory):
         pytest.skip(f"fixtures missing: {missing}")
     s = Settings(kaoyan_chroma_dir=str(tmp_path_factory.mktemp("chroma_kaoyan")), embedding_base_url="")
     report = ingest_kaoyan(s, paths=[DATA / p for p in FIXTURES], reindex=True)
-    yield s, get_store(s, profile="kaoyan"), report
-    reset_store("kaoyan")
+    yield s, get_store(s), report
+    reset_store()
 
 
 def _chunks(store: DocumentStore, doc_id: str) -> list[dict]:
@@ -92,17 +92,15 @@ def test_table_blocks_keep_header(ky) -> None:
     assert len(tm) > 5 and all("院系代码 | 院系名称 | 学院拟接收推免人数 | 专业代码" in c["text"] for c in tm)
 
 
-def test_rag_search_tool_uses_kaoyan_index_for_filters(ky, monkeypatch, tmp_path) -> None:
-    from doc_agent.tools import registry
+def test_rag_search_tool_filters_by_school(ky, monkeypatch) -> None:
+    from kaoyan.tools import registry
 
     s, _, _ = ky
-    s = s.model_copy(update={"chroma_dir": str(tmp_path / "enterprise")})
     monkeypatch.setattr(registry, "get_settings", lambda: s)
     payload = json.loads(registry.rag_search.invoke({"query": "085404 复试分数线", "school": "sysu", "top_k": 3}))
     assert payload and all(h["metadata"]["school"] == "sysu" for h in payload)
     assert payload[0]["metadata"]["doc_id"] in {"sysu-078", "sysu-070"}
-    assert "未检索到" in registry.rag_search.invoke({"query": "085404 复试分数线"})  # enterprise index is empty
-    reset_store("enterprise")
+    assert "未检索到" in registry.rag_search.invoke({"query": "085404 复试分数线", "school": "nowhere"})
 
 
 def test_personal_files_are_flagged_and_downweighted(tmp_path) -> None:
@@ -126,14 +124,14 @@ def test_personal_files_are_flagged_and_downweighted(tmp_path) -> None:
     s = Settings(kaoyan_data_dir=str(data), kaoyan_chroma_dir=str(tmp_path / "idx"), embedding_base_url="")
     report = ingest_kaoyan(s, reindex=True)
     assert report["docs_redacted"] == 1 and report["docs_indexed"] == 2 and not report["docs_missing"]
-    store = get_store(s, profile="kaoyan")
+    store = get_store(s)
     rows = _chunks(store, "demo-1")
     assert rows and all(r["redacted"] is True for r in rows)
     text = "\n".join(r["text"] for r in rows)
     assert "测某 | 085404" in text and "测试甲" not in text and "105586000000001" not in text
     hits = store.search("085404 复试分数线", top_k=2, school="demo")
     assert hits[0].metadata["doc_id"] == "demo-2"
-    reset_store("kaoyan")
+    reset_store()
 
 
 # --- unit level -------------------------------------------------------------------
@@ -163,27 +161,25 @@ def test_header_detection_skips_title_and_data_rows() -> None:
     assert table_header_rows(no_header) == (0, 0)
 
 
-def test_enterprise_chunks_unchanged(tmp_path) -> None:
+def test_chunks_without_metadata_keep_core_fields(tmp_path) -> None:
     doc = LoadedDocument(source="/tmp/demo.txt", pages=[DocumentPage("/tmp/demo.txt", 1, "hello world " * 50)])
     chunks = chunk_document(doc, chunk_size=40, overlap=5)
     assert chunks[0].chunk_id == "demo.txt::p1::c1" and chunks[0].metadata() == {}
-    s = Settings(chroma_dir=str(tmp_path / "ent"), embedding_base_url="")
+    s = Settings(kaoyan_chroma_dir=str(tmp_path / "idx"), embedding_base_url="")
     store = DocumentStore(s)
     texts = ["文档保存期限为十年", "会议纪要由行政部归档", "合同原件存放在档案室"]
     store.upsert_chunks([TextChunk(f"a::p1::c{i}", "/x/a.txt", 1, t, "a.txt") for i, t in enumerate(texts, 1)])
-    rows = [json.loads(ln) for ln in (tmp_path / "ent" / "chunks.jsonl").read_text(encoding="utf-8").splitlines()]
+    rows = [json.loads(ln) for ln in (tmp_path / "idx" / "chunks.jsonl").read_text(encoding="utf-8").splitlines()]
     assert all(set(r) == {"chunk_id", "source", "page", "doc_name", "text"} for r in rows)
     hits = store.search("保存期限")
     assert hits[0].chunk_id == "a::p1::c1" and "metadata" not in hits[0].to_dict()
     assert store.list_documents() == [{"doc_name": "a.txt", "source": "/x/a.txt", "chunks": 3, "pages": 1}]
 
 
-def test_query_expansion_by_profile() -> None:
-    assert expand_queries("085404复试线") == ["085404复试线"]
-    assert expand_queries("主营业务构成") == [
-        "主营业务构成", "主营业务分行业", "主营业务分地区", "产品情况", "营业收入主要来自", "茅台酒及系列酒",
-    ]
-    ky = expand_queries("中大 085404 复试线", profile="kaoyan")
+def test_query_expansion() -> None:
+    assert expand_queries("") == []
+    assert expand_queries("学校在哪") == ["学校在哪"]
+    ky = expand_queries("中大 085404 复试线")
     assert ky[0] == "中大 085404 复试线" and ky[1] == "中大 085404 复试线 中山大学"
     assert any("复试分数线" in q and q.startswith("中大 085404 复试线 中山大学") for q in ky[2:])
 
@@ -195,16 +191,12 @@ def test_kaoyan_prior() -> None:
     assert kaoyan_prior("085410 计划", {"college": "研究生院（校级）"}) == 1.0
 
 
-def test_profiles_and_store_cache(tmp_path) -> None:
-    s = Settings(chroma_dir=str(tmp_path / "a"), kaoyan_chroma_dir=str(tmp_path / "b"), embedding_base_url="")
-    ky = s.for_profile("kaoyan")
-    assert ky.chroma_path == tmp_path / "b" and ky.collection_name == "kaoyan_docs"
-    assert s.for_profile("enterprise") is s
-    with pytest.raises(ValueError):
-        s.for_profile("other")
-    ent, kao = get_store(s), get_store(s, profile="kaoyan")
-    assert ent is not kao and ent is get_store(s) and kao.profile == "kaoyan"
-    other = Settings(chroma_dir=str(tmp_path / "c"), embedding_base_url="")
-    assert get_store(other) is not ent
+def test_store_cache(tmp_path) -> None:
+    s = Settings(kaoyan_chroma_dir=str(tmp_path / "a"), embedding_base_url="")
+    assert s.chroma_path == tmp_path / "a" and s.collection_name == "kaoyan_docs"
+    store = get_store(s)
+    assert store is get_store(s)
+    other = Settings(kaoyan_chroma_dir=str(tmp_path / "b"), embedding_base_url="")
+    assert get_store(other) is not store
     reset_store()
     assert Hit("c", "s", 1, "d", "t", 1.0, "bm25").to_dict().keys() == {"chunk_id", "source", "page", "doc_name", "text", "score", "backend"}

@@ -20,7 +20,7 @@ class ApiError(Exception):
         super().__init__(f"{status_code} {code}: {message}")
 
 
-def is_doc_agent_health(payload: dict[str, Any]) -> bool:
+def is_kaoyan_health(payload: dict[str, Any]) -> bool:
     return "version" in payload and "llm" in payload and "retrieval_backend" in payload
 
 
@@ -80,7 +80,7 @@ class DocAgentClient:
 
     def health(self) -> dict[str, Any]:
         data = self._request("GET", "/health", timeout=10)
-        if not is_doc_agent_health(data):
+        if not is_kaoyan_health(data):
             raise ApiError(
                 200,
                 "wrong_service",
@@ -127,14 +127,6 @@ class DocAgentClient:
 
     def get_session(self, session_id: str) -> dict[str, Any]:
         return self._request("GET", f"/v1/sessions/{session_id}", timeout=15)
-
-    def ingest(self, paths: list[str], *, reindex: bool = False) -> dict[str, Any]:
-        return self._request(
-            "POST",
-            "/v1/ingest",
-            json={"paths": paths, "reindex": reindex},
-            timeout=300,
-        )
 
     def list_programs(self, **filters: Any) -> dict[str, Any]:
         """GET /v1/programs; filters as in the API (school, code, is_408, min_public_plan, year, ...)."""

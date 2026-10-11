@@ -4,7 +4,7 @@ import json
 from pathlib import Path
 from types import SimpleNamespace
 
-from doc_agent.tools import export as export_mod
+from kaoyan.tools import export as export_mod
 
 
 def test_export_markdown_and_excel(tmp_path: Path, monkeypatch):

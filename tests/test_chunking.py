@@ -1,7 +1,7 @@
 from __future__ import annotations
 
-from doc_agent.ingest.chunking import _split_text, chunk_document
-from doc_agent.ingest.loaders import DocumentPage, LoadedDocument
+from kaoyan.ingest.chunking import _split_text, chunk_document
+from kaoyan.ingest.loaders import DocumentPage, LoadedDocument
 
 
 def test_split_text_overlap():

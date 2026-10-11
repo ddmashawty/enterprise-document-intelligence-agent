@@ -1,7 +1,7 @@
 import json
 from pathlib import Path
 
-from doc_agent.agent.graph import token_usage
+from kaoyan.agent.graph import token_usage
 
 ROOT = Path(__file__).resolve().parents[1]
 EVAL = ROOT / "data" / "gold" / "kaoyan_eval_v2.jsonl"

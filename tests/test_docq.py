@@ -4,8 +4,8 @@ from pathlib import Path
 
 import pytest
 
-from doc_agent.eval.drafts import bigram_overlap, check_item, overlap_layer, too_short
-from doc_agent.ingest.loaders import load_file
+from kaoyan.eval.drafts import bigram_overlap, check_item, overlap_layer, too_short
+from kaoyan.ingest.loaders import load_file
 
 ROOT = Path(__file__).resolve().parents[1]
 SPEC = ROOT / "data" / "gold" / "docq_m1.json"

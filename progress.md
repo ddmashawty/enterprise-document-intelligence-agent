@@ -1,5 +1,14 @@
 # 进度日志
 
+## 会话：2026-10-11（只留考研路径，包改名 kaoyan）
+
+- **状态：** 分支 `refactor/kaoyan-only`，叠在 PR #8 上，PR 目标 main，#8 先合
+- **做了：** 删通用文档问答代码（年报对比、通用工具、企业查询扩展、`RAG_PROFILE`、`/v1/ingest`、知识库页、`GENERIC_QUESTIONS`）；非考研问题固定拒答、不调 LLM；包 `doc_agent` 改名 `kaoyan`，`doc_agent.kaoyan` 展平到顶层
+- **配置：** 去掉 `CHROMA_DIR`、`RAW_DIR`、`COLLECTION_NAME`、`RAG_PROFILE`；本机 `.venv` 要重新 `pip install -e .`
+- **核对：** ruff 通过，pytest 284 通过，L0/L1 门禁不变
+- **记录：** `docs/kaoyan_p1_notes.md`「只留考研路径，包改名 kaoyan」
+- **之后：** 回到 P1，跑 L2 检索评测
+
 ## 会话：2026-10-11（仓库改名 kaoyan，删企业文档演示遗留）
 
 - **状态：** 分支 `chore/drop-enterprise-demo`；GitHub 仓库已改名 `ddmashawty/kaoyan`（旧地址自动跳转），爬虫 User-Agent 里的仓库地址同步改了
