@@ -44,6 +44,22 @@ def test_fact_match_needs_value_and_reports_source_separately():
     assert match_fact(_fact(264, year=2025), facts) == (False, False)
 
 
+def test_tool_facts_reads_search_programs_fields():
+    program = {
+        "program_id": "scut-ft-140500",
+        "score_lines": [_line(320, scope="school_baseline", doc="scut-040")],
+        "admission_stats": [{"kind": "admit_count", "year": 2026, "value": 36, "source": {"doc_id": "scut-058"}}],
+        "exam_subjects": [{"year": 2026, "subjects": [{"slot": 4, "code": "408"}], "source": {"doc_id": "scut-061"}}],
+    }
+    facts = tool_facts([json.dumps({"programs": [program]})])
+    keys = {(f["table"], f["kind"], f["value"], f["source_doc_id"]) for f in facts}
+    assert keys == {
+        ("score_lines", "school_baseline", 320, "scut-040"),
+        ("admission_stats", "admit_count", 36, "scut-058"),
+        ("exam_subjects", "slot4", "408", "scut-061"),
+    }
+
+
 def test_l1_passes_fails_and_skips_compare_rows(monkeypatch):
     from doc_agent.agent import kaoyan_flow
 

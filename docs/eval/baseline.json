@@ -1,7 +1,7 @@
 {
   "meta": {
-    "date": "2026-10-09",
-    "commit": "1cbd1ed-dirty",
+    "date": "2026-10-10",
+    "commit": "8bf7470-dirty",
     "gold": "data/gold/kaoyan_eval_v2.jsonl",
     "splits": [],
     "rows": 68
@@ -21,7 +21,7 @@
     },
     "L1": {
       "summary": {
-        "rows": 50,
+        "rows": 66,
         "unscorable": 0,
         "row_pass": 1.0,
         "fact_recall": 1.0,

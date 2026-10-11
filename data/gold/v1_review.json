@@ -1,0 +1,493 @@
+{
+  "reviewer": "cursor-agent（v1 原答案 + 库内 verified 事实；和用户交互审查）",
+  "reviewed_at": "2026-10-10",
+  "rows": {
+    "v1-01": {
+      "expected_facts": [
+        {
+          "table": "score_lines",
+          "program_id": "sysu-670-085404",
+          "kind": "college",
+          "year": 2026,
+          "value": 379,
+          "source_doc_id": "sysu-078"
+        }
+      ],
+      "note": "可补充的学校电子信息基本线 300 不是必答，不列事实"
+    },
+    "v1-02": {
+      "expected_facts": [
+        {
+          "table": "score_lines",
+          "program_id": "jnu-052-085412",
+          "kind": "college",
+          "year": 2026,
+          "value": 348,
+          "source_doc_id": "jnu-005"
+        }
+      ],
+      "note": "可补充的 2027 目录 62、推免 25 不是必答，不列事实"
+    },
+    "v1-03": {
+      "expected_facts": [
+        {
+          "table": "score_lines",
+          "program_id": "scnu-019-085404",
+          "kind": "college",
+          "year": 2026,
+          "value": 348,
+          "source_doc_id": "scnu-037"
+        },
+        {
+          "table": "score_lines",
+          "program_id": "scnu-019-085404",
+          "kind": "special_veteran",
+          "year": 2026,
+          "value": 288,
+          "source_doc_id": "scnu-037"
+        }
+      ]
+    },
+    "v1-04": {
+      "expected_facts": [
+        {
+          "table": "plans",
+          "program_id": "sysu-757-083900",
+          "kind": "rules_total",
+          "year": 2026,
+          "value": 15,
+          "source_doc_id": "sysu-085"
+        },
+        {
+          "table": "plans",
+          "program_id": "sysu-757-083900",
+          "kind": "tm",
+          "year": 2026,
+          "value": 15,
+          "source_doc_id": "sysu-085"
+        },
+        {
+          "table": "plans",
+          "program_id": "sysu-757-083900",
+          "kind": "public_exam",
+          "year": 2026,
+          "value": 0,
+          "source_doc_id": "sysu-085"
+        }
+      ]
+    },
+    "v1-05": {
+      "expected_facts": [
+        {
+          "table": "score_lines",
+          "program_id": "scut-cs-085404",
+          "kind": "school_baseline",
+          "year": 2026,
+          "value": 305,
+          "source_doc_id": "scut-040"
+        },
+        {
+          "table": "plans",
+          "program_id": "scut-cs-085404",
+          "kind": "college_exam_plan",
+          "year": 2026,
+          "value": 35,
+          "source_doc_id": "scut-055"
+        },
+        {
+          "table": "plans",
+          "program_id": "scut-cs-085404",
+          "kind": "available_exam",
+          "year": 2026,
+          "value": 21,
+          "source_doc_id": "scut-048"
+        }
+      ]
+    },
+    "v1-06": {
+      "expected_facts": [
+        {
+          "table": "exam_subjects",
+          "program_id": "scut-ft-140500",
+          "kind": "slot1",
+          "year": 2026,
+          "value": "101",
+          "source_doc_id": "scut-061"
+        },
+        {
+          "table": "exam_subjects",
+          "program_id": "scut-ft-140500",
+          "kind": "slot2",
+          "year": 2026,
+          "value": "201",
+          "source_doc_id": "scut-061"
+        },
+        {
+          "table": "exam_subjects",
+          "program_id": "scut-ft-140500",
+          "kind": "slot3",
+          "year": 2026,
+          "value": "301",
+          "source_doc_id": "scut-061"
+        },
+        {
+          "table": "exam_subjects",
+          "program_id": "scut-ft-140500",
+          "kind": "slot4",
+          "year": 2026,
+          "value": "408",
+          "source_doc_id": "scut-061"
+        },
+        {
+          "table": "score_lines",
+          "program_id": "scut-ft-140500",
+          "kind": "school_baseline",
+          "year": 2026,
+          "value": 320,
+          "source_doc_id": "scut-040"
+        }
+      ]
+    },
+    "v1-07": {
+      "expected_facts": [
+        {
+          "table": "plans",
+          "program_id": "jnu-010-081203",
+          "kind": "catalog_total",
+          "year": 2027,
+          "value": 24,
+          "source_doc_id": "jnu-016"
+        },
+        {
+          "table": "plans",
+          "program_id": "jnu-010-081203",
+          "kind": "tm",
+          "year": 2027,
+          "value": 19,
+          "source_doc_id": "jnu-012"
+        }
+      ],
+      "note": "可补充的 2026 目录 081203 为 6 不是必答，不列事实"
+    },
+    "v1-08": {
+      "expected_facts": [
+        {
+          "table": "plans",
+          "program_id": "sysu-724-081200",
+          "kind": "catalog_total",
+          "year": 2026,
+          "value": 9,
+          "source_doc_id": "sysu-072"
+        },
+        {
+          "table": "plans",
+          "program_id": "sysu-724-081200",
+          "kind": "rules_total",
+          "year": 2026,
+          "value": 15,
+          "source_doc_id": "sysu-081"
+        },
+        {
+          "table": "plans",
+          "program_id": "sysu-724-081200",
+          "kind": "tm",
+          "year": 2026,
+          "value": 7,
+          "source_doc_id": "sysu-081"
+        },
+        {
+          "table": "plans",
+          "program_id": "sysu-724-081200",
+          "kind": "public_exam",
+          "year": 2026,
+          "value": 8,
+          "source_doc_id": "sysu-081"
+        }
+      ]
+    },
+    "v1-09": {
+      "expected_facts": [
+        {
+          "table": "plans",
+          "program_id": "scnu-041-085410",
+          "kind": "catalog_total",
+          "year": 2026,
+          "value": 66,
+          "source_doc_id": "scnu-024"
+        },
+        {
+          "table": "plans",
+          "program_id": "scnu-041-085410",
+          "kind": "rules_total",
+          "year": 2026,
+          "value": 72,
+          "source_doc_id": "scnu-036"
+        },
+        {
+          "table": "plans",
+          "program_id": "scnu-041-085410",
+          "kind": "tm",
+          "year": 2026,
+          "value": 5,
+          "source_doc_id": "scnu-024"
+        }
+      ]
+    },
+    "v1-10": {
+      "expected_facts": [
+        {
+          "table": "plans",
+          "program_id": "sysu-725-085405",
+          "kind": "rules_total",
+          "year": 2026,
+          "value": 53,
+          "source_doc_id": "sysu-095"
+        },
+        {
+          "table": "plans",
+          "program_id": "sysu-725-085405",
+          "kind": "tm",
+          "year": 2026,
+          "value": 30,
+          "source_doc_id": "sysu-095"
+        },
+        {
+          "table": "plans",
+          "program_id": "sysu-725-085405",
+          "kind": "public_exam",
+          "year": 2026,
+          "value": 23,
+          "source_doc_id": "sysu-095"
+        },
+        {
+          "table": "plans",
+          "program_id": "sysu-725-085405",
+          "kind": "catalog_total",
+          "year": 2026,
+          "value": 37,
+          "source_doc_id": "sysu-072"
+        }
+      ]
+    },
+    "v1-11": {
+      "expected_facts": [],
+      "judge_rubric": "应列出并标年份、口径：中大 670 085404（目录 210 − 推免 165 = 45，细则公开招考 49）、暨大 052 085412（2027 目录 62 − 推免 25 = 37）、华师 019 081200（48 − 17 = 31）、华师 019 085404（50 − 4 = 46）、华师 041 085405（50 − 5 = 45）、华师 041 085410（66 − 5 = 61）。华工单列并标口径，初试科目未知。暨大推免是“≤N”上限的专业（如 010 085404）不能算出确定统招数，不计入",
+      "note": "标准答案多为派生差值（目录 − 推免），库里没有，L1 不评"
+    },
+    "v1-12": {
+      "expected_facts": [
+        {
+          "table": "score_lines",
+          "program_id": "sysu-670-085404",
+          "kind": "college",
+          "year": 2026,
+          "value": 379,
+          "source_doc_id": "sysu-078"
+        },
+        {
+          "table": "score_lines",
+          "program_id": "sysu-771-085404",
+          "kind": "college",
+          "year": 2026,
+          "value": 335,
+          "source_doc_id": "sysu-097"
+        },
+        {
+          "table": "score_lines",
+          "program_id": "scut-cs-085404",
+          "kind": "school_baseline",
+          "year": 2026,
+          "value": 305,
+          "source_doc_id": "scut-040"
+        },
+        {
+          "table": "score_lines",
+          "program_id": "jnu-010-085404",
+          "kind": "college",
+          "year": 2026,
+          "value": 318,
+          "source_doc_id": "jnu-003"
+        },
+        {
+          "table": "score_lines",
+          "program_id": "scnu-019-085404",
+          "kind": "college",
+          "year": 2026,
+          "value": 348,
+          "source_doc_id": "scnu-037"
+        },
+        {
+          "table": "score_lines",
+          "program_id": "scnu-046-085404",
+          "kind": "college",
+          "year": 2026,
+          "value": 340,
+          "source_doc_id": "scnu-038"
+        }
+      ]
+    },
+    "v1-13": {
+      "expected_facts": [
+        {
+          "table": "plans",
+          "program_id": "sysu-670-085404",
+          "kind": "catalog_total",
+          "year": 2026,
+          "value": 210,
+          "source_doc_id": "sysu-072"
+        },
+        {
+          "table": "plans",
+          "program_id": "sysu-670-085404",
+          "kind": "rules_total",
+          "year": 2026,
+          "value": 214,
+          "source_doc_id": "sysu-078"
+        },
+        {
+          "table": "plans",
+          "program_id": "sysu-670-085404",
+          "kind": "tm",
+          "year": 2026,
+          "value": 165,
+          "source_doc_id": "sysu-078"
+        },
+        {
+          "table": "plans",
+          "program_id": "sysu-670-085404",
+          "kind": "public_exam",
+          "year": 2026,
+          "value": 49,
+          "source_doc_id": "sysu-078"
+        }
+      ]
+    },
+    "v1-14": {
+      "expected_facts": [],
+      "note": "答案是范围内没有 0839，没有数值事实"
+    },
+    "v1-15": {
+      "expected_facts": [
+        {
+          "table": "plans",
+          "program_id": "jnu-044-0812Z3",
+          "kind": "catalog_total",
+          "year": 2027,
+          "value": 10,
+          "source_doc_id": "jnu-016"
+        },
+        {
+          "table": "plans",
+          "program_id": "jnu-044-0812Z3",
+          "kind": "tm",
+          "year": 2027,
+          "value": 10,
+          "source_doc_id": "jnu-013"
+        },
+        {
+          "table": "plans",
+          "program_id": "jnu-044-0812Z3",
+          "kind": "public_exam",
+          "year": 2026,
+          "value": 5,
+          "source_doc_id": "jnu-004"
+        }
+      ]
+    },
+    "v1-16": {
+      "expected_facts": [
+        {
+          "table": "exam_subjects",
+          "program_id": "sysu-765-085400",
+          "kind": "slot4",
+          "year": 2026,
+          "value": "884",
+          "source_doc_id": "sysu-072"
+        },
+        {
+          "table": "score_lines",
+          "program_id": "sysu-765-085400",
+          "kind": "college",
+          "year": 2026,
+          "value": 382,
+          "source_doc_id": "sysu-089"
+        }
+      ]
+    },
+    "v1-17": {
+      "expected_facts": [
+        {
+          "table": "admission_stats",
+          "program_id": "scut-cs-085404",
+          "kind": "admit_count",
+          "year": 2026,
+          "value": 36,
+          "source_doc_id": "scut-058"
+        },
+        {
+          "table": "admission_stats",
+          "program_id": "scut-cs-081200",
+          "kind": "admit_count",
+          "year": 2026,
+          "value": 23,
+          "source_doc_id": "scut-058"
+        }
+      ],
+      "note": "只有统计数，不含个人信息"
+    },
+    "v1-18": {
+      "expected_facts": [
+        {
+          "table": "score_lines",
+          "program_id": "sysu-670-085404",
+          "kind": "college",
+          "year": 2026,
+          "value": 379,
+          "source_doc_id": "sysu-078"
+        },
+        {
+          "table": "score_lines",
+          "program_id": "sysu-771-085404",
+          "kind": "college",
+          "year": 2026,
+          "value": 335,
+          "source_doc_id": "sysu-097"
+        },
+        {
+          "table": "score_lines",
+          "program_id": "scut-cs-085404",
+          "kind": "school_baseline",
+          "year": 2026,
+          "value": 305,
+          "source_doc_id": "scut-040"
+        },
+        {
+          "table": "score_lines",
+          "program_id": "jnu-010-085404",
+          "kind": "college",
+          "year": 2026,
+          "value": 318,
+          "source_doc_id": "jnu-003"
+        },
+        {
+          "table": "score_lines",
+          "program_id": "scnu-019-085404",
+          "kind": "college",
+          "year": 2026,
+          "value": 348,
+          "source_doc_id": "scnu-037"
+        },
+        {
+          "table": "score_lines",
+          "program_id": "scnu-046-085404",
+          "kind": "college",
+          "year": 2026,
+          "value": 340,
+          "source_doc_id": "scnu-038"
+        }
+      ],
+      "judge_rubric": "导出的复试线要和 v1-12 的 6 条一致；华工计划、科目取不到的格子写“未取得”",
+      "note": "导出内容应与 v1-12 相同"
+    }
+  }
+}

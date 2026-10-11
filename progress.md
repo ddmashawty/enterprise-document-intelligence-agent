@@ -1,5 +1,12 @@
 # 进度日志
 
+## 会话：2026-10-10（P1 回填旧 18 题事实）
+
+- **状态：** 分支 `p1/v1-facts`（从 `main` `8bf7470`，PR #3、#4 已合并）
+- **做了：** `data/gold/v1_review.json`（51 条事实，交互审查定 v1-11 / v1-18 / 核对人），`--migrate-v1` 应用；L1 多认 `exam_subjects`、`admission_stats`，并读 `search_programs` 的 `score_lines`
+- **结果：** L1 66 道 100%，L0 97.1%；新报告 `docs/eval/2026-10-10.md`，基线已重写
+- **记录：** `docs/kaoyan_p1_notes.md`「v1 回填」
+
 ## 会话：2026-10-09（P1 评测 L0 + L1，不调 LLM）
 
 - **状态：** 分支 `p1/eval-l0-l1`；M0 已开 [PR #3](https://github.com/ddmashawty/enterprise-document-intelligence-agent/pull/3)
