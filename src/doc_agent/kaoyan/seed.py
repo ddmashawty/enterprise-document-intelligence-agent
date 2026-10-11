@@ -566,12 +566,13 @@ class Seeder:
             if "推免目录" in row["数据年份"]:
                 tm_pref, tm_def = "tm_catalog", f"{year}年推免硕士招生专业目录中的推免数"
             if tm_count.pool_scope:
-                tm_def += f"；{tm_count.pool_scope}一级学科合计上限"
+                tm_def += (f"；原文在{tm_count.pool_scope}各二级学科行都写“{tm_count.text}”，"
+                           f"按一级学科统筹记（原文没写“合计”）")
             self.add_plan(conn, Plan(
                 program_id=program_id, year=year, kind="tm", value=tm_count.value, value_text=tm_count.text,
                 is_upper_bound=tm_count.is_upper_bound, pool_scope=tm_count.pool_scope, definition=tm_def,
                 source_doc_id=self.pick_source(tm_pref, ctx, year),
-                evidence_text=f"majors.csv 其中推免人数={tm_count.text}", **seed))
+                evidence_text=f"majors.csv 其中推免人数={row['其中推免人数']}", **seed))
 
         # score line from columns
         line_total = parse_count(row["2026复试线总分"])

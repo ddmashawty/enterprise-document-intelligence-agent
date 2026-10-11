@@ -13,6 +13,7 @@ class ProgramSearchResponse(BaseModel):
     programs: list[dict[str, Any]] = Field(default_factory=list)
     unknown: list[dict[str, Any]] = Field(default_factory=list)
     excluded: int = 0
+    excluded_programs: list[dict[str, Any]] = Field(default_factory=list)
     public_plan_rule: str | None = None
     scope_note: str | None = None
 

@@ -1,4 +1,6 @@
 import csv
+import shutil
+import subprocess
 import re
 from pathlib import Path
 
@@ -143,3 +145,20 @@ def test_no_names_or_exam_numbers_leak_from_local_lists() -> None:
             # counts only: never put names or numbers into test output
             failures.append(f"{path.name}: names={len(names)} leaked={leaked} exam_nos={exam_nos}")
     assert not failures, failures
+
+
+def test_every_personal_data_file_is_git_ignored() -> None:
+    manifest = DATA / "raw" / "manifest.csv"
+    if shutil.which("git") is None or not (ROOT / ".git").exists():
+        pytest.skip("not a git checkout")
+    with manifest.open(encoding="utf-8-sig", newline="") as f:
+        paths = [f"data/kaoyan/{r['local_path']}" for r in csv.DictReader(f) if r["contains_personal_data"] == "True"]
+    assert paths
+    run = subprocess.run(["git", "-c", "core.quotepath=off", "check-ignore", "--no-index", "--stdin"], input="\n".join(paths), cwd=ROOT,
+                         capture_output=True, text=True)
+    ignored = set(run.stdout.splitlines())
+    assert [p for p in paths if p not in ignored] == []
+    unlisted = ["data/kaoyan/raw/new/某校_2027_拟录取名单.pdf", "data/kaoyan/raw/new/某校_2027_复试名单.xlsx"]
+    run = subprocess.run(["git", "-c", "core.quotepath=off", "check-ignore", "--no-index", "--stdin"], input="\n".join(unlisted),
+                         cwd=ROOT, capture_output=True, text=True)
+    assert set(run.stdout.splitlines()) == set(unlisted)

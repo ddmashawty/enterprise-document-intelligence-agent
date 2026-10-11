@@ -42,6 +42,8 @@ def test_detect_filters() -> None:
     assert i["filters"] == {"is_408": True, "study_mode": "全日制", "min_public_plan": 21}
     assert detect_kaoyan_intent("哪些专业统招≥20")["filters"]["min_public_plan"] == 20
     assert detect_kaoyan_intent("哪些非全日制专业不考408")["filters"] == {"is_408": False, "study_mode": "非全日制"}
+    assert detect_kaoyan_intent("哪些专业不考数学")["filters"] == {"exclude_subject": "数学"}
+    assert detect_kaoyan_intent("有哪些不用考数学二的")["filters"] == {"exclude_subject": "302"}
 
 
 def test_detect_scope_and_name_keyword() -> None:

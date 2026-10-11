@@ -103,12 +103,13 @@ def structured_calls(intent: dict[str, Any]) -> list[tuple[str, dict[str, Any]]]
         return [("compare_programs", args)]
 
     calls: list[tuple[str, dict[str, Any]]] = []
-    if scope:
+    scopes = [_nonempty(school=school, college=college, code=c) for c in codes] if len(codes) > 1 else [scope]
+    for s in (s for s in scopes if s):
         if "score_line" in kinds:
-            calls.append(("get_score_lines", {**scope, "year": year or 2026}))
+            calls.append(("get_score_lines", {**s, "year": year or 2026}))
         if "subjects" in kinds:
-            calls.append(("get_exam_subjects", scope))
-        calls.append(("search_programs", scope))
+            calls.append(("get_exam_subjects", s))
+        calls.append(("search_programs", s))
     if intent.get("name_kw"):
         calls.append(("search_programs", _nonempty(school=school, name_kw=intent["name_kw"])))
     return calls

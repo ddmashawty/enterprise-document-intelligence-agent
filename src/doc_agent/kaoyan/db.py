@@ -16,7 +16,7 @@ SCHEMA_PATH = Path(__file__).with_name("schema.sql")
 
 _FACT_TABLES = ("directions", "exam_subjects", "plans", "score_lines", "admission_stats")
 # Columns added after K1; databases created earlier get them via ALTER TABLE.
-_ADDED_COLUMNS = (("directions", "evidence_text"), ("exam_subjects", "evidence_text"))
+_ADDED_COLUMNS = (("directions", "evidence_text"), ("exam_subjects", "evidence_text"), ("directions", "advisors"))
 
 
 def _row_values(model: BaseModel) -> dict[str, Any]:

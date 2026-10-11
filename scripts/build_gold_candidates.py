@@ -8,11 +8,21 @@ every other row.
 plan question per program, capped at 60, from the local kaoyan.db.
 --apply-review replaces the reviewed template rows of the eval file with the
 accepted and edited candidates listed in data/gold/review_m0.json.
+--specs replaces the handwritten rows (adv-* from adversarial_m1.json, sup-* from
+supplement_m1.json, doc-* from docq_m1.json), reading each fact's value and source from
+verified rows of the kaoyan DB; an unreviewed spec is refused.
+--freeze-test draws the test split once (30% of the unsplit rows, stratified by school x
+category) into data/gold/split_m1.json; every later write puts those ids in test and the
+other unsplit rows in dev. --freeze-append PREFIX does the same once for a spec added later
+(stratified by question shape x bigram overlap), leaving earlier test rows untouched.
+--rehash-test re-records the frozen rows after a deliberate edit.
 """
 
 from __future__ import annotations
 
 import argparse
+import datetime as dt
+import hashlib
 import json
 import re
 import sqlite3
@@ -25,8 +35,22 @@ EVAL_V2 = ROOT / "data" / "gold" / "kaoyan_eval_v2.jsonl"
 CANDIDATES = ROOT / "data" / "gold" / "candidates_m0.jsonl"
 REVIEW = ROOT / "data" / "gold" / "review_m0.json"
 V1_REVIEW = ROOT / "data" / "gold" / "v1_review.json"
+ADVERSARIAL = ROOT / "data" / "gold" / "adversarial_m1.json"
+SUPPLEMENT = ROOT / "data" / "gold" / "supplement_m1.json"
+DOCQ = ROOT / "data" / "gold" / "docq_m1.json"
+SPECS = (ADVERSARIAL, SUPPLEMENT, DOCQ)
+SPLIT = ROOT / "data" / "gold" / "split_m1.json"
 DB_PATH = ROOT / "data" / "kaoyan.db"
 CANDIDATE_CAP = 60
+TEST_SHARE = 0.3
+TEST_SEED = "kaoyan-test-m1"
+# Rows already named as fix targets; tuning against them would leak into test.
+TEST_EXCLUDE = {
+    "sup-07": "L1 修复目标：一句里两个代码被丢",
+    "sup-10": "导师试点会给它补事实",
+    "sup-29": "L1 修复目标：精简视图丢口径",
+    "sup-36": "L1 修复目标：不考数学的排除筛选",
+}
 
 _SCHOOLS = (
     ("华南师范大学", "scnu"),
@@ -150,6 +174,120 @@ def read_jsonl(path: Path) -> list[dict]:
     return [json.loads(line) for line in path.read_text(encoding="utf-8").splitlines() if line.strip()]
 
 
+def row_digest(row: dict) -> str:
+    body = {k: v for k, v in row.items() if k != "split"}
+    return hashlib.sha256(json.dumps(body, ensure_ascii=False, sort_keys=True).encode()).hexdigest()[:16]
+
+
+def stratum(row: dict) -> str:
+    schools = row["expected_intent"]["schools"]
+    school = schools[0] if len(schools) == 1 else ("multi" if schools else "none")
+    return f"{school}/{row['category']}"
+
+
+def doc_stratum(row: dict) -> str:
+    """Retrieval questions: question shape x how much of the question's wording the evidence repeats."""
+    sys.path.insert(0, str(ROOT / "src"))
+    from doc_agent.eval.drafts import bigram_overlap, overlap_layer
+
+    if row["expected_facts"]:
+        return "structured"
+    schools = row["expected_intent"]["schools"]
+    if row["expected_refusal"] == "unknown_data":
+        shape = "unknown"
+    else:
+        shape = "no_school" if not schools else ("cross" if len(schools) > 1 else "single")
+    overlap = bigram_overlap(row["turns"][0], [f["text"] for f in row.get("evidence") or []])
+    return f"{shape}/{overlap_layer(overlap)}"
+
+
+def draw_test(rows: list[dict], exclude: set[str], share: float = TEST_SHARE, seed: str = TEST_SEED,
+              key=stratum) -> list[str]:
+    """Proportional stratified sample; leftover seats go to the largest remainders."""
+    strata: dict[str, list[str]] = {}
+    for r in rows:
+        if r["split"] == "unsplit" and r["id"] not in exclude:
+            strata.setdefault(key(r), []).append(r["id"])
+
+    def order(key: str) -> str:
+        return hashlib.sha256(f"{seed}:{key}".encode()).hexdigest()
+
+    quota = {k: share * len(ids) for k, ids in strata.items()}
+    take = {k: int(q) for k, q in quota.items()}
+    target = round(share * sum(len(ids) for ids in strata.values()))
+    for k in sorted(strata, key=lambda k: (take[k] - quota[k], order(k)))[: target - sum(take.values())]:
+        take[k] += 1
+    return sorted(i for k, ids in strata.items() for i in sorted(ids, key=order)[: take[k]])
+
+
+def assign_splits(rows: list[dict]) -> list[dict]:
+    if not SPLIT.exists():
+        return rows
+    frozen = json.loads(SPLIT.read_text(encoding="utf-8"))["test"]
+    for r in rows:
+        if r["id"] in frozen:
+            r["split"] = "test"
+        elif r["split"] == "test":
+            raise SystemExit(f"{r['id']}: split=test but not in {SPLIT.name}; the test split is frozen")
+        elif r["split"] == "unsplit":
+            r["split"] = "dev"
+    return rows
+
+
+def write_eval(rows: list[dict]) -> None:
+    write_jsonl(EVAL_V2, assign_splits(rows))
+
+
+def freeze_test() -> list[str]:
+    if SPLIT.exists():
+        raise SystemExit(f"{SPLIT.relative_to(ROOT)} exists; the test split is drawn only once")
+    rows = read_jsonl(EVAL_V2)
+    ids = draw_test(rows, set(TEST_EXCLUDE))
+    by_id = {r["id"]: r for r in rows}
+    payload = {
+        "frozen_at": dt.date.today().isoformat(),
+        "rule": f"{TEST_SHARE:.0%} of unsplit rows, stratified by school x category, seed {TEST_SEED!r}",
+        "excluded": TEST_EXCLUDE,
+        "test": {i: row_digest(by_id[i]) for i in ids},
+    }
+    SPLIT.write_text(json.dumps(payload, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+    write_eval(rows)
+    return ids
+
+
+def freeze_append(prefix: str, db_path: Path = DB_PATH) -> list[str]:
+    """Freeze a test share of one new spec's rows; rows frozen earlier are left alone. Once per prefix."""
+    payload = json.loads(SPLIT.read_text(encoding="utf-8"))
+    appended = payload.setdefault("appended", {})
+    if prefix in appended:
+        raise SystemExit(f"{prefix}* rows were frozen on {appended[prefix]['frozen_at']}; appending is once only")
+    rows = spec_rows(db_path)
+    new = [r for r in rows if r["id"].startswith(prefix)]
+    if not new or any(r["id"] in payload["test"] for r in new):
+        raise SystemExit(f"no new {prefix}* rows to freeze")
+    seed = f"{TEST_SEED}:{prefix}"
+    ids = draw_test(new, set(), seed=seed, key=doc_stratum)
+    by_id = {r["id"]: r for r in new}
+    payload["test"].update({i: row_digest(by_id[i]) for i in ids})
+    appended[prefix] = {
+        "frozen_at": dt.date.today().isoformat(),
+        "rule": f"{TEST_SHARE:.0%} of {prefix}* rows, stratified by question shape x bigram overlap, seed {seed!r}",
+        "test": ids,
+    }
+    SPLIT.write_text(json.dumps(payload, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+    write_eval(rows)
+    return ids
+
+
+def rehash_test() -> list[str]:
+    payload = json.loads(SPLIT.read_text(encoding="utf-8"))
+    by_id = {r["id"]: r for r in read_jsonl(EVAL_V2)}
+    changed = [i for i, old in payload["test"].items() if row_digest(by_id[i]) != old]
+    payload["test"] = {i: row_digest(by_id[i]) for i in payload["test"]}
+    SPLIT.write_text(json.dumps(payload, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+    return changed
+
+
 def apply_v1_review(row: dict, decision: dict, reviewer: str, reviewed_at: str) -> dict:
     facts = decision.get("expected_facts") or []
     row["expected_facts"] = facts
@@ -173,7 +311,7 @@ def migrate_v1() -> list[dict]:
             for r in rows
         ]
     kept = [r for r in read_jsonl(EVAL_V2) if not r["id"].startswith("v1-")]
-    write_jsonl(EVAL_V2, rows + kept)
+    write_eval(rows + kept)
     return rows
 
 
@@ -220,8 +358,118 @@ def apply_review() -> list[dict]:
     ]
     rows += [addition_row(a, review["reviewer"], review["reviewed_at"]) for a in review.get("additions") or []]
     kept = [r for r in read_jsonl(EVAL_V2) if not r["id"].startswith("rv-")]
-    write_jsonl(EVAL_V2, kept + rows)
+    write_eval(kept + rows)
     return rows
+
+
+_FACT_SQL = {
+    "score_lines": "SELECT DISTINCT {field}, source_doc_id FROM score_lines WHERE program_id=? AND scope=? AND year=?",
+    "plans": "SELECT DISTINCT value, source_doc_id FROM plans WHERE program_id=? AND kind=? AND year=?",
+    "admission_stats": "SELECT DISTINCT value, source_doc_id FROM admission_stats WHERE program_id=? AND kind=? AND year=?",
+    "exam_subjects": "SELECT DISTINCT code, source_doc_id FROM exam_subjects WHERE program_id=? AND 'slot'||slot=? AND year=?",
+    "directions": "SELECT DISTINCT advisors, source_doc_id FROM directions "
+                  "WHERE program_id=? AND code=? AND year=? AND advisors IS NOT NULL",
+}
+_LINE_FIELDS = ("total", "politics", "foreign_lang", "subject1", "subject2")
+
+
+def resolve_fact(conn: sqlite3.Connection, key: str) -> dict:
+    """`program_id|table|kind|year[|source_doc_id][|field=politics][|checked]` -> an expected fact.
+
+    Only verified rows count, unless the key has `checked`: the row was read
+    against the official file by hand because no seed exists to verify it.
+    `field=` picks a single-subject score line instead of the total.
+    """
+    pid, table, kind, year, *rest = key.split("|")
+    checked = "checked" in rest
+    field = next((r.removeprefix("field=") for r in rest if r.startswith("field=")), "total")
+    doc = [r for r in rest if r != "checked" and not r.startswith("field=")]
+    if field not in _LINE_FIELDS or (field != "total" and table != "score_lines"):
+        raise SystemExit(f"fact {key!r}: bad field {field!r}")
+    sql = _FACT_SQL[table].format(field=field) + ("" if checked else " AND verified=1")
+    sql += " AND source_doc_id=?" if doc else ""
+    hits = conn.execute(sql, (pid, kind, int(year), *doc)).fetchall()
+    if len(hits) != 1:
+        raise SystemExit(f"fact {key!r} resolves to {len(hits)} verified rows: {hits}")
+    value, source = hits[0]
+    fact = {"table": table, "program_id": pid, "kind": kind, "year": int(year), "value": value,
+            "source_doc_id": source}
+    if field != "total":
+        fact = {**fact, "field": field}
+    return fact
+
+
+def _page_url(conn: sqlite3.Connection, doc_id: str) -> str | None:
+    row = conn.execute("SELECT page_url FROM documents WHERE id=?", (doc_id,)).fetchone()
+    if row is None:
+        raise SystemExit(f"unknown source document {doc_id!r}")
+    return row[0]
+
+
+def spec_row(item: dict, conn: sqlite3.Connection, spec: dict) -> dict:
+    """One eval row from a handwritten spec item; facts and source URLs come from the DB."""
+    facts = [resolve_fact(conn, key) for key in item["facts"]]
+    docs = list(dict.fromkeys([f["source_doc_id"] for f in facts] + item.get("sources", [])))
+    urls = [_page_url(conn, d) for d in docs]
+    row = {
+        "id": item["id"],
+        "split": spec.get("split", "adversarial"),
+        "category": item["category"],
+        "trap": item["trap"],
+        "turns": item["turns"],
+        "school": item["schools"],
+        "program_ids": list(dict.fromkeys(f["program_id"] for f in facts)),
+        "year": item["year"],
+        "expected_intent": {
+            "operation": item["operation"],
+            "metrics": item["metrics"],
+            "schools": item["schools"],
+            "codes": item["codes"],
+            "year": item["year"],
+            "follow_up": len(item["turns"]) > 1,
+        },
+        "expected_facts": facts,
+        "expected_refusal": item["refusal"],
+        "expected_sources": [u for u in urls if u],
+        "must_include": item["must_include"],
+        "must_not_include": item.get("must_not_include") or [],
+        "judge_rubric": item["judge_rubric"],
+        "origin": "handwritten",
+        "reviewed_by": spec.get("reviewed_by", ""),
+        "reviewed_at": spec.get("reviewed_at", ""),
+        "notes": f"{item.get('label', spec.get('label', 'adversarial'))} trap={item['trap']}",
+    }
+    for key in ("judge_flags", "evidence"):
+        if item.get(key):
+            row[key] = item[key]
+    return row
+
+
+def spec_rows(db_path: Path = DB_PATH) -> list[dict]:
+    """The eval rows with every handwritten spec (adv-*, sup-*, doc-*) rebuilt; splits not yet assigned."""
+    rows = read_jsonl(EVAL_V2)
+    conn = sqlite3.connect(db_path)
+    try:
+        for path in SPECS:
+            spec = json.loads(path.read_text(encoding="utf-8"))
+            prefix = spec.get("id_prefix", "adv-")
+            if not all(item["id"].startswith(prefix) for item in spec["items"]):
+                raise SystemExit(f"{path.name}: every id must start with {prefix!r}")
+            if not spec.get("reviewed_by"):
+                raise SystemExit(f"{path.name}: unreviewed specs stay out of the eval set")
+            new = [spec_row(item, conn, spec) for item in spec["items"]]
+            rows = [r for r in rows if not r["id"].startswith(prefix)] + new
+    finally:
+        conn.close()
+    return rows
+
+
+def build_specs(db_path: Path = DB_PATH) -> dict[str, int]:
+    """Replace the rows of every handwritten spec in the eval file."""
+    rows = spec_rows(db_path)
+    write_eval(rows)
+    prefixes = {path.name: json.loads(path.read_text(encoding="utf-8")).get("id_prefix", "adv-") for path in SPECS}
+    return {name: sum(r["id"].startswith(p) for r in rows) for name, p in prefixes.items()}
 
 
 def addition_row(addition: dict, reviewer: str, reviewed_at: str) -> dict:
@@ -400,9 +648,31 @@ def main() -> int:
     parser.add_argument("--migrate-v1", action="store_true", help="only rewrite kaoyan_eval_v2.jsonl")
     parser.add_argument("--candidates", action="store_true", help="only rewrite candidates_m0.jsonl")
     parser.add_argument("--apply-review", action="store_true", help="only merge review_m0.json into the eval file")
+    parser.add_argument("--specs", action="store_true",
+                        help="only rebuild handwritten rows (adversarial_m1.json, supplement_m1.json)")
+    parser.add_argument("--freeze-test", action="store_true", help="draw and freeze the test split (once)")
+    parser.add_argument("--rehash-test", action="store_true",
+                        help="re-record frozen test rows after a deliberate edit; lists the changed ids")
+    parser.add_argument("--freeze-append", metavar="PREFIX",
+                        help="freeze a test share of a newly reviewed spec (e.g. doc-), once per prefix")
     parser.add_argument("--db", default=str(DB_PATH))
     args = parser.parse_args()
 
+    if args.freeze_append:
+        ids = freeze_append(args.freeze_append, Path(args.db))
+        print(f"froze {len(ids)} {args.freeze_append}* test rows: {', '.join(ids)}")
+        return 0
+    if args.freeze_test:
+        ids = freeze_test()
+        print(f"froze {len(ids)} test rows in {SPLIT.relative_to(ROOT)}")
+        return 0
+    if args.rehash_test:
+        print("changed test rows:", ", ".join(rehash_test()) or "none")
+        return 0
+    if args.specs:
+        for name, count in build_specs(Path(args.db)).items():
+            print(f"wrote {count} rows from {name} to {EVAL_V2.relative_to(ROOT)}")
+        return 0
     if args.apply_review:
         rows = apply_review()
         print(f"wrote {len(rows)} reviewed rows to {EVAL_V2.relative_to(ROOT)}")

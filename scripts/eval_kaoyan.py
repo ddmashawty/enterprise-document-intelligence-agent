@@ -40,19 +40,32 @@ def main() -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument("--gold", default=str(GOLD))
     parser.add_argument("--layers", default="L0,L1", help="comma list of L0, L1")
-    parser.add_argument("--split", default="", help="comma list of splits; default all rows")
+    parser.add_argument("--split", default="",
+                        help="comma list of splits; default every split except the frozen test split, "
+                             "which is only run for milestone sign-off and reported as totals")
     parser.add_argument("--db", default="", help="kaoyan SQLite path for L1 (default: settings)")
     parser.add_argument("--out", default="", help="directory for <date>.md and <date>.json")
     parser.add_argument("--baseline", default="", help="report json to compare against")
     parser.add_argument("--max-drop", type=float, default=0.02)
-    parser.add_argument("--write-baseline", default="", help="write summaries only, for later --baseline")
+    parser.add_argument("--write-baseline", default="",
+                        help="write summaries and the known-failure list, for later --baseline")
+    parser.add_argument("--accept-new-failures", action="store_true",
+                        help="let --write-baseline add rows to the known-failure list")
     args = parser.parse_args()
 
     if args.db:
         os.environ["KAOYAN_DB"] = str(Path(args.db).resolve())
 
     from doc_agent.config import get_settings
-    from doc_agent.eval.runner import load_rows, regressions, render_markdown, run_l0, run_l1
+    from doc_agent.eval.runner import (
+        failure_changes,
+        known_failures,
+        load_rows,
+        regressions,
+        render_markdown,
+        run_l0,
+        run_l1,
+    )
 
     layers = [x.strip().upper() for x in args.layers.split(",") if x.strip()]
     splits = {x.strip() for x in args.split.split(",") if x.strip()}
@@ -92,16 +105,30 @@ def main() -> int:
         print(f"wrote {stem}.md / .json")
 
     if args.write_baseline:
-        summary = {**report, "layers": {k: {"summary": v["summary"]} for k, v in report["layers"].items()}}
-        Path(args.write_baseline).write_text(json.dumps(summary, ensure_ascii=False, indent=2) + "\n",
-                                             encoding="utf-8")
+        path = Path(args.write_baseline)
+        old_known = json.loads(path.read_text(encoding="utf-8")).get("known_failures", {}) if path.exists() else {}
+        added, removed = failure_changes(report, old_known)
+        if removed:
+            print("dropped from the known-failure list (now pass):\n  " + "\n  ".join(removed))
+        if added:
+            print("new known failures:\n  " + "\n  ".join(added), file=sys.stderr)
+            if not args.accept_new_failures:
+                print("not written; pass --accept-new-failures and list them in the PR", file=sys.stderr)
+                return 1
+        summary = {**report, "layers": {k: {g: v[g] for g in ("summary", "by_split", "by_trap")}
+                                        for k, v in report["layers"].items()},
+                   "known_failures": known_failures(report)}
+        path.write_text(json.dumps(summary, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
         print(f"wrote {args.write_baseline}")
 
     if args.baseline:
         baseline = json.loads(Path(args.baseline).read_text(encoding="utf-8"))
-        dropped = regressions(report, baseline, args.max_drop)
-        if dropped:
-            print("regression vs baseline:\n  " + "\n  ".join(dropped), file=sys.stderr)
+        problems = [f"metric drop {d}" for d in regressions(report, baseline, args.max_drop)]
+        new, fixed = failure_changes(report, baseline.get("known_failures", {}))
+        problems += [f"new failure {x}" for x in new]
+        problems += [f"fixed but still listed {x} (rewrite the baseline to drop it)" for x in fixed]
+        if problems:
+            print("regression vs baseline:\n  " + "\n  ".join(problems), file=sys.stderr)
             return 1
     return 0
 

@@ -49,6 +49,7 @@ def search_programs(
     degree_type: str = "",
     study_mode: str = "",
     exam_subject: str = "",
+    exclude_subject: str = "",
     is_408: bool | None = None,
     min_public_plan: int | None = None,
     year: int = 0,
@@ -59,9 +60,11 @@ def search_programs(
     school: sysu/scut/jnu/scnu or 中大/华工/暨大/华师; college: 学院名或代码 (e.g. 670, 计算机学院);
     code: 6-char program code (085404) or 4-digit prefix (0854); name_kw: keyword in program or
     direction names (e.g. 人工智能); degree_type: 学硕/专硕; study_mode: 全日制/非全日制;
-    exam_subject: subject code or name (e.g. 408); is_408: only programs whose exam includes 408;
+    exam_subject: subject code or name (e.g. 408); exclude_subject: drop programs whose exam has this
+    subject (不考数学 → 数学); is_408: only programs whose exam includes 408;
     min_public_plan: 统招 >= N (for "统招>20" pass 21); year: intake year (2026/2027), 0 = all.
-    Programs that cannot be decided (unknown subjects, 推免上限) are listed under "unknown" with reasons.
+    Programs that cannot be decided (unknown subjects, 推免上限) are listed under "unknown" with reasons;
+    filtered-out ones are under "excluded_programs" with the reason and the subjects or plan behind it.
     """
     result = get_query().search_programs(
         school=school or None,
@@ -71,6 +74,7 @@ def search_programs(
         degree_type=degree_type or None,
         study_mode=study_mode or None,
         exam_subject=exam_subject or None,
+        exclude_subject=exclude_subject or None,
         is_408=is_408,
         min_public_plan=min_public_plan or None,
         year=year or None,

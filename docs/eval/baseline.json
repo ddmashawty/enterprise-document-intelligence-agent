@@ -1,32 +1,518 @@
 {
   "meta": {
-    "date": "2026-10-10",
-    "commit": "8bf7470-dirty",
+    "date": "2026-10-11",
+    "commit": "d153b48-dirty",
     "gold": "data/gold/kaoyan_eval_v2.jsonl",
     "splits": [],
-    "rows": 68
+    "rows": 183
   },
   "layers": {
     "L0": {
       "summary": {
-        "rows": 68,
-        "exact": 0.9706,
-        "schools": 0.9706,
-        "codes": 1.0,
-        "year": 1.0,
-        "operation": 1.0,
-        "metrics": 1.0,
-        "privacy": 1.0
+        "rows": 183,
+        "exact": 0.7268,
+        "schools": 0.9508,
+        "codes": 0.8907,
+        "year": 0.9781,
+        "operation": 0.9399,
+        "metrics": 0.8304,
+        "privacy": 0.9781
+      },
+      "by_split": {
+        "adversarial": {
+          "rows": 80,
+          "exact": 0.625,
+          "schools": 0.95,
+          "codes": 0.8375,
+          "year": 0.95,
+          "operation": 0.9625,
+          "metrics": 0.7931,
+          "privacy": 0.95
+        },
+        "dev": {
+          "rows": 103,
+          "exact": 0.8058,
+          "schools": 0.9515,
+          "codes": 0.932,
+          "year": 1.0,
+          "operation": 0.9223,
+          "metrics": 0.8704,
+          "privacy": 1.0
+        }
+      },
+      "by_trap": {
+        "aggregate": {
+          "rows": 4,
+          "exact": 0.25,
+          "schools": 0.5,
+          "codes": 1.0,
+          "year": 1.0,
+          "operation": 0.75,
+          "metrics": 0.75,
+          "privacy": 1.0
+        },
+        "boundary": {
+          "rows": 10,
+          "exact": 0.7,
+          "schools": 1.0,
+          "codes": 1.0,
+          "year": 0.9,
+          "operation": 1.0,
+          "metrics": 0.8,
+          "privacy": 1.0
+        },
+        "colloquial": {
+          "rows": 6,
+          "exact": 0.0,
+          "schools": 1.0,
+          "codes": 0.3333,
+          "year": 1.0,
+          "operation": 0.6667,
+          "metrics": 0.6667,
+          "privacy": 1.0
+        },
+        "cross_school": {
+          "rows": 10,
+          "exact": 0.0,
+          "schools": 0.7,
+          "codes": 0.0,
+          "year": 0.8,
+          "operation": 1.0,
+          "metrics": 0.4286,
+          "privacy": 1.0
+        },
+        "doc_only": {
+          "rows": 20,
+          "exact": 0.9,
+          "schools": 1.0,
+          "codes": 1.0,
+          "year": 1.0,
+          "operation": 0.9,
+          "metrics": null,
+          "privacy": 1.0
+        },
+        "false_premise": {
+          "rows": 5,
+          "exact": 0.6,
+          "schools": 0.8,
+          "codes": 0.8,
+          "year": 1.0,
+          "operation": 0.8,
+          "metrics": 0.6,
+          "privacy": 1.0
+        },
+        "missing_field": {
+          "rows": 7,
+          "exact": 0.7143,
+          "schools": 1.0,
+          "codes": 0.7143,
+          "year": 1.0,
+          "operation": 0.8571,
+          "metrics": null,
+          "privacy": 1.0
+        },
+        "no_exam": {
+          "rows": 10,
+          "exact": 0.6,
+          "schools": 0.9,
+          "codes": 0.8,
+          "year": 1.0,
+          "operation": 0.9,
+          "metrics": 1.0,
+          "privacy": 1.0
+        },
+        "out_of_scope": {
+          "rows": 10,
+          "exact": 1.0,
+          "schools": 1.0,
+          "codes": 1.0,
+          "year": 1.0,
+          "operation": 1.0,
+          "metrics": 1.0,
+          "privacy": 1.0
+        },
+        "policy": {
+          "rows": 3,
+          "exact": 0.3333,
+          "schools": 1.0,
+          "codes": 1.0,
+          "year": 1.0,
+          "operation": 1.0,
+          "metrics": 0.0,
+          "privacy": 1.0
+        },
+        "pool": {
+          "rows": 10,
+          "exact": 0.6,
+          "schools": 1.0,
+          "codes": 0.9,
+          "year": 0.9,
+          "operation": 0.8,
+          "metrics": 0.8571,
+          "privacy": 1.0
+        },
+        "prediction": {
+          "rows": 3,
+          "exact": 0.6667,
+          "schools": 1.0,
+          "codes": 1.0,
+          "year": 1.0,
+          "operation": 0.6667,
+          "metrics": 1.0,
+          "privacy": 1.0
+        },
+        "privacy": {
+          "rows": 10,
+          "exact": 0.6,
+          "schools": 1.0,
+          "codes": 1.0,
+          "year": 1.0,
+          "operation": 1.0,
+          "metrics": null,
+          "privacy": 0.6
+        },
+        "routing": {
+          "rows": 3,
+          "exact": 1.0,
+          "schools": 1.0,
+          "codes": 1.0,
+          "year": 1.0,
+          "operation": 1.0,
+          "metrics": 1.0,
+          "privacy": 1.0
+        },
+        "upper_bound": {
+          "rows": 10,
+          "exact": 0.6,
+          "schools": 1.0,
+          "codes": 1.0,
+          "year": 1.0,
+          "operation": 1.0,
+          "metrics": 0.6,
+          "privacy": 1.0
+        },
+        "year": {
+          "rows": 10,
+          "exact": 0.9,
+          "schools": 1.0,
+          "codes": 1.0,
+          "year": 1.0,
+          "operation": 1.0,
+          "metrics": 0.9,
+          "privacy": 1.0
+        }
       }
     },
     "L1": {
       "summary": {
-        "rows": 66,
+        "rows": 127,
         "unscorable": 0,
-        "row_pass": 1.0,
-        "fact_recall": 1.0,
+        "row_pass": 0.9843,
+        "fact_recall": 0.9919,
         "source_match": 1.0
+      },
+      "by_split": {
+        "adversarial": {
+          "rows": 57,
+          "unscorable": 0,
+          "row_pass": 0.9649,
+          "fact_recall": 0.9785,
+          "source_match": 1.0
+        },
+        "dev": {
+          "rows": 70,
+          "unscorable": 0,
+          "row_pass": 1.0,
+          "fact_recall": 1.0,
+          "source_match": 1.0
+        }
+      },
+      "by_trap": {
+        "aggregate": {
+          "rows": 3,
+          "unscorable": 0,
+          "row_pass": 1.0,
+          "fact_recall": 1.0,
+          "source_match": 1.0
+        },
+        "boundary": {
+          "rows": 10,
+          "unscorable": 0,
+          "row_pass": 1.0,
+          "fact_recall": 1.0,
+          "source_match": 1.0
+        },
+        "colloquial": {
+          "rows": 5,
+          "unscorable": 0,
+          "row_pass": 1.0,
+          "fact_recall": 1.0,
+          "source_match": 1.0
+        },
+        "cross_school": {
+          "rows": 9,
+          "unscorable": 0,
+          "row_pass": 1.0,
+          "fact_recall": 1.0,
+          "source_match": 1.0
+        },
+        "false_premise": {
+          "rows": 5,
+          "unscorable": 0,
+          "row_pass": 1.0,
+          "fact_recall": 1.0,
+          "source_match": 1.0
+        },
+        "missing_field": {
+          "rows": 2,
+          "unscorable": 0,
+          "row_pass": 1.0,
+          "fact_recall": 1.0,
+          "source_match": 1.0
+        },
+        "no_exam": {
+          "rows": 10,
+          "unscorable": 0,
+          "row_pass": 1.0,
+          "fact_recall": 1.0,
+          "source_match": 1.0
+        },
+        "out_of_scope": {
+          "rows": 3,
+          "unscorable": 0,
+          "row_pass": 0.6667,
+          "fact_recall": 0.8333,
+          "source_match": 1.0
+        },
+        "policy": {
+          "rows": 2,
+          "unscorable": 0,
+          "row_pass": 1.0,
+          "fact_recall": 1.0,
+          "source_match": 1.0
+        },
+        "pool": {
+          "rows": 10,
+          "unscorable": 0,
+          "row_pass": 0.9,
+          "fact_recall": 0.9286,
+          "source_match": 1.0
+        },
+        "prediction": {
+          "rows": 1,
+          "unscorable": 0,
+          "row_pass": 1.0,
+          "fact_recall": 1.0,
+          "source_match": 1.0
+        },
+        "privacy": {
+          "rows": 3,
+          "unscorable": 0,
+          "row_pass": 1.0,
+          "fact_recall": 1.0,
+          "source_match": 1.0
+        },
+        "routing": {
+          "rows": 2,
+          "unscorable": 0,
+          "row_pass": 1.0,
+          "fact_recall": 1.0,
+          "source_match": 1.0
+        },
+        "upper_bound": {
+          "rows": 10,
+          "unscorable": 0,
+          "row_pass": 1.0,
+          "fact_recall": 1.0,
+          "source_match": 1.0
+        },
+        "year": {
+          "rows": 2,
+          "unscorable": 0,
+          "row_pass": 1.0,
+          "fact_recall": 1.0,
+          "source_match": 1.0
+        }
       }
+    }
+  },
+  "known_failures": {
+    "L0": {
+      "v1-12": [
+        "schools"
+      ],
+      "v1-18": [
+        "schools"
+      ],
+      "adv-priv-01": [
+        "privacy"
+      ],
+      "adv-priv-03": [
+        "privacy"
+      ],
+      "adv-priv-04": [
+        "privacy"
+      ],
+      "adv-priv-10": [
+        "privacy"
+      ],
+      "adv-year-03": [
+        "metrics"
+      ],
+      "adv-cross-01": [
+        "codes",
+        "metrics",
+        "year"
+      ],
+      "adv-cross-02": [
+        "codes"
+      ],
+      "adv-cross-03": [
+        "codes"
+      ],
+      "adv-cross-04": [
+        "codes",
+        "metrics",
+        "schools"
+      ],
+      "adv-cross-05": [
+        "codes",
+        "metrics",
+        "year"
+      ],
+      "adv-cross-06": [
+        "codes",
+        "schools"
+      ],
+      "adv-cross-07": [
+        "codes",
+        "metrics"
+      ],
+      "adv-cross-08": [
+        "codes",
+        "schools"
+      ],
+      "adv-cross-09": [
+        "codes"
+      ],
+      "adv-cross-10": [
+        "codes"
+      ],
+      "adv-ub-03": [
+        "metrics"
+      ],
+      "adv-ub-08": [
+        "metrics"
+      ],
+      "adv-ub-09": [
+        "metrics"
+      ],
+      "adv-ub-10": [
+        "metrics"
+      ],
+      "adv-pool-06": [
+        "codes"
+      ],
+      "adv-pool-07": [
+        "metrics",
+        "operation"
+      ],
+      "adv-pool-08": [
+        "year"
+      ],
+      "adv-pool-09": [
+        "operation"
+      ],
+      "adv-bd-06": [
+        "year"
+      ],
+      "adv-bd-07": [
+        "metrics"
+      ],
+      "adv-bd-10": [
+        "metrics"
+      ],
+      "adv-noexam-02": [
+        "codes"
+      ],
+      "adv-noexam-05": [
+        "operation"
+      ],
+      "adv-noexam-06": [
+        "codes"
+      ],
+      "adv-noexam-07": [
+        "schools"
+      ],
+      "sup-01": [
+        "codes"
+      ],
+      "sup-02": [
+        "codes"
+      ],
+      "sup-04": [
+        "codes",
+        "operation"
+      ],
+      "sup-05": [
+        "operation"
+      ],
+      "sup-07": [
+        "codes",
+        "metrics"
+      ],
+      "sup-08": [
+        "codes"
+      ],
+      "sup-10": [
+        "codes",
+        "operation"
+      ],
+      "sup-17": [
+        "metrics"
+      ],
+      "sup-18": [
+        "metrics"
+      ],
+      "sup-26": [
+        "operation"
+      ],
+      "sup-31": [
+        "metrics",
+        "operation"
+      ],
+      "sup-32": [
+        "codes",
+        "metrics",
+        "schools"
+      ],
+      "sup-33": [
+        "schools"
+      ],
+      "sup-34": [
+        "operation"
+      ],
+      "sup-36": [
+        "metrics",
+        "schools"
+      ],
+      "doc-19": [
+        "metrics"
+      ],
+      "doc-26": [
+        "operation"
+      ],
+      "doc-28": [
+        "operation"
+      ]
+    },
+    "L1": {
+      "adv-oos-04": [
+        "sysu-771-085404 college 2026 total=335"
+      ],
+      "adv-pool-09": [
+        "jnu-044-0812Z3 college 2026 total=276"
+      ]
     }
   }
 }
