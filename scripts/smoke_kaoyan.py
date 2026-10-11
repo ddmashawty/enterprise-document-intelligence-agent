@@ -21,19 +21,10 @@ sys.path.insert(0, str(ROOT / "src"))
 
 from doc_agent.agent.graph import run_agent  # noqa: E402
 from doc_agent.config import get_settings  # noqa: E402
+from doc_agent.eval.metrics import forbidden_items, missing_items  # noqa: E402
 from doc_agent.tools.kaoyan import kaoyan_available  # noqa: E402
 
 GOLD = ROOT / "data" / "gold" / "kaoyan_qa.json"
-
-
-def _normalize(text: str) -> str:
-    return (
-        text.replace(" ", "")
-        .replace("\u3000", "")
-        .replace("，", ",")
-        .replace("、", ",")
-        .replace("：", ":")
-    )
 
 
 def group(item: dict) -> str:
@@ -43,9 +34,9 @@ def group(item: dict) -> str:
 
 
 def check(item: dict, result: dict) -> dict:
-    ans = _normalize(result.get("answer", ""))
-    missing = [k for k in item.get("must_include") or [] if _normalize(k) not in ans]
-    forbidden = [k for k in item.get("must_not_include") or [] if _normalize(k) in ans]
+    ans = result.get("answer", "")
+    missing = missing_items(ans, item.get("must_include") or [])
+    forbidden = forbidden_items(ans, item.get("must_not_include") or [])
     cited = bool(result.get("citations"))
     if item["category"] == "export":
         xlsx = [e for e in result.get("exports") or [] if str(e.get("path", "")).endswith(".xlsx")]

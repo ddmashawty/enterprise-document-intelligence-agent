@@ -27,7 +27,7 @@ K1 的 18 道验收题。已经被调过参，只作旧集合。`scripts/smoke_k
 | `expected_facts` | 库里的键：`table`、`program_id`、`kind`、`year`、`value`、`source_doc_id`。`table` 是 `score_lines`（kind 为线的口径）、`plans`、`admission_stats`、`exam_subjects`（kind 为 `slot1`–`slot4`，value 为科目代码）或 `directions`（kind 为方向代码，value 为目录“导师”格原文，目前只有暨大）。单科线另带 `field`（`politics` / `foreign_lang` / `subject1` / `subject2`），没有 `field` 就是总分 |
 | `expected_refusal` | `out_of_scope` / `privacy` / `unknown_data` / `null` |
 | `expected_sources` | 事实应引用的 URL |
-| `must_include` / `must_not_include` | 粗的字符串检查。`must_include` 里必须有每条 `expected_facts` 的数值 |
+| `must_include` / `must_not_include` | 粗的字符串检查。`must_include` 里必须有每条 `expected_facts` 的数值。每项可以是字符串或备选列表（任一命中即可），匹配前用 `doc_agent.eval.metrics.normalize_text` 归一化（去空白、全角转半角、2.5万=25000、16,000=16000、两门=2门、不记入=不计入） |
 | `judge_rubric` | 字符串查不准的口径要求（专项线、学校基本线、计划口径），留给 P1 的 L2 裁判。空串表示没有 |
 | `origin` | `db_template` / `handwritten` / `paraphrase` / `user_log` |
 | `reviewed_by` / `reviewed_at` | 核对人。空着表示还没核对 |

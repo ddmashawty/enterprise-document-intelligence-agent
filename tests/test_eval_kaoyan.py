@@ -2,7 +2,15 @@ import json
 from pathlib import Path
 
 from doc_agent.eval import runner
-from doc_agent.eval.metrics import intent_fields, match_fact, tool_facts
+from doc_agent.eval.metrics import (
+    contains,
+    forbidden_items,
+    intent_fields,
+    match_fact,
+    missing_items,
+    normalize_text,
+    tool_facts,
+)
 
 ROOT = Path(__file__).resolve().parents[1]
 GOLD = ROOT / "data" / "gold" / "kaoyan_eval_v2.jsonl"
@@ -165,3 +173,24 @@ def test_l0_runs_on_the_eval_set_without_a_database():
     assert "# 考研评测报告" in runner.render_markdown(
         {"meta": {"date": "d", "commit": "c", "gold": "g", "splits": [], "rows": 1}, "layers": {"L0": report}}
     )
+
+
+def test_normalize_text_equivalences() -> None:
+    assert normalize_text("2.5 万元") == normalize_text("25000元") == "25000元"
+    assert normalize_text("16,000") == "16000"
+    assert normalize_text("101、204") == "101,204"
+    assert normalize_text("4 月 8 日") == "4月8日"
+    assert normalize_text("加试两门") == normalize_text("加试2门") == normalize_text("加试 2 门")
+    assert normalize_text("学制三年") == "学制3年" and normalize_text("二十年") == "二十年"
+    assert normalize_text("不记入") == normalize_text("不计入")
+    assert normalize_text("１∶１．２") == normalize_text("1:1.2") == "1:1.2"
+    assert normalize_text("40%—50%") == normalize_text("40%-50%")
+    assert normalize_text("一般") == "一般" and normalize_text("26.8万") == "268000"
+
+
+def test_contains_and_alternatives() -> None:
+    answer = "非全日制定向 2.5 万元/年，加试 2 门，机试成绩不计入"
+    assert contains(answer, "25000") and contains(answer, "两门")
+    assert contains(answer, ["不算分", "不记入"]) and not contains(answer, ["不算分", "免考"])
+    assert missing_items(answer, ["3年", ["2.5万", "25000"]]) == ["3年"]
+    assert forbidden_items(answer, ["机试成绩不记入", "8门"]) == ["机试成绩不记入"]

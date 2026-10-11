@@ -3,7 +3,49 @@
 from __future__ import annotations
 
 import json
+import re
+import unicodedata
+from decimal import Decimal
 from typing import Any
+
+_THOUSANDS = re.compile(r"(?<=\d),(?=\d{3}(?!\d))")
+_WAN = re.compile(r"(\d+(?:\.\d+)?)万")
+_COUNTED = re.compile(r"(?<![一二两三四五六七八九十百千万\d])([一二两三四五六七八九十])(?=[门年个科项名次人])")
+_CN_DIGIT = dict(zip("一二两三四五六七八九十", ("1", "2", "2", "3", "4", "5", "6", "7", "8", "9", "10")))
+_REPLACE = (("∶", ":"), ("、", ","), ("—", "-"), ("–", "-"), ("~", "-"), ("记入", "计入"))
+
+
+def _wan(match: re.Match) -> str:
+    value = Decimal(match.group(1)) * 10000
+    return str(int(value)) if value == value.to_integral_value() else match.group(0)
+
+
+def normalize_text(text: str) -> str:
+    """Canonical form for must_include matching: 2.5 万 / 25,000 / 25000 and 两门 / 2 门 compare equal.
+
+    Thousands separators go first, while ASCII commas are still distinguishable from list commas.
+    """
+    text = _THOUSANDS.sub("", text)
+    text = re.sub(r"\s+", "", unicodedata.normalize("NFKC", text))
+    for old, new in _REPLACE:
+        text = text.replace(old, new)
+    text = _COUNTED.sub(lambda m: _CN_DIGIT[m.group(1)], text)
+    return _WAN.sub(_wan, text)
+
+
+def contains(text: str, item: str | list[str]) -> bool:
+    """`item` is one string or a list of alternatives; any alternative counts."""
+    norm = normalize_text(text)
+    alternatives = item if isinstance(item, list) else [item]
+    return any(normalize_text(alt) in norm for alt in alternatives)
+
+
+def missing_items(text: str, must_include: list[str | list[str]]) -> list[str | list[str]]:
+    return [item for item in must_include if not contains(text, item)]
+
+
+def forbidden_items(text: str, must_not_include: list[str | list[str]]) -> list[str | list[str]]:
+    return [item for item in must_not_include if contains(text, item)]
 
 
 def predicted_operation(intent: dict[str, Any]) -> str:
