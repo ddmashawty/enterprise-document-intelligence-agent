@@ -310,6 +310,18 @@ P1 不改检测器，用 `--write-baseline --accept-new-failures` 记进基线�
 
 **隐私兜底。** `data/kaoyan/.gitignore` 加了 `/raw/**/*名单*.pdf` 和 `/raw/**/*名单*.xlsx`：新下载的名单在 manifest 标 PII 之前也不会入库。已确认没有已跟踪文件命中；7 份文件名带“名单”的已跟踪文件都是 html，不受影响。`test_every_personal_data_file_is_git_ignored` 加了两条虚构路径，检查兜底规则生效。这个 `.gitignore` 是 box 上的 `build_part2.py` 生成的，但脚本不在仓库里。box 上重新生成会把兜底规则覆盖掉，要在脚本里同步加上。华工拟录取名单 PDF 在 box 上，sha256 和 manifest 一致；本机仍缺这一份。
 
+## 只留考研路径，包改名 kaoyan（2026-10-11，分支 `refactor/kaoyan-only`）
+
+**为什么。** 仓库已改名 `kaoyan`，企业文档演示的文件在 PR #8 删了。剩下的通用文档问答代码（通用规划 / 执行 / 反思、年报对比、通用查询扩展、`/v1/ingest`、知识库页）不服务考研路径：知识库页导入的是企业索引，考研问题从来不查它。
+
+**删了什么。** `tools/compare.py`；`list_documents` / `parse_document` / `summarize_citations` 三个工具；企业查询扩展和 `RAG_PROFILE` 切换；`POST /v1/ingest` 和 `ingest_paths`；前端知识库页、`GENERIC_QUESTIONS`；配置里的 `CHROMA_DIR`、`RAW_DIR`、`COLLECTION_NAME`、`RAG_PROFILE`（本机 `.env` 里这几项现在被忽略）。`rag_search` 只查考研索引（`KAOYAN_CHROMA_DIR` / `KAOYAN_COLLECTION`）。记忆、导出、多格式加载、任务和会话接口都留着，考研路径在用。
+
+**非考研问题。** 用户选了直接拒答。`plan` 判出不是考研问题就走 `direct`，`finalize` 回固定一句，不调 LLM、不调工具；是考研问题但库没建好，回一句建库提示。测试覆盖“你好”和“茅台和五粮液 2024 年营收对比”。
+
+**包改名。** `doc_agent` 改成 `kaoyan`，原来的 `doc_agent.kaoyan` 子包展平到顶层：`kaoyan.db`、`kaoyan.query`、`kaoyan.extract`、`kaoyan.roster` 等。pip 项目名改成 `kaoyan`，API 用 `uvicorn kaoyan.api:app` 启动。本机 `.venv` 要重新 `pip install -e .`。`progress.md`、`findings.md` 和旧阶段笔记里的 `doc_agent` 路径是历史记录，不改。
+
+**验证。** ruff 通过，pytest 284 通过，L0/L1 门禁和改前完全一样（L0 exact 72.68%，L1 row_pass 98.43%）。没有调用 DeepSeek。
+
 ## 没做
 
 - **L2 检索**：设计见“L2 检索评测设计”，题已审完、切分已冻结，下一步就跑
